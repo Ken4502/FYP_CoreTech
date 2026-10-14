@@ -1,0 +1,37 @@
+{
+  "species": [
+    "Aloe",
+    "Cactus",
+    "Money_Plant",
+    "Snake_Plant",
+    "Spider_Plant"
+  ],
+  "groups": {
+    "Aloe": [
+      "Healthy",
+      "Anthracnose",
+      "LeafSpot",
+      "Rust",
+      "Sunburn"
+    ],
+    "Cactus": [
+      "Healthy",
+      "Dactylopius_Opuntia"
+    ],
+    "Money_Plant": [
+      "Healthy",
+      "Bacterial_wilt_disease",
+      "Manganese_Toxicity"
+    ],
+    "Snake_Plant": [
+      "Healthy",
+      "Anthracnose",
+      "Leaf_Withering"
+    ],
+    "Spider_Plant": [
+      "Healthy",
+      "Fungal_leaf_spot",
+      "Leaf_Tip_Necrosis"
+    ]
+  }
+}

@@ -1,0 +1,18 @@
+services:
+  flora-id:
+    build:
+      context: .
+      dockerfile: Plant_Identification/Dockerfile
+    container_name: flora_identification
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
+  phytocare:
+    build:
+      context: .
+      dockerfile: Plant_Disease/Dockerfile
+    container_name: phytocare_disease
+    ports:
+      - "8001:8001"
+    restart: unless-stopped

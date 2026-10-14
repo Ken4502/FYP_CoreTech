@@ -1,0 +1,90 @@
+{
+  "total_samples": 21097,
+  "splits": {
+    "train": 17008,
+    "val": 2078,
+    "test": 2011
+  },
+  "per_class": {
+    "Aloe_Anthracnose": {
+      "train": 3007,
+      "val": 375,
+      "test": 377
+    },
+    "Aloe_Healthy": {
+      "train": 4286,
+      "val": 535,
+      "test": 537
+    },
+    "Aloe_LeafSpot": {
+      "train": 3024,
+      "val": 378,
+      "test": 378
+    },
+    "Aloe_Rust": {
+      "train": 1552,
+      "val": 194,
+      "test": 195
+    },
+    "Aloe_Sunburn": {
+      "train": 3053,
+      "val": 381,
+      "test": 383
+    },
+    "Cactus_Dactylopius_Opuntia": {
+      "train": 274,
+      "val": 34,
+      "test": 35
+    },
+    "Cactus_Healthy": {
+      "train": 228,
+      "val": 28,
+      "test": 29
+    },
+    "Money_Plant_Bacterial_wilt_disease": {
+      "train": 135,
+      "val": 10,
+      "test": 4
+    },
+    "Money_Plant_Healthy": {
+      "train": 186,
+      "val": 19,
+      "test": 12
+    },
+    "Money_Plant_Manganese_Toxicity": {
+      "train": 144,
+      "val": 23,
+      "test": 9
+    },
+    "Snake_Plant_Anthracnose": {
+      "train": 177,
+      "val": 16,
+      "test": 6
+    },
+    "Snake_Plant_Healthy": {
+      "train": 189,
+      "val": 16,
+      "test": 10
+    },
+    "Snake_Plant_Leaf_Withering": {
+      "train": 165,
+      "val": 19,
+      "test": 12
+    },
+    "Spider_Plant_Fungal_leaf_spot": {
+      "train": 189,
+      "val": 15,
+      "test": 9
+    },
+    "Spider_Plant_Healthy": {
+      "train": 207,
+      "val": 16,
+      "test": 7
+    },
+    "Spider_Plant_Leaf_Tip_Necrosis": {
+      "train": 192,
+      "val": 19,
+      "test": 8
+    }
+  }
+}

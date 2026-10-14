@@ -1,0 +1,22 @@
+                                    precision    recall  f1-score   support
+
+                  Aloe_Anthracnose     0.6172    0.4960    0.5500       377
+                      Aloe_Healthy     0.6000    0.9218    0.7269       537
+                     Aloe_LeafSpot     0.5401    0.3915    0.4540       378
+                         Aloe_Rust     0.2345    0.1744    0.2000       195
+                      Aloe_Sunburn     0.6176    0.5144    0.5613       383
+        Cactus_Dactylopius_Opuntia     0.8293    0.9714    0.8947        35
+                    Cactus_Healthy     0.9583    0.7931    0.8679        29
+Money_Plant_Bacterial_wilt_disease     0.5000    0.5000    0.5000         4
+               Money_Plant_Healthy     0.5789    0.9167    0.7097        12
+    Money_Plant_Manganese_Toxicity     0.6667    0.2222    0.3333         9
+           Snake_Plant_Anthracnose     0.3000    0.5000    0.3750         6
+               Snake_Plant_Healthy     0.7143    1.0000    0.8333        10
+        Snake_Plant_Leaf_Withering     1.0000    0.1667    0.2857        12
+     Spider_Plant_Fungal_leaf_spot     0.0000    0.0000    0.0000         9
+              Spider_Plant_Healthy     0.2500    1.0000    0.4000         7
+    Spider_Plant_Leaf_Tip_Necrosis     0.0000    0.0000    0.0000         8
+
+                          accuracy                         0.5743      2011
+                         macro avg     0.5254    0.5355    0.4807      2011
+                      weighted avg     0.5648    0.5743    0.5520      2011

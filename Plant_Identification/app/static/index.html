@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FloraID - AI Plant Species Identification</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="navbar">
+      <div class="brand">
+        <span class="brand-icon">🌿</span>
+        <div class="brand-text">
+          <h1>FloraID</h1>
+          <span class="brand-tagline">House Plant Species Identification</span>
+        </div>
+      </div>
+      <div class="header-status">
+        <span class="status-pill" id="system-status">
+          <span class="status-dot"></span>
+          <span id="status-text">Connecting...</span>
+        </span>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-grid">
+      <!-- Left: Upload & Preview Section -->
+      <section class="card upload-card">
+        <div class="card-header">
+          <h2>Upload Plant Photo</h2>
+          <p>Drop a photo of a house plant leaf or whole plant to identify its species</p>
+        </div>
+
+        <div class="drop-zone" id="drop-zone">
+          <input type="file" id="file-input" accept="image/*" class="file-input" hidden>
+          
+          <div class="drop-prompt" id="drop-prompt">
+            <div class="upload-icon-circle">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
+            </div>
+            <p class="drop-text-primary">Drag & drop your leaf or plant photo here</p>
+            <p class="drop-text-secondary">Supports JPG, PNG, WEBP</p>
+            <button type="button" class="btn btn-outline" id="browse-btn">Browse Local Files</button>
+          </div>
+
+          <div class="preview-container" id="preview-container" style="display: none;">
+            <img id="image-preview" src="" alt="Selected Plant Image">
+            <button type="button" class="btn-clear" id="clear-btn" title="Remove image">×</button>
+          </div>
+        </div>
+
+        <div class="upload-actions">
+          <button type="button" class="btn btn-primary" id="identify-btn" disabled>
+            <span class="btn-spinner" id="btn-spinner" style="display: none;"></span>
+            <span id="btn-text">Identify Plant Species</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Right: Identification Results -->
+      <section class="card results-card" id="results-card">
+        <div class="card-header">
+          <h2>Identification Results</h2>
+          <span class="latency-tag" id="latency-tag" style="display: none;">12.4 ms</span>
+        </div>
+
+        <!-- Initial Placeholder State -->
+        <div class="results-empty" id="results-empty">
+          <div class="empty-illustration">🌱</div>
+          <h3>Awaiting Photo Upload</h3>
+          <p>Select or upload a plant image on the left to view the predicted species and confidence breakdown.</p>
+        </div>
+
+        <!-- Populated Results State -->
+        <div class="results-content" id="results-content" style="display: none;">
+          <!-- Top Match Hero Banner -->
+          <div class="top-match-banner">
+            <div class="top-match-badge">Top Match</div>
+            <h3 class="top-species-name" id="top-species-name">Monstera Deliciosa</h3>
+            <div class="confidence-badge" id="top-confidence-badge">98.4% Confidence</div>
+          </div>
+
+          <!-- Top-5 Probability Breakdown -->
+          <div class="breakdown-section">
+            <h4>Top Predictions</h4>
+            <div class="prediction-list" id="prediction-list">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Model Stats & Specs Footer Card -->
+    <footer class="model-info-footer">
+      <div class="info-metric">
+        <span class="metric-label">Architecture</span>
+        <span class="metric-value">FloraNet-V3 (Bespoke)</span>
+      </div>
+      <div class="info-metric">
+        <span class="metric-label">Blueprint</span>
+        <span class="metric-value">MobileNetV3 (From Scratch)</span>
+      </div>
+      <div class="info-metric">
+        <span class="metric-label">Supported Species</span>
+        <span class="metric-value" id="species-count-val">47 Classes</span>
+      </div>
+      <div class="info-metric">
+        <span class="metric-label">Acceleration</span>
+        <span class="metric-value" id="device-val">NVIDIA RTX 3060</span>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
+

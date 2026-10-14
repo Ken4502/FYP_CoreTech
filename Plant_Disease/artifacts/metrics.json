@@ -1,0 +1,12 @@
+{
+  "species_routing_accuracy": 0.9965,
+  "disease_diagnosis_accuracy": 0.6837,
+  "total_test_samples": 2011,
+  "per_group_accuracy": {
+    "Aloe": 0.6663,
+    "Cactus": 0.9688,
+    "Money_Plant": 0.92,
+    "Snake_Plant": 0.7143,
+    "Spider_Plant": 1.0
+  }
+}

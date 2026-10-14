@@ -1,0 +1,8 @@
+{
+  "top1_accuracy": 0.7967,
+  "top5_accuracy": 0.9526,
+  "macro_avg_f1": 0.7907,
+  "weighted_avg_f1": 0.796,
+  "total_test_samples": 1520,
+  "classes_count": 47
+}
