@@ -1,0 +1,1816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FloraNet | Multi-Model Arena & 500-Image Internet Benchmark</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0a110e;
+      --bg-card: rgba(18, 30, 24, 0.78);
+      --bg-card-border: rgba(46, 125, 84, 0.28);
+      --emerald-300: #6ee7b7;
+      --emerald-400: #34d399;
+      --emerald-500: #10b981;
+      --emerald-600: #059669;
+      --accent-glow: rgba(16, 185, 129, 0.2);
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --text-faint: #6b7280;
+      --radius-lg: 18px;
+      --radius-md: 12px;
+      --radius-sm: 8px;
+      --transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', system-ui, sans-serif; }
+
+    body {
+      background: radial-gradient(circle at 15% 15%, #0f241a 0%, #0a110e 55%, #050a08 100%);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Ambient background */
+    .glow-orb {
+      position: fixed;
+      width: 550px;
+      height: 550px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.1) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+      filter: blur(40px);
+    }
+    .glow-1 { top: -100px; left: -100px; }
+    .glow-2 { bottom: -120px; right: -120px; }
+
+    /* Header & Navigation */
+    header {
+      position: relative;
+      z-index: 10;
+      padding: 1.1rem 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--bg-card-border);
+      background: rgba(10, 17, 14, 0.75);
+      backdrop-filter: blur(14px);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.9rem;
+    }
+
+    .logo-icon {
+      width: 42px;
+      height: 42px;
+      background: linear-gradient(135deg, var(--emerald-500), #047857);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+    }
+
+    .brand h1 { font-size: 1.3rem; font-weight: 700; color: #fff; }
+    .brand h1 span { color: var(--emerald-400); }
+
+    .nav-tabs {
+      display: flex;
+      gap: 0.5rem;
+      background: rgba(0, 0, 0, 0.45);
+      padding: 0.3rem;
+      border-radius: 999px;
+      border: 1px solid var(--bg-card-border);
+    }
+
+    .nav-tab {
+      padding: 0.45rem 1.15rem;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: var(--transition);
+      cursor: pointer;
+    }
+
+    .nav-tab:hover { color: #fff; }
+    .nav-tab.active {
+      background: var(--emerald-500);
+      color: #fff;
+      box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+    }
+
+    /* Sub-nav Mode Switcher */
+    .view-switcher-bar {
+      position: relative;
+      z-index: 10;
+      max-width: 1440px;
+      width: 100%;
+      margin: 1rem auto 0 auto;
+      padding: 0 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .view-pills {
+      display: inline-flex;
+      background: rgba(0, 0, 0, 0.4);
+      padding: 0.35rem;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--bg-card-border);
+      gap: 0.4rem;
+    }
+
+    .view-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.55rem 1.2rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.84rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .view-pill:hover { color: #fff; }
+    .view-pill.active {
+      background: rgba(16, 185, 129, 0.2);
+      color: var(--emerald-400);
+      border: 1px solid rgba(52, 211, 153, 0.4);
+      box-shadow: 0 0 16px rgba(16, 185, 129, 0.25);
+    }
+
+    main {
+      position: relative;
+      z-index: 1;
+      max-width: 1440px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 1.2rem 2.5rem 2.5rem 2.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.8rem;
+      flex: 1;
+    }
+
+    /* Common Card */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--bg-card-border);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      backdrop-filter: blur(14px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.7rem 1.3rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition);
+      border: none;
+      outline: none;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--emerald-500), var(--emerald-600));
+      color: #fff;
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.35);
+    }
+    .btn-primary:hover {
+      box-shadow: 0 0 28px rgba(16, 185, 129, 0.6);
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text-main);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.4);
+    }
+    .btn-danger:hover {
+      background: rgba(239, 68, 68, 0.25);
+      border-color: rgba(239, 68, 68, 0.6);
+    }
+
+    /* ----------------------------------------------------------------- */
+    /* VIEW 1: 500-IMAGE BATCH BENCHMARK STYLES                          */
+    /* ----------------------------------------------------------------- */
+    .batch-control-deck {
+      display: flex;
+      flex-direction: column;
+      gap: 1.3rem;
+    }
+
+    .batch-top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .batch-header-info h2 {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .batch-header-info p {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      margin-top: 0.25rem;
+    }
+
+    .batch-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      flex-wrap: wrap;
+    }
+
+    .batch-select {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--bg-card-border);
+      color: var(--text-main);
+      padding: 0.65rem 0.9rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.84rem;
+      font-weight: 600;
+      outline: none;
+    }
+
+    /* Progress Banner */
+    .progress-banner {
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-md);
+      padding: 1.2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+
+    .progress-meta-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      font-size: 0.85rem;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .status-idle { background: rgba(156, 163, 175, 0.15); color: var(--text-muted); border: 1px solid rgba(156, 163, 175, 0.3); }
+    .status-running {
+      background: rgba(16, 185, 129, 0.2);
+      color: var(--emerald-400);
+      border: 1px solid rgba(52, 211, 153, 0.5);
+      animation: pulseGlow 1.8s infinite;
+    }
+    .status-completed { background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.5); }
+    .status-stopped { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); }
+
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 10px rgba(16, 185, 129, 0.2); }
+      50% { box-shadow: 0 0 22px rgba(16, 185, 129, 0.5); }
+    }
+
+    .progress-bar-container {
+      width: 100%;
+      height: 12px;
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 999px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--emerald-600), var(--emerald-400));
+      border-radius: 999px;
+      transition: width 0.3s ease;
+      box-shadow: 0 0 14px var(--emerald-400);
+    }
+
+    .progress-stats-strip {
+      display: flex;
+      align-items: center;
+      gap: 1.8rem;
+      flex-wrap: wrap;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    .progress-stats-strip strong { color: #fff; }
+
+    /* Leaderboard 4-Model Cards Grid */
+    .leaderboard-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.2rem;
+    }
+    @media (max-width: 1200px) { .leaderboard-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 650px) { .leaderboard-grid { grid-template-columns: 1fr; } }
+
+    .lb-card {
+      background: var(--bg-card);
+      border: 1px solid var(--bg-card-border);
+      border-radius: var(--radius-lg);
+      padding: 1.3rem;
+      backdrop-filter: blur(14px);
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+      position: relative;
+      overflow: hidden;
+      transition: var(--transition);
+    }
+    .lb-card.lb-featured {
+      border-color: var(--emerald-400);
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.16) 0%, rgba(18, 30, 24, 0.85) 100%);
+      box-shadow: 0 0 28px var(--accent-glow);
+    }
+
+    .lb-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    .lb-title-row h3 { font-size: 1.05rem; font-weight: 700; color: #fff; }
+    .lb-rank-badge {
+      font-size: 0.72rem;
+      font-weight: 800;
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      background: rgba(16, 185, 129, 0.2);
+      color: var(--emerald-400);
+      border: 1px solid rgba(52, 211, 153, 0.4);
+    }
+
+    .lb-acc-box {
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: var(--radius-md);
+      padding: 0.9rem;
+      text-align: center;
+    }
+    .lb-acc-num {
+      font-size: 2.3rem;
+      font-weight: 800;
+      color: var(--emerald-400);
+      letter-spacing: -0.02em;
+    }
+    .lb-acc-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin-top: 0.15rem;
+    }
+
+    .lb-details-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      font-size: 0.78rem;
+    }
+    .lb-detail-row {
+      display: flex;
+      justify-content: space-between;
+      color: var(--text-muted);
+    }
+    .lb-detail-row strong { color: var(--text-main); }
+
+    /* Live Feed Table Section */
+    .feed-controls-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+
+    .filter-pills {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      padding: 0.4rem 0.9rem;
+      border-radius: 999px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .filter-btn:hover { color: #fff; }
+    .filter-btn.active {
+      background: var(--emerald-500);
+      color: #fff;
+      border-color: var(--emerald-400);
+    }
+
+    .search-input {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--bg-card-border);
+      color: #fff;
+      padding: 0.5rem 0.9rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.82rem;
+      outline: none;
+      width: 240px;
+    }
+
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      max-height: 600px;
+      overflow-y: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      text-align: left;
+      padding: 0.85rem 1rem;
+      background: #0f1c16;
+      color: var(--text-muted);
+      font-weight: 700;
+      border-bottom: 1px solid var(--bg-card-border);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      color: var(--text-main);
+      vertical-align: middle;
+    }
+
+    tr:hover td { background: rgba(255, 255, 255, 0.02); }
+
+    .thumb-img {
+      width: 48px;
+      height: 48px;
+      border-radius: 8px;
+      object-fit: cover;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .thumb-img:hover {
+      transform: scale(1.8);
+      z-index: 10;
+      position: relative;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+    }
+
+    .match-pill {
+      font-size: 0.72rem;
+      font-weight: 800;
+      padding: 0.2rem 0.5rem;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.2rem;
+      white-space: nowrap;
+    }
+    .match-yes { background: rgba(16, 185, 129, 0.2); color: var(--emerald-400); border: 1px solid rgba(52, 211, 153, 0.4); }
+    .match-no { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+
+    /* ----------------------------------------------------------------- */
+    /* VIEW 2: SINGLE SPECIMEN SHOWDOWN STYLES                           */
+    /* ----------------------------------------------------------------- */
+    .stage-card {
+      background: var(--bg-card);
+      border: 1px solid var(--bg-card-border);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      backdrop-filter: blur(14px);
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 1.8rem;
+      align-items: center;
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.4);
+    }
+    @media (max-width: 900px) { .stage-card { grid-template-columns: 1fr; } }
+
+    .stage-img-box {
+      width: 100%;
+      height: 260px;
+      background: #000;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .stage-img-box img { width: 100%; height: 100%; object-fit: cover; }
+
+    .gt-badge-container { display: flex; flex-direction: column; gap: 0.6rem; }
+    .gt-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--emerald-400);
+      background: rgba(16, 185, 129, 0.15);
+      padding: 0.25rem 0.7rem;
+      border-radius: 999px;
+      width: fit-content;
+    }
+    .gt-common { font-size: 1.8rem; font-weight: 800; color: #fff; letter-spacing: -0.01em; }
+    .gt-scientific { font-family: 'Playfair Display', serif; font-style: italic; color: var(--emerald-300); font-size: 1.15rem; }
+    .gt-meta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.8rem; margin-top: 0.6rem; }
+    .gt-meta-item {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: var(--radius-sm);
+      padding: 0.5rem 0.8rem;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+    .gt-meta-item strong { display: block; color: var(--text-main); font-size: 0.85rem; margin-top: 0.1rem; }
+
+    .arena-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.2rem; }
+    @media (max-width: 1200px) { .arena-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 650px) { .arena-grid { grid-template-columns: 1fr; } }
+
+    .model-card {
+      background: var(--bg-card);
+      border: 1px solid var(--bg-card-border);
+      border-radius: var(--radius-lg);
+      padding: 1.3rem;
+      backdrop-filter: blur(14px);
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+    .model-card.featured {
+      border-color: var(--emerald-400);
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.14) 0%, rgba(18, 30, 24, 0.8) 100%);
+      box-shadow: 0 0 30px var(--accent-glow);
+    }
+    .model-card:hover { transform: translateY(-3px); }
+
+    .top-pred-box {
+      background: rgba(0, 0, 0, 0.35);
+      border-radius: var(--radius-sm);
+      padding: 0.85rem;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .top-pred-name { font-size: 1.15rem; font-weight: 800; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .top-pred-sci { font-size: 0.78rem; font-style: italic; color: var(--emerald-300); margin-top: 0.15rem; }
+    .top-pred-conf { margin-top: 0.5rem; display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; }
+    .conf-num { font-weight: 800; color: var(--emerald-400); font-size: 1.15rem; }
+
+    .speed-tag {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .mini-bars { display: flex; flex-direction: column; gap: 0.5rem; flex: 1; }
+    .mini-bar-item { display: flex; flex-direction: column; gap: 0.2rem; font-size: 0.75rem; }
+    .mini-bar-meta { display: flex; justify-content: space-between; color: var(--text-muted); }
+    .mini-bar-track { width: 100%; height: 5px; background: rgba(255, 255, 255, 0.08); border-radius: 999px; overflow: hidden; }
+    .mini-bar-fill { height: 100%; border-radius: 999px; background: var(--emerald-400); }
+
+    /* Fullscreen Spinner for single run */
+    .arena-loader {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 17, 14, 0.88);
+      backdrop-filter: blur(10px);
+      z-index: 100;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+    }
+    .spinner {
+      width: 55px;
+      height: 55px;
+      border: 3px solid rgba(52, 211, 153, 0.2);
+      border-top-color: var(--emerald-400);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Diagnostic & Improvement Modal */
+    .diag-modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 17, 14, 0.88);
+      backdrop-filter: blur(12px);
+      z-index: 150;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+    .diag-modal {
+      background: var(--bg-card);
+      border: 1px solid var(--bg-card-border);
+      border-radius: var(--radius-lg);
+      max-width: 980px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 2rem;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7);
+      display: flex;
+      flex-direction: column;
+      gap: 1.4rem;
+      position: relative;
+    }
+    .diag-modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 1px solid var(--bg-card-border);
+      padding-bottom: 1rem;
+    }
+    .diag-close-btn {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: var(--text-muted);
+      border-radius: 8px;
+      width: 34px;
+      height: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1.2rem;
+      transition: var(--transition);
+    }
+    .diag-close-btn:hover { color: #fff; border-color: rgba(255, 255, 255, 0.4); }
+    .diag-kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+    }
+    @media (max-width: 800px) { .diag-kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+    .diag-kpi-card {
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: var(--radius-md);
+      padding: 1rem;
+      text-align: center;
+    }
+    .diag-kpi-val {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--emerald-400);
+    }
+    .diag-kpi-lbl {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-top: 0.2rem;
+    }
+    .diag-cat-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .diag-cat-pill {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      padding: 0.45rem 0.8rem;
+      font-size: 0.78rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .diag-cat-pill strong { color: var(--emerald-400); }
+
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      font-size: 0.8rem;
+      color: var(--text-faint);
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+  </style>
+</head>
+<body>
+  <div class="glow-orb glow-1"></div>
+  <div class="glow-orb glow-2"></div>
+
+  <!-- Header -->
+  <header>
+    <div class="brand">
+      <div class="logo-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2">
+          <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/>
+          <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>
+        </svg>
+      </div>
+      <div>
+        <h1>FloraNet <span>Arena</span></h1>
+        <p style="font-size: 0.75rem; color: var(--text-muted);">Multi-Model Benchmarking & Internet Scraper</p>
+      </div>
+    </div>
+
+    <div class="nav-tabs">
+      <a href="/" class="nav-tab">Single Plant Diagnostic</a>
+      <a href="/compare" class="nav-tab active">Multi-Model Arena</a>
+      <a href="/log" class="nav-tab">📋 Pipeline Log</a>
+    </div>
+  </header>
+
+  <!-- View Switcher -->
+  <div class="view-switcher-bar">
+    <div class="view-pills">
+      <button class="view-pill active" id="pillBatchView">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+        </svg>
+        500-Image Internet Batch Benchmark
+      </button>
+      <button class="view-pill" id="pillSingleView">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <rect width="18" height="18" x="3" y="3" rx="2"/>
+          <circle cx="8.5" cy="8.5" r="1.5"/>
+          <circle cx="15.5" cy="15.5" r="1.5"/>
+        </svg>
+        Single Specimen Showdown
+      </button>
+    </div>
+  </div>
+
+  <main>
+    <!-- ============================================================== -->
+    <!-- SECTION 1: 500-IMAGE INTERNET BATCH BENCHMARK                  -->
+    <!-- ============================================================== -->
+    <div id="sectionBatch" style="display: flex; flex-direction: column; gap: 1.5rem;">
+      <!-- Batch Control Deck -->
+      <div class="card batch-control-deck">
+        <div class="batch-top-row">
+          <div class="batch-header-info">
+            <h2>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--emerald-400)" stroke-width="2.2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="2" y1="12" x2="22" y2="12"/>
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+              </svg>
+              500-Image Live Internet Batch Benchmark
+            </h2>
+            <p>Continuously scrapes verified botanical specimens from independent archives (Wikimedia Commons & Openverse) to ensure zero overlap with training data, running side-by-side inference on RTX 3060.</p>
+          </div>
+          <div class="batch-actions">
+            <select class="batch-select" id="batchSizeSelect">
+              <option value="500" selected>500 Specimens (Full Test)</option>
+              <option value="250">250 Specimens</option>
+              <option value="100">100 Specimens</option>
+              <option value="50">50 Specimens (Quick Smoke Test)</option>
+            </select>
+            <select class="batch-select" id="batchCategorySelect">
+              <option value="wikimedia" selected>Wikimedia Commons (Zero iNat Overlap)</option>
+              <option value="openverse">Openverse CC (Smithsonian & Flickr)</option>
+              <option value="hybrid">Multi-Source Hybrid (Wikimedia + Openverse)</option>
+            </select>
+            <button class="btn btn-primary" id="startBatchBtn">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="5 3 19 12 5 21 5 3"/>
+              </svg>
+              Start Batch Test
+            </button>
+            <button class="btn btn-danger" id="stopBatchBtn" style="display: none;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect width="16" height="16" x="4" y="4" rx="2"/>
+              </svg>
+              Stop Test
+            </button>
+            <button class="btn btn-secondary" id="exportCsvBtn">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+              Export CSV (36 Signals)
+            </button>
+            <button class="btn btn-secondary" id="openAnalysisBtn" style="border-color: rgba(56, 189, 248, 0.45); color: #38bdf8; background: rgba(56, 189, 248, 0.12);">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M12 16v-4"/>
+                <path d="M12 8h.01"/>
+              </svg>
+              🧠 Diagnostic & Improvement Report
+            </button>
+          </div>
+        </div>
+
+        <!-- Zero Data Leakage Guarantee Notice -->
+        <div style="background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(52, 211, 153, 0.35); border-radius: var(--radius-sm); padding: 0.65rem 1rem; font-size: 0.82rem; color: var(--emerald-300); display: flex; align-items: center; gap: 0.6rem;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+          <span><strong>Zero Data Contamination Guarantee:</strong> Testing is strictly performed on external specimens scraped from Wikimedia Commons and Openverse (Smithsonian & Flickr CC) to ensure complete independence from the training dataset.</span>
+        </div>
+
+        <!-- Real-time Progress Bar & Stats -->
+        <div class="progress-banner">
+          <div class="progress-meta-row">
+            <div style="display: flex; align-items: center; gap: 0.8rem;">
+              <span class="status-badge status-idle" id="batchStatusBadge">⚪ Idle</span>
+              <strong id="batchProgressLabel" style="font-size: 0.95rem; color: #fff;">0 / 500 specimens evaluated (0.0%)</strong>
+            </div>
+            <div style="font-size: 0.85rem; color: var(--emerald-400); font-weight: 700;" id="batchEtaLabel">ETA: --</div>
+          </div>
+          <div class="progress-bar-container">
+            <div class="progress-bar-fill" id="batchProgressBar"></div>
+          </div>
+          <div class="progress-stats-strip">
+            <span>Elapsed: <strong id="batchElapsed">0.0s</strong></span>
+            <span>Throughput: <strong id="batchSpeed">0.0 img/s</strong></span>
+            <span>Target: <strong id="batchTotalTarget">500 images</strong></span>
+            <span>Hardware: <strong>NVIDIA RTX 3060 (PyTorch CUDA)</strong></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4-Model Comparative Leaderboard Grid -->
+      <div class="leaderboard-grid">
+        <!-- FloraNet-102 -->
+        <div class="lb-card lb-featured">
+          <div class="lb-title-row">
+            <div>
+              <h3>FloraNet Ultra-250</h3>
+              <div style="font-size: 0.72rem; color: var(--emerald-300);">ConvNeXt-Small (384px) • 250 Classes • 5-Crop TTA Active</div>
+            </div>
+            <span class="lb-rank-badge">🏆 #1 Botanical</span>
+          </div>
+          <div class="lb-acc-box">
+            <div class="lb-acc-num" id="accF102">0.0%</div>
+            <div class="lb-acc-label">Top-1 Accuracy</div>
+          </div>
+          <div class="lb-details-list">
+            <div class="lb-detail-row">
+              <span>Correct Predictions:</span>
+              <strong id="correctF102">0 / 0</strong>
+            </div>
+            <div class="lb-detail-row">
+              <span>Avg RTX 3060 Latency:</span>
+              <strong id="latF102">0.0 ms</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Baseline FloraNet-47 -->
+        <div class="lb-card">
+          <div class="lb-title-row">
+            <div>
+              <h3>Baseline FloraNet-47</h3>
+              <div style="font-size: 0.72rem; color: var(--text-muted);">Original FYP Baseline • 47 Classes</div>
+            </div>
+            <span style="font-size: 0.72rem; color: var(--text-muted);">Baseline</span>
+          </div>
+          <div class="lb-acc-box">
+            <div class="lb-acc-num" id="accB47" style="color: #9ca3af;">0.0%</div>
+            <div class="lb-acc-label">Top-1 Accuracy</div>
+          </div>
+          <div class="lb-details-list">
+            <div class="lb-detail-row">
+              <span>Correct Predictions:</span>
+              <strong id="correctB47">0 / 0</strong>
+            </div>
+            <div class="lb-detail-row">
+              <span>Avg Latency:</span>
+              <strong id="latB47">0.0 ms</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- YOLOv8 -->
+        <div class="lb-card">
+          <div class="lb-title-row">
+            <div>
+              <h3>YOLOv8 Classifier</h3>
+              <div style="font-size: 0.72rem; color: var(--text-muted);">Ultralytics YOLO • Pretrained</div>
+            </div>
+            <span style="font-size: 0.72rem; color: var(--text-muted);">General Vision</span>
+          </div>
+          <div class="lb-acc-box">
+            <div class="lb-acc-num" id="accYolo" style="color: #9ca3af;">0.0%</div>
+            <div class="lb-acc-label">Top-1 Accuracy</div>
+          </div>
+          <div class="lb-details-list">
+            <div class="lb-detail-row">
+              <span>Correct Predictions:</span>
+              <strong id="correctYolo">0 / 0</strong>
+            </div>
+            <div class="lb-detail-row">
+              <span>Avg Latency:</span>
+              <strong id="latYolo">0.0 ms</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- ResNet-50 -->
+        <div class="lb-card">
+          <div class="lb-title-row">
+            <div>
+              <h3>ResNet-50</h3>
+              <div style="font-size: 0.72rem; color: var(--text-muted);">Torchvision Deep ResNet • ImageNet</div>
+            </div>
+            <span style="font-size: 0.72rem; color: var(--text-muted);">Benchmark</span>
+          </div>
+          <div class="lb-acc-box">
+            <div class="lb-acc-num" id="accRes" style="color: #9ca3af;">0.0%</div>
+            <div class="lb-acc-label">Top-1 Accuracy</div>
+          </div>
+          <div class="lb-details-list">
+            <div class="lb-detail-row">
+              <span>Correct Predictions:</span>
+              <strong id="correctRes">0 / 0</strong>
+            </div>
+            <div class="lb-detail-row">
+              <span>Avg Latency:</span>
+              <strong id="latRes">0.0 ms</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Stream Feed & Results Table -->
+      <div class="card">
+        <div class="feed-controls-row">
+          <div class="filter-pills">
+            <button class="filter-btn active" data-filter="all">All Evaluated (<span id="countFilterAll">0</span>)</button>
+            <button class="filter-btn" data-filter="f102_win">FloraNet-102 Wins (<span id="countFilterF102">0</span>)</button>
+            <button class="filter-btn" data-filter="f102_exclusive">FloraNet-102 Exclusive Wins (<span id="countFilterExcl">0</span>)</button>
+            <button class="filter-btn" data-filter="b47_win">Baseline Wins (<span id="countFilterB47">0</span>)</button>
+            <button class="filter-btn" data-filter="yolo_win">YOLO Wins (<span id="countFilterYolo">0</span>)</button>
+            <button class="filter-btn" data-filter="res_win">ResNet Wins (<span id="countFilterRes">0</span>)</button>
+            <button class="filter-btn" data-filter="all_miss">All Missed (<span id="countFilterMiss">0</span>)</button>
+          </div>
+          <input type="text" class="search-input" id="searchSpeciesInput" placeholder="Filter by species name...">
+        </div>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Photo</th>
+                <th>Ground Truth & Independent Source</th>
+                <th>FloraNet-102 (Our Model)</th>
+                <th>Baseline FloraNet-47</th>
+                <th>YOLOv8</th>
+                <th>ResNet-50</th>
+              </tr>
+            </thead>
+            <tbody id="batchTableBody">
+              <tr>
+                <td colspan="7" style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                  No batch test currently active. Click <strong>"Start Batch Test"</strong> above to scrape and evaluate 500 images!
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- SECTION 2: SINGLE SPECIMEN SHOWDOWN VIEW                       -->
+    <!-- ============================================================== -->
+    <div id="sectionSingle" style="display: none; flex-direction: column; gap: 1.5rem;">
+      <!-- Single Control Deck -->
+      <div class="card" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+        <div>
+          <h2 style="font-size: 1.25rem; font-weight: 700; color: #fff;">Interactive Single-Specimen Arena</h2>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.2rem;">Fetch one random verified specimen from Wikimedia Commons & Openverse or upload your own image.</p>
+        </div>
+        <div style="display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap;">
+          <button class="btn btn-primary" id="randomSingleBtn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect width="18" height="18" x="3" y="3" rx="2"/>
+              <circle cx="8.5" cy="8.5" r="1.5"/>
+              <circle cx="15.5" cy="15.5" r="1.5"/>
+            </svg>
+            Fetch Random Internet Plant
+          </button>
+          <label class="btn btn-secondary" style="cursor: pointer;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+            Upload Photo
+            <input type="file" id="localFileInput" accept="image/*" style="display: none;">
+          </label>
+        </div>
+      </div>
+
+      <!-- Stage Card -->
+      <div class="stage-card">
+        <div class="stage-img-box">
+          <img id="stageImg" src="https://thumb.wikimedia.org/wikipedia/commons/thumb/f/fa/Monstera_deliciosa_-_Wilhelma_01.jpg/600px-Monstera_deliciosa_-_Wilhelma_01.jpg" alt="Active Botanical Specimen">
+        </div>
+        <div class="gt-badge-container">
+          <span class="gt-tag">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12 6 12 12 14 14"/>
+            </svg>
+            Independent Ground Truth
+          </span>
+          <div class="gt-common" id="gtCommon">Monstera</div>
+          <div class="gt-scientific" id="gtScientific">Monstera deliciosa</div>
+          <div class="gt-meta-grid">
+            <div class="gt-meta-item">
+              Taxon Family
+              <strong id="gtFamily">Araceae</strong>
+            </div>
+            <div class="gt-meta-item">
+              Observed Location
+              <strong id="gtLocation">Wilhelma Botanical Garden, Stuttgart</strong>
+            </div>
+            <div class="gt-meta-item">
+              Source & Credit
+              <strong id="gtCredit">Wikimedia Commons Botanical Archive</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Single Arena Grid -->
+      <div class="arena-grid" id="singleArenaGrid">
+        <!-- Injected via JavaScript -->
+      </div>
+    </div>
+  </main>
+
+  <!-- Diagnostic & Continuous Improvement Modal -->
+  <div class="diag-modal-overlay" id="diagModalOverlay">
+    <div class="diag-modal">
+      <div class="diag-modal-header">
+        <div>
+          <div style="display: flex; align-items: center; gap: 0.6rem;">
+            <span style="font-size: 1.5rem;">🧠</span>
+            <h2 style="font-size: 1.35rem; font-weight: 800; color: #fff;">Model Diagnostic & Continuous Improvement Hub</h2>
+          </div>
+          <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 0.25rem;">
+            Synthesizing 36 CSV diagnostic signals to isolate confusion pairs, measure latent Top-5 headroom, and harvest active learning retraining data.
+          </p>
+        </div>
+        <button class="diag-close-btn" id="diagCloseBtn">✕</button>
+      </div>
+
+      <!-- KPI Summary Grid -->
+      <div class="diag-kpi-grid">
+        <div class="diag-kpi-card">
+          <div class="diag-kpi-val" id="diagInVocabAcc">--%</div>
+          <div class="diag-kpi-lbl">In-Vocab Top-1 Accuracy</div>
+        </div>
+        <div class="diag-kpi-card" style="border-color: rgba(56, 189, 248, 0.3);">
+          <div class="diag-kpi-val" id="diagTop5Headroom" style="color: #38bdf8;">--%</div>
+          <div class="diag-kpi-lbl">Top-5 Retrieval (Latent Headroom)</div>
+        </div>
+        <div class="diag-kpi-card">
+          <div class="diag-kpi-val" id="diagConfMargin" style="font-size: 1.35rem; margin-top: 0.35rem;">--</div>
+          <div class="diag-kpi-lbl">Avg Margin (Correct / Missed)</div>
+        </div>
+        <div class="diag-kpi-card">
+          <div class="diag-kpi-val" id="diagEntropy" style="font-size: 1.35rem; margin-top: 0.35rem;">-- nats</div>
+          <div class="diag-kpi-lbl">Shannon Softmax Entropy</div>
+        </div>
+      </div>
+
+      <!-- Error Taxonomy Breakdown -->
+      <div style="background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.06); border-radius: var(--radius-md); padding: 1.2rem;">
+        <h3 style="font-size: 0.95rem; font-weight: 700; color: #fff; margin-bottom: 0.8rem; display: flex; align-items: center; gap: 0.5rem;">
+          <span>📊</span> Error Taxonomy Distribution
+        </h3>
+        <div class="diag-cat-pills" id="diagCatPills">
+          <!-- Injected via JS -->
+        </div>
+      </div>
+
+      <!-- Top Confused Botanical Pairs -->
+      <div style="background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.06); border-radius: var(--radius-md); padding: 1.2rem;">
+        <h3 style="font-size: 0.95rem; font-weight: 700; color: #fff; margin-bottom: 0.8rem; display: flex; align-items: center; gap: 0.5rem;">
+          <span>🔍</span> Top Confused Botanical Pairs & Root Causes
+        </h3>
+        <div style="overflow-x: auto;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 0.82rem;" id="diagConfusionTable">
+            <thead>
+              <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--text-muted); text-align: left;">
+                <th style="padding: 0.5rem 0.8rem;">Ground Truth Species</th>
+                <th style="padding: 0.5rem 0.8rem;">Confused Model Prediction</th>
+                <th style="padding: 0.5rem 0.8rem;">Frequency</th>
+                <th style="padding: 0.5rem 0.8rem;">Remediation Strategy</th>
+              </tr>
+            </thead>
+            <tbody id="diagConfusionBody">
+              <!-- Injected via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Actionable Improvement Directives -->
+      <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(52, 211, 153, 0.3); border-radius: var(--radius-md); padding: 1.2rem;">
+        <h3 style="font-size: 0.95rem; font-weight: 700; color: var(--emerald-300); margin-bottom: 0.8rem; display: flex; align-items: center; gap: 0.5rem;">
+          <span>💡</span> Concrete Model Improvement Directives
+        </h3>
+        <ul id="diagRecommendationsList" style="margin: 0; padding-left: 1.2rem; font-size: 0.84rem; color: #e5e7eb; display: flex; flex-direction: column; gap: 0.5rem;">
+          <!-- Injected via JS -->
+        </ul>
+      </div>
+
+      <!-- Active Learning Reinforcement Harvester -->
+      <div style="background: linear-gradient(135deg, rgba(56, 189, 248, 0.12) 0%, rgba(16, 185, 129, 0.12) 100%); border: 1px solid rgba(56, 189, 248, 0.35); border-radius: var(--radius-md); padding: 1.3rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+        <div>
+          <div style="font-weight: 800; font-size: 1rem; color: #fff; display: flex; align-items: center; gap: 0.5rem;">
+            <span>⚡</span> Automated Active Learning Reinforcement
+          </div>
+          <div style="font-size: 0.82rem; color: var(--text-muted); margin-top: 0.2rem;" id="diagActiveQueueLabel">
+            Staged hard failure cases ready for automatic download into retraining dataset.
+          </div>
+        </div>
+        <button class="btn btn-primary" id="diagHarvestBtn" style="background: linear-gradient(135deg, #0284c7 0%, #10b981 100%);">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          Harvest Failure Images for Retraining
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fullscreen Loading Spinner for single test -->
+  <div class="arena-loader" id="arenaLoader">
+    <div class="spinner"></div>
+    <div style="font-size: 1.1rem; font-weight: 700; color: #fff;">Querying Models Across RTX 3060...</div>
+    <div style="font-size: 0.85rem; color: var(--emerald-400);">FloraNet-102 • Baseline-47 • YOLOv8 • ResNet-50</div>
+  </div>
+
+  <footer>
+    FloraNet Botanical AI Architecture • FYP CoreTech Model Arena • Live Multi-Model Benchmark
+  </footer>
+
+  <script>
+    // View Switcher
+    const pillBatchView = document.getElementById('pillBatchView');
+    const pillSingleView = document.getElementById('pillSingleView');
+    const sectionBatch = document.getElementById('sectionBatch');
+    const sectionSingle = document.getElementById('sectionSingle');
+
+    pillBatchView.addEventListener('click', () => {
+      pillBatchView.classList.add('active');
+      pillSingleView.classList.remove('active');
+      sectionBatch.style.display = 'flex';
+      sectionSingle.style.display = 'none';
+    });
+
+    pillSingleView.addEventListener('click', () => {
+      pillSingleView.classList.add('active');
+      pillBatchView.classList.remove('active');
+      sectionSingle.style.display = 'flex';
+      sectionBatch.style.display = 'none';
+      if (!singleArenaRendered) {
+        fetchRandomSinglePlant();
+      }
+    });
+
+    // -------------------------------------------------------------
+    // 500-IMAGE BATCH ENGINE LOGIC
+    // -------------------------------------------------------------
+    const startBatchBtn = document.getElementById('startBatchBtn');
+    const stopBatchBtn = document.getElementById('stopBatchBtn');
+    const exportCsvBtn = document.getElementById('exportCsvBtn');
+    const batchSizeSelect = document.getElementById('batchSizeSelect');
+    const batchCategorySelect = document.getElementById('batchCategorySelect');
+
+    const batchStatusBadge = document.getElementById('batchStatusBadge');
+    const batchProgressLabel = document.getElementById('batchProgressLabel');
+    const batchProgressBar = document.getElementById('batchProgressBar');
+    const batchEtaLabel = document.getElementById('batchEtaLabel');
+    const batchElapsed = document.getElementById('batchElapsed');
+    const batchSpeed = document.getElementById('batchSpeed');
+    const batchTotalTarget = document.getElementById('batchTotalTarget');
+
+    const accF102 = document.getElementById('accF102');
+    const correctF102 = document.getElementById('correctF102');
+    const latF102 = document.getElementById('latF102');
+
+    const accB47 = document.getElementById('accB47');
+    const correctB47 = document.getElementById('correctB47');
+    const latB47 = document.getElementById('latB47');
+
+    const accYolo = document.getElementById('accYolo');
+    const correctYolo = document.getElementById('correctYolo');
+    const latYolo = document.getElementById('latYolo');
+
+    const accRes = document.getElementById('accRes');
+    const correctRes = document.getElementById('correctRes');
+    const latRes = document.getElementById('latRes');
+
+    const countFilterAll = document.getElementById('countFilterAll');
+    const countFilterF102 = document.getElementById('countFilterF102');
+    const countFilterExcl = document.getElementById('countFilterExcl');
+    const countFilterB47 = document.getElementById('countFilterB47');
+    const countFilterYolo = document.getElementById('countFilterYolo');
+    const countFilterRes = document.getElementById('countFilterRes');
+    const countFilterMiss = document.getElementById('countFilterMiss');
+
+    const batchTableBody = document.getElementById('batchTableBody');
+    const searchSpeciesInput = document.getElementById('searchSpeciesInput');
+
+    let allBatchResults = [];
+    let currentFilter = 'all';
+    let pollInterval = null;
+
+    async function startBatchBenchmark() {
+      const total = parseInt(batchSizeSelect.value, 10) || 500;
+      const cat = batchCategorySelect.value || 'all';
+
+      startBatchBtn.style.display = 'none';
+      stopBatchBtn.style.display = 'inline-flex';
+      batchTotalTarget.textContent = `${total} images`;
+
+      try {
+        const res = await fetch('/api/benchmark/batch/start', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ total_images: total, category: cat })
+        });
+        const data = await res.json();
+        pollBatchStatus();
+        if (!pollInterval) {
+          pollInterval = setInterval(pollBatchStatus, 900);
+        }
+      } catch (err) {
+        alert("Failed to start batch test: " + err.message);
+        startBatchBtn.style.display = 'inline-flex';
+        stopBatchBtn.style.display = 'none';
+      }
+    }
+
+    async function stopBatchBenchmark() {
+      try {
+        await fetch('/api/benchmark/batch/stop', { method: 'POST' });
+        stopBatchBtn.style.display = 'none';
+        startBatchBtn.style.display = 'inline-flex';
+      } catch (err) {
+        console.error("Stop error:", err);
+      }
+    }
+
+    async function pollBatchStatus() {
+      try {
+        const res = await fetch('/api/benchmark/batch/status?limit=500');
+        const data = await res.json();
+
+        // Status badge
+        if (data.status === 'running') {
+          batchStatusBadge.className = 'status-badge status-running';
+          batchStatusBadge.innerHTML = '🟢 Running Live Benchmark';
+          startBatchBtn.style.display = 'none';
+          stopBatchBtn.style.display = 'inline-flex';
+        } else if (data.status === 'completed') {
+          batchStatusBadge.className = 'status-badge status-completed';
+          batchStatusBadge.innerHTML = '✅ Batch Test Completed';
+          startBatchBtn.style.display = 'inline-flex';
+          stopBatchBtn.style.display = 'none';
+          if (pollInterval) { clearInterval(pollInterval); pollInterval = null; }
+        } else if (data.status === 'stopped') {
+          batchStatusBadge.className = 'status-badge status-stopped';
+          batchStatusBadge.innerHTML = '⏹️ Batch Test Stopped';
+          startBatchBtn.style.display = 'inline-flex';
+          stopBatchBtn.style.display = 'none';
+          if (pollInterval) { clearInterval(pollInterval); pollInterval = null; }
+        } else {
+          batchStatusBadge.className = 'status-badge status-idle';
+          batchStatusBadge.innerHTML = '⚪ Idle';
+          startBatchBtn.style.display = 'inline-flex';
+          stopBatchBtn.style.display = 'none';
+        }
+
+        // Progress bar
+        batchProgressLabel.textContent = `${data.completed} / ${data.total} specimens evaluated (${data.progress_pct}%)`;
+        batchProgressBar.style.width = `${data.progress_pct}%`;
+        batchElapsed.textContent = `${data.elapsed_sec}s`;
+        batchSpeed.textContent = `${data.speed_fps} img/s`;
+        batchEtaLabel.textContent = data.eta_sec > 0 ? `ETA: ~${data.eta_sec}s remaining` : 'ETA: Complete';
+
+        // Leaderboard Stats
+        const ms = data.models_stats || {};
+        if (ms["FloraNet-102"]) {
+          const s = ms["FloraNet-102"];
+          accF102.textContent = `${s.accuracy}%`;
+          correctF102.textContent = `${s.correct} / ${s.total}`;
+          latF102.textContent = `${s.avg_latency_ms} ms`;
+        }
+        if (ms["Baseline-47"]) {
+          const s = ms["Baseline-47"];
+          accB47.textContent = `${s.accuracy}%`;
+          correctB47.textContent = `${s.correct} / ${s.total}`;
+          latB47.textContent = `${s.avg_latency_ms} ms`;
+        }
+        if (ms["YOLOv8"]) {
+          const s = ms["YOLOv8"];
+          accYolo.textContent = `${s.accuracy}%`;
+          correctYolo.textContent = `${s.correct} / ${s.total}`;
+          latYolo.textContent = `${s.avg_latency_ms} ms`;
+        }
+        if (ms["ResNet-50"]) {
+          const s = ms["ResNet-50"];
+          accRes.textContent = `${s.accuracy}%`;
+          correctRes.textContent = `${s.correct} / ${s.total}`;
+          latRes.textContent = `${s.avg_latency_ms} ms`;
+        }
+
+        // Results Table
+        if (data.recent_results && data.recent_results.length > 0) {
+          allBatchResults = data.recent_results;
+          updateFilterCounts();
+          renderBatchTable();
+        }
+      } catch (err) {
+        console.error("Poll status error:", err);
+      }
+    }
+
+    function updateFilterCounts() {
+      countFilterAll.textContent = allBatchResults.length;
+      let cF102 = 0, cExcl = 0, cB47 = 0, cYolo = 0, cRes = 0, cMiss = 0;
+
+      allBatchResults.forEach(r => {
+        const p = r.predictions || {};
+        const f102 = p.floranet_102 && p.floranet_102.is_correct;
+        const b47 = p.baseline_47 && p.baseline_47.is_correct;
+        const yolo = p.yolov8 && p.yolov8.is_correct;
+        const res = p.resnet50 && p.resnet50.is_correct;
+
+        if (f102) cF102++;
+        if (f102 && !b47 && !yolo && !res) cExcl++;
+        if (b47) cB47++;
+        if (yolo) cYolo++;
+        if (res) cRes++;
+        if (!f102 && !b47 && !yolo && !res) cMiss++;
+      });
+
+      countFilterF102.textContent = cF102;
+      countFilterExcl.textContent = cExcl;
+      countFilterB47.textContent = cB47;
+      countFilterYolo.textContent = cYolo;
+      countFilterRes.textContent = cRes;
+      countFilterMiss.textContent = cMiss;
+    }
+
+    function renderBatchTable() {
+      const q = (searchSpeciesInput.value || '').toLowerCase().trim();
+      const filtered = allBatchResults.filter(r => {
+        const p = r.predictions || {};
+        const f102 = p.floranet_102 && p.floranet_102.is_correct;
+        const b47 = p.baseline_47 && p.baseline_47.is_correct;
+        const yolo = p.yolov8 && p.yolov8.is_correct;
+        const res = p.resnet50 && p.resnet50.is_correct;
+
+        if (currentFilter === 'f102_win' && !f102) return false;
+        if (currentFilter === 'f102_exclusive' && !(f102 && !b47 && !yolo && !res)) return false;
+        if (currentFilter === 'b47_win' && !b47) return false;
+        if (currentFilter === 'yolo_win' && !yolo) return false;
+        if (currentFilter === 'res_win' && !res) return false;
+        if (currentFilter === 'all_miss' && (f102 || b47 || yolo || res)) return false;
+
+        if (q) {
+          const text = `${r.ground_truth_common} ${r.ground_truth_scientific} ${p.floranet_102?.name} ${p.baseline_47?.name}`.toLowerCase();
+          if (!text.includes(q)) return false;
+        }
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        batchTableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 2rem; color:var(--text-muted);">No records matching the filter criteria.</td></tr>`;
+        return;
+      }
+
+      batchTableBody.innerHTML = filtered.map(r => {
+        const p = r.predictions || {};
+        const f102 = p.floranet_102 || {};
+        const b47 = p.baseline_47 || {};
+        const yolo = p.yolov8 || {};
+        const res = p.resnet50 || {};
+
+        const pill = (corr) => corr
+          ? `<span class="match-pill match-yes">✓ Correct</span>`
+          : `<span class="match-pill match-no">✕ Missed</span>`;
+
+        return `
+          <tr>
+            <td><strong>#${r.id}</strong></td>
+            <td>
+              <a href="${r.source_url || '#'}" target="_blank">
+                <img class="thumb-img" src="${r.thumbnail_url || r.image_url}" alt="${r.ground_truth_common}" loading="lazy">
+              </a>
+            </td>
+            <td>
+              <div style="font-weight:700; color:#fff;">${r.ground_truth_common}</div>
+              <div style="font-size:0.75rem; font-style:italic; color:var(--emerald-300);">${r.ground_truth_scientific || ''}</div>
+              <div style="font-size:0.7rem; color:var(--text-faint); margin-top:2px;">
+                <a href="${r.source_url || '#'}" target="_blank" style="color:var(--emerald-400); text-decoration:none;">${r.source || 'Wikimedia Commons'} ↗</a>
+              </div>
+            </td>
+            <td>
+              <div style="font-weight:700; color:var(--emerald-400);">${f102.name || 'N/A'}</div>
+              <div style="font-size:0.75rem; color:var(--text-muted);">${f102.confidence || 0}% • ${f102.latency_ms || 0}ms</div>
+              <div style="margin-top:4px;">${pill(f102.is_correct)}</div>
+            </td>
+            <td>
+              <div style="font-weight:600; color:#fff;">${b47.name || 'N/A'}</div>
+              <div style="font-size:0.75rem; color:var(--text-muted);">${b47.confidence || 0}% • ${b47.latency_ms || 0}ms</div>
+              <div style="margin-top:4px;">${pill(b47.is_correct)}</div>
+            </td>
+            <td>
+              <div style="font-weight:600; color:#fff;">${yolo.name || 'N/A'}</div>
+              <div style="font-size:0.75rem; color:var(--text-muted);">${yolo.confidence || 0}% • ${yolo.latency_ms || 0}ms</div>
+              <div style="margin-top:4px;">${pill(yolo.is_correct)}</div>
+            </td>
+            <td>
+              <div style="font-weight:600; color:#fff;">${res.name || 'N/A'}</div>
+              <div style="font-size:0.75rem; color:var(--text-muted);">${res.confidence || 0}% • ${res.latency_ms || 0}ms</div>
+              <div style="margin-top:4px;">${pill(res.is_correct)}</div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // Filter Buttons
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentFilter = btn.dataset.filter;
+        renderBatchTable();
+      });
+    });
+
+    searchSpeciesInput.addEventListener('input', renderBatchTable);
+
+    startBatchBtn.addEventListener('click', startBatchBenchmark);
+    stopBatchBtn.addEventListener('click', stopBatchBenchmark);
+    exportCsvBtn.addEventListener('click', () => {
+      window.location.href = '/api/benchmark/batch/export';
+    });
+
+    // -------------------------------------------------------------
+    // DIAGNOSTIC & CONTINUOUS IMPROVEMENT MODAL LOGIC
+    // -------------------------------------------------------------
+    const openAnalysisBtn = document.getElementById('openAnalysisBtn');
+    const diagModalOverlay = document.getElementById('diagModalOverlay');
+    const diagCloseBtn = document.getElementById('diagCloseBtn');
+    const diagHarvestBtn = document.getElementById('diagHarvestBtn');
+
+    const diagInVocabAcc = document.getElementById('diagInVocabAcc');
+    const diagTop5Headroom = document.getElementById('diagTop5Headroom');
+    const diagConfMargin = document.getElementById('diagConfMargin');
+    const diagEntropy = document.getElementById('diagEntropy');
+    const diagCatPills = document.getElementById('diagCatPills');
+    const diagConfusionBody = document.getElementById('diagConfusionBody');
+    const diagRecommendationsList = document.getElementById('diagRecommendationsList');
+    const diagActiveQueueLabel = document.getElementById('diagActiveQueueLabel');
+
+    async function openDiagnosticModal() {
+      diagModalOverlay.style.display = 'flex';
+      try {
+        const res = await fetch('/api/benchmark/batch/analyze');
+        const data = await res.json();
+        if (data.status !== 'success') {
+          alert("Please run a batch test first to gather diagnostic data!");
+          diagModalOverlay.style.display = 'none';
+          return;
+        }
+
+        const s = data.summary || {};
+        diagInVocabAcc.textContent = `${s.in_vocabulary_top1_acc_pct || 0}%`;
+        const headroom = Math.max(0, (s.in_vocabulary_top5_acc_pct || 0) - (s.in_vocabulary_top1_acc_pct || 0)).toFixed(1);
+        diagTop5Headroom.innerHTML = `${s.in_vocabulary_top5_acc_pct || 0}% <span style="font-size:0.75rem; color:var(--emerald-400); font-weight:600;">(+${headroom}% headroom)</span>`;
+        diagConfMargin.textContent = `+${s.avg_confidence_margin_correct || 0}% / ${s.avg_confidence_margin_missed || 0}%`;
+        diagEntropy.textContent = `${s.mean_prediction_entropy || 0} nats`;
+
+        // Error taxonomy
+        const cats = data.error_category_breakdown || {};
+        diagCatPills.innerHTML = Object.entries(cats).map(([cat, count]) => {
+          let color = '#9ca3af';
+          if (cat === 'CORRECT_DECISIVE') color = '#34d399';
+          else if (cat === 'CORRECT_LOW_MARGIN') color = '#fbbf24';
+          else if (cat === 'NEAR_MISS_TOP5') color = '#38bdf8';
+          else if (cat === 'GENUS_LEVEL_CONFUSION') color = '#a78bfa';
+          else if (cat === 'IN_DISTRIBUTION_HARD_MISS') color = '#f87171';
+          return `<div class="diag-cat-pill"><span style="color:${color};">●</span> ${cat}: <strong>${count}</strong></div>`;
+        }).join('');
+
+        // Confusion table
+        const confs = data.top_confusion_pairs || [];
+        if (confs.length === 0) {
+          diagConfusionBody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:1.2rem; color:var(--text-muted);">No confusion pairs recorded. All in-distribution specimens were classified accurately!</td></tr>`;
+        } else {
+          diagConfusionBody.innerHTML = confs.map(c => `
+            <tr>
+              <td style="padding:0.6rem 0.8rem; font-weight:700; color:#fff;">${c.true_species}</td>
+              <td style="padding:0.6rem 0.8rem; color:#f87171; font-weight:600;">${c.confused_with}</td>
+              <td style="padding:0.6rem 0.8rem; font-weight:700; color:var(--emerald-400);">${c.frequency}</td>
+              <td style="padding:0.6rem 0.8rem; color:var(--text-muted); font-size:0.78rem;">${c.recommendation}</td>
+            </tr>
+          `).join('');
+        }
+
+        // Actionable directives
+        const recs = data.actionable_recommendations || [];
+        diagRecommendationsList.innerHTML = recs.map(r => `<li>${r}</li>`).join('');
+
+        // Active learning queue
+        const qSize = data.active_learning_queue_size || 0;
+        diagActiveQueueLabel.textContent = `${qSize} hard in-distribution failure specimens identified. Clicking harvest will save images into data/active_learning_reinforcement/ for instant retraining.`;
+        diagHarvestBtn.disabled = qSize === 0;
+        diagHarvestBtn.innerHTML = qSize > 0
+          ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Harvest ${qSize} Failure Images for Retraining`
+          : `No Failure Images to Harvest`;
+
+      } catch (err) {
+        alert("Failed to load diagnostic analysis: " + err.message);
+        diagModalOverlay.style.display = 'none';
+      }
+    }
+
+    async function harvestFailureImages() {
+      diagHarvestBtn.disabled = true;
+      diagHarvestBtn.textContent = "Downloading Specimen Images...";
+      try {
+        const res = await fetch('/api/benchmark/batch/harvest', { method: 'POST' });
+        const data = await res.json();
+        if (data.status === 'success') {
+          alert(`Successfully harvested ${data.harvested_count} hard failure images into:\n${data.target_dir}\n\nThese images are ready to be used in your next training run!`);
+          diagHarvestBtn.textContent = `Harvest Complete (${data.harvested_count} Saved)`;
+        } else {
+          alert(data.message || "Harvest failed");
+          diagHarvestBtn.disabled = false;
+          diagHarvestBtn.textContent = "Harvest Failure Images for Retraining";
+        }
+      } catch (err) {
+        alert("Harvest error: " + err.message);
+        diagHarvestBtn.disabled = false;
+        diagHarvestBtn.textContent = "Harvest Failure Images for Retraining";
+      }
+    }
+
+    openAnalysisBtn.addEventListener('click', openDiagnosticModal);
+    diagCloseBtn.addEventListener('click', () => { diagModalOverlay.style.display = 'none'; });
+    diagModalOverlay.addEventListener('click', (e) => {
+      if (e.target === diagModalOverlay) diagModalOverlay.style.display = 'none';
+    });
+    diagHarvestBtn.addEventListener('click', harvestFailureImages);
+
+    // -------------------------------------------------------------
+    // SINGLE SPECIMEN SHOWDOWN LOGIC
+    // -------------------------------------------------------------
+    const randomSingleBtn = document.getElementById('randomSingleBtn');
+    const localFileInput = document.getElementById('localFileInput');
+    const stageImg = document.getElementById('stageImg');
+    const gtCommon = document.getElementById('gtCommon');
+    const gtScientific = document.getElementById('gtScientific');
+    const gtFamily = document.getElementById('gtFamily');
+    const gtLocation = document.getElementById('gtLocation');
+    const gtCredit = document.getElementById('gtCredit');
+    const singleArenaGrid = document.getElementById('singleArenaGrid');
+    const arenaLoader = document.getElementById('arenaLoader');
+    let singleArenaRendered = false;
+
+    function showLoader(show) {
+      arenaLoader.style.display = show ? 'flex' : 'none';
+    }
+
+    async function fetchRandomSinglePlant() {
+      showLoader(true);
+      try {
+        const res = await fetch('/api/benchmark/random-plant');
+        const data = await res.json();
+        updateSingleStageUI(data);
+        await runSingleBenchmark(data.image_url, data.ground_truth_common, data.ground_truth_scientific);
+        singleArenaRendered = true;
+      } catch (err) {
+        alert("Failed to fetch random plant: " + err.message);
+      } finally {
+        showLoader(false);
+      }
+    }
+
+    localFileInput.addEventListener('change', async (e) => {
+      if (e.target.files && e.target.files.length > 0) {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+        reader.onload = async (event) => {
+          stageImg.src = event.target.result;
+          const meta = {
+            ground_truth_common: 'Custom User Upload',
+            ground_truth_scientific: 'Unknown (Uploaded)',
+            family: 'User Specimen',
+            location: 'Local Upload',
+            photographer: 'User'
+          };
+          updateSingleStageUI(meta);
+          showLoader(true);
+          const formData = new FormData();
+          formData.append('file', file);
+          try {
+            const res = await fetch('/api/benchmark/compare', {
+              method: 'POST',
+              body: formData
+            });
+            const data = await res.json();
+            renderSingleArena(data.models);
+            singleArenaRendered = true;
+          } catch (err) {
+            alert("Comparison error: " + err.message);
+          } finally {
+            showLoader(false);
+          }
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    function updateSingleStageUI(data) {
+      if (data.image_url) stageImg.src = data.image_url;
+      gtCommon.textContent = data.ground_truth_common;
+      gtScientific.textContent = data.ground_truth_scientific;
+      gtFamily.textContent = data.family || 'Plantae';
+      gtLocation.textContent = data.location || 'Unknown';
+      gtCredit.textContent = data.photographer || 'iNaturalist';
+    }
+
+    async function runSingleBenchmark(imgUrl, gtC, gtS) {
+      showLoader(true);
+      try {
+        const res = await fetch('/api/benchmark/compare', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            image_url: imgUrl,
+            ground_truth_common: gtC,
+            ground_truth_scientific: gtS
+          })
+        });
+        const data = await res.json();
+        renderSingleArena(data.models);
+      } catch (err) {
+        alert("Benchmark error: " + err.message);
+      } finally {
+        showLoader(false);
+      }
+    }
+
+    function renderSingleArena(models) {
+      singleArenaGrid.innerHTML = '';
+      models.forEach((m, idx) => {
+        const isFeatured = idx === 0;
+        const card = document.createElement('div');
+        card.className = `model-card ${isFeatured ? 'featured' : ''}`;
+
+        const matchBadge = m.is_correct
+          ? `<span class="match-pill match-yes">✓ Matches GT</span>`
+          : `<span class="match-pill match-no">✕ Mismatch</span>`;
+
+        let top5Bars = '';
+        if (m.predictions && m.predictions.length > 0) {
+          m.predictions.slice(0, 4).forEach(p => {
+            top5Bars += `
+              <div class="mini-bar-item">
+                <div class="mini-bar-meta">
+                  <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:180px;">${p.name}</span>
+                  <span>${p.confidence}%</span>
+                </div>
+                <div class="mini-bar-track">
+                  <div class="mini-bar-fill" style="width: ${p.confidence}%;"></div>
+                </div>
+              </div>
+            `;
+          });
+        }
+
+        card.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+            <div>
+              <h3 style="font-size:1.05rem; font-weight:700; color:#fff;">${m.model_name}</h3>
+              <div style="font-size:0.7rem; color:var(--text-muted); margin-top:2px;">${m.model_badge || ''}</div>
+            </div>
+            ${matchBadge}
+          </div>
+
+          <div class="top-pred-box">
+            <div style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase;">Top Match</div>
+            <div class="top-pred-name">${m.top_prediction || 'N/A'}</div>
+            <div class="top-pred-sci">${m.scientific_name || ''}</div>
+            <div class="top-pred-conf">
+              <span>Confidence</span>
+              <span class="conf-num">${m.confidence || 0}%</span>
+            </div>
+          </div>
+
+          <div class="speed-tag">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+            </svg>
+            Inference: <strong>${m.latency_ms || 0} ms</strong> on RTX 3060
+          </div>
+
+          <div class="mini-bars">
+            <div style="font-size:0.72rem; color:var(--text-muted); font-weight:700; text-transform:uppercase;">Candidate Probabilities</div>
+            ${top5Bars}
+          </div>
+        `;
+        singleArenaGrid.appendChild(card);
+      });
+    }
+
+    randomSingleBtn.addEventListener('click', fetchRandomSinglePlant);
+
+    // Initial check: query batch status on page load to restore running state if active
+    pollBatchStatus();
+  </script>
+</body>
+</html>

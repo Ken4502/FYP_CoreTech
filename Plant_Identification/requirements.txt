@@ -11,4 +11,8 @@ fastapi
 uvicorn
 python-multipart
 onnx
-
+opencv-python-headless>=4.8.0
+rembg>=2.0.50
+onnxruntime>=1.16.0
+ultralytics>=8.0.0
+scipy>=1.10.0

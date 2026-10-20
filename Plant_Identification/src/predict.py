@@ -13,11 +13,22 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
+CORETECH_ROOT = PROJECT_ROOT.parent
+if str(CORETECH_ROOT) not in sys.path:
+    sys.path.insert(0, str(CORETECH_ROOT))
+
+import numpy as np
 import torch
 from PIL import Image
 from src import config
 from src.dataset import get_transforms
 from src.model import build_model
+
+try:
+    from preprocessing.methods import PlantPreprocessors
+    _preprocessor = PlantPreprocessors()
+except Exception as e:
+    _preprocessor = None
 
 _cached_model = None
 _cached_classes = None
@@ -42,9 +53,11 @@ def load_inference_model():
     _cached_model = model
     return _cached_model, _cached_classes
 
-def predict_image(image_input, top_k: int = 5):
+def predict_image(image_input, top_k: int = 5, return_preprocessed: bool = False):
     """
     Predicts plant species for a given PIL Image or file path.
+    Applies Preprocessing Method 1 (Plant Species Identification) to isolate the plant
+    from background noise, pots, and soil while preserving leaf margins.
     Returns:
         List of dicts: [{"rank": 1, "species": "...", "confidence": 98.5}, ...]
     """
@@ -58,7 +71,23 @@ def predict_image(image_input, top_k: int = 5):
     else:
         raise TypeError("Expected filepath or PIL Image instance")
 
-    tensor = eval_tf(img).unsqueeze(0).to(config.DEVICE)
+    # Method 1: Plant Species Identification Preprocessing
+    clean_img = img
+    if _preprocessor is not None:
+        try:
+            res = _preprocessor.process_for_species_identification(
+                np.array(img),
+                bg_color=(128, 128, 128),
+                padding_ratio=0.12,
+                filter_pot_soil=True,
+                preserve_leaf_shape=True
+            )
+            clean_img = Image.fromarray(res["cropped_image"])
+        except Exception as e:
+            print(f"Warning: Species Preprocessing Method 1 fallback: {e}")
+            clean_img = img
+
+    tensor = eval_tf(clean_img).unsqueeze(0).to(config.DEVICE)
 
     with torch.no_grad():
         outputs = model(tensor)
@@ -74,6 +103,8 @@ def predict_image(image_input, top_k: int = 5):
             "confidence": round(prob.item() * 100, 2)
         })
 
+    if return_preprocessed:
+        return results, clean_img
     return results
 
 def main():

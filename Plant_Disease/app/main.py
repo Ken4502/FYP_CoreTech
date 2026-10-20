@@ -16,6 +16,9 @@ import io
 # Ensure project root is in sys.path
 current_dir = Path(__file__).resolve().parent
 project_root = current_dir.parent
+coretech_root = project_root.parent
+if str(coretech_root) not in sys.path:
+    sys.path.insert(0, str(coretech_root))
 if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 

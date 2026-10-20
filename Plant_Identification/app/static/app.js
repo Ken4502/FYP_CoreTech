@@ -22,7 +22,16 @@ document.addEventListener("DOMContentLoaded", () => {
   const speciesCountVal = document.getElementById("species-count-val");
   const deviceVal = document.getElementById("device-val");
 
+  const viewToggleBar = document.getElementById("view-toggle-bar");
+  const btnShowOriginal = document.getElementById("btn-show-original");
+  const btnShowPreprocessed = document.getElementById("btn-show-preprocessed");
+  const prepSummaryCard = document.getElementById("prep-summary-card");
+  const prepThumbOrig = document.getElementById("prep-thumb-orig");
+  const prepThumbClean = document.getElementById("prep-thumb-clean");
+
   let selectedFile = null;
+  let originalImgData = "";
+  let preprocessedImgData = "";
 
   // 1. Fetch system & model info
   async function fetchSystemInfo() {
@@ -94,10 +103,16 @@ document.addEventListener("DOMContentLoaded", () => {
     selectedFile = file;
     const reader = new FileReader();
     reader.onload = e => {
-      imagePreview.src = e.target.result;
+      originalImgData = e.target.result;
+      preprocessedImgData = "";
+      imagePreview.src = originalImgData;
       dropPrompt.style.display = "none";
       previewContainer.style.display = "block";
       identifyBtn.disabled = false;
+      if (viewToggleBar) viewToggleBar.style.display = "none";
+      if (prepSummaryCard) prepSummaryCard.style.display = "none";
+      if (btnShowOriginal) btnShowOriginal.classList.add("active");
+      if (btnShowPreprocessed) btnShowPreprocessed.classList.remove("active");
     };
     reader.readAsDataURL(file);
   }
@@ -109,6 +124,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function resetUpload() {
     selectedFile = null;
+    originalImgData = "";
+    preprocessedImgData = "";
     fileInput.value = "";
     imagePreview.src = "";
     dropPrompt.style.display = "block";
@@ -117,6 +134,29 @@ document.addEventListener("DOMContentLoaded", () => {
     resultsEmpty.style.display = "flex";
     resultsContent.style.display = "none";
     latencyTag.style.display = "none";
+    if (viewToggleBar) viewToggleBar.style.display = "none";
+    if (prepSummaryCard) prepSummaryCard.style.display = "none";
+    if (btnShowOriginal) btnShowOriginal.classList.add("active");
+    if (btnShowPreprocessed) btnShowPreprocessed.classList.remove("active");
+  }
+
+  // View toggle listeners
+  if (btnShowOriginal && btnShowPreprocessed) {
+    btnShowOriginal.addEventListener("click", () => {
+      if (originalImgData) {
+        imagePreview.src = originalImgData;
+        btnShowOriginal.classList.add("active");
+        btnShowPreprocessed.classList.remove("active");
+      }
+    });
+
+    btnShowPreprocessed.addEventListener("click", () => {
+      if (preprocessedImgData) {
+        imagePreview.src = preprocessedImgData;
+        btnShowPreprocessed.classList.add("active");
+        btnShowOriginal.classList.remove("active");
+      }
+    });
   }
 
   // 3. Identification prediction handler
@@ -155,6 +195,26 @@ document.addEventListener("DOMContentLoaded", () => {
   function displayResults(data) {
     resultsEmpty.style.display = "none";
     resultsContent.style.display = "flex";
+
+    // Preprocessed image support
+    if (data.preprocessed_image_base64) {
+      preprocessedImgData = data.preprocessed_image_base64.startsWith("data:")
+        ? data.preprocessed_image_base64
+        : `data:image/jpeg;base64,${data.preprocessed_image_base64}`;
+
+      if (viewToggleBar) viewToggleBar.style.display = "flex";
+      if (btnShowPreprocessed && btnShowOriginal) {
+        btnShowPreprocessed.classList.add("active");
+        btnShowOriginal.classList.remove("active");
+      }
+      imagePreview.src = preprocessedImgData;
+
+      if (prepSummaryCard && prepThumbOrig && prepThumbClean) {
+        prepThumbOrig.src = originalImgData;
+        prepThumbClean.src = preprocessedImgData;
+        prepSummaryCard.style.display = "block";
+      }
+    }
 
     // Latency
     latencyTag.textContent = `${data.inference_time_ms} ms`;

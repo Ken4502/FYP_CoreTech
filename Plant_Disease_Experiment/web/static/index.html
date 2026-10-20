@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PhytoCare - AI Plant Disease Diagnosis & Spot Localizer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="navbar">
+      <div class="brand">
+        <span class="brand-icon">🔬</span>
+        <div class="brand-text">
+          <h1>PhytoCare AI</h1>
+          <span class="brand-tagline">Hierarchical Indoor Plant Pathology, Pests & Abiotic Vigor</span>
+        </div>
+      </div>
+      <div class="header-status">
+        <a href="http://127.0.0.1:8000" target="_blank" class="nav-bridge-link" title="Switch to FloraNet-250 Species Identification">
+          🌿 FloraNet-250 (Species ID) ↗
+        </a>
+        <a href="/benchmark" class="nav-bridge-link nav-benchmark-link" title="Open 500-Specimen Disease Benchmark Arena">
+          🧪 500-Test Arena ↗
+        </a>
+        <button type="button" class="btn-encyclopedia-trigger" id="open-encyclopedia-btn">
+          📖 Clinical Encyclopedia (31)
+        </button>
+        <span class="status-pill" id="system-status">
+          <span class="status-dot"></span>
+          <span id="status-text">Connecting...</span>
+        </span>
+      </div>
+    </header>
+
+    <!-- Plant Selector Strip -->
+    <div class="species-badge-strip">
+      <strong><span>🪴</span> Target Plant Mode:</strong>
+      <div class="plant-selector-wrap">
+        <select id="plant-select" class="plant-select-dropdown">
+          <option value="auto" selected>✨ Auto-Detect Species (AI)</option>
+          <option value="Aloe">Aloe Vera</option>
+          <option value="Cactus">Cactus (Opuntia)</option>
+          <option value="Money_Plant">Money Plant (Pothos)</option>
+          <option value="Snake_Plant">Snake Plant (Sansevieria)</option>
+          <option value="Spider_Plant">Spider Plant</option>
+          <option value="Universal">🐛 Universal Pests & Pathogens (All Houseplants)</option>
+        </select>
+      </div>
+      <span class="selector-hint">Select a specific plant to focus diagnosis solely on that plant's disease spots, or leave on Auto-Detect.</span>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-grid">
+      <!-- Left: Upload & Preview Section -->
+      <section class="card upload-card">
+        <div class="card-header">
+          <h2>Upload Leaf or Plant Photo</h2>
+          <p>Drop a photo to detect diseased spots or verify clean healthy foliage.</p>
+        </div>
+
+        <div class="drop-zone" id="drop-zone">
+          <input type="file" id="file-input" accept="image/*" class="file-input" hidden>
+          
+          <div class="drop-prompt" id="drop-prompt">
+            <div class="upload-icon-circle">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
+            </div>
+            <p class="drop-text-primary">Drag & drop your leaf photo here</p>
+            <p class="drop-text-secondary">Supports JPG, JPEG, PNG, WEBP</p>
+            <button type="button" class="btn btn-outline" id="browse-btn">Browse Local Files</button>
+          </div>
+
+          <div class="preview-container" id="preview-container" style="display: none;">
+            <img id="image-preview" src="" alt="Selected Plant Image">
+            <button type="button" class="btn-clear" id="clear-btn" title="Remove image">×</button>
+          </div>
+        </div>
+
+        <div class="upload-actions">
+          <button type="button" class="btn btn-primary" id="diagnose-btn" disabled>
+            <span class="btn-spinner" id="btn-spinner" style="display: none;"></span>
+            <span id="btn-text">Diagnose & Detect Disease Spots</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Right: Diagnosis & Advisory Results -->
+      <section class="card results-card" id="results-card">
+        <div class="card-header results-header-wrap">
+          <div>
+            <h2>Pathology Report & Spot Detection</h2>
+            <p>Spatial lesion detection, bounding boxes, and treatment remedies</p>
+          </div>
+          <div class="header-action-group">
+            <button type="button" class="btn-export-pdf" id="export-report-btn" style="display: none;" title="Print or save official clinical diagnosis certificate">
+              📄 Export Clinical Lab Report
+            </button>
+            <span class="latency-tag" id="latency-tag" style="display: none;">12.4 ms</span>
+          </div>
+        </div>
+
+        <!-- Empty State -->
+        <div class="results-empty" id="results-empty">
+          <div class="empty-illustration">🍃</div>
+          <h3>Awaiting Photo Upload</h3>
+          <p>Upload a plant photo on the left to scan for pathological spots or verify clean healthy foliage.</p>
+        </div>
+
+        <!-- Populated Results State -->
+        <div class="results-content" id="results-content" style="display: none;">
+          
+          <!-- Layer 1 Plant Identification Strip -->
+          <div class="layer1-id-banner" id="layer1-id-banner">
+            <div class="layer1-icon">🪴</div>
+            <div class="layer1-details">
+              <span class="layer1-tag">LAYER 1 • BOTANICAL IDENTIFICATION</span>
+              <div class="layer1-title-row">
+                <h4 id="layer1-species-name">Aloe Vera</h4>
+                <span class="layer1-confidence" id="layer1-confidence">96.0% Match</span>
+              </div>
+            </div>
+            <span class="layer1-status-pill" id="layer1-status-pill">Supported in Disease Model</span>
+          </div>
+
+          <!-- Spot Detection Visualizer Card -->
+          <div class="spot-visualizer-box" id="spot-visualizer-box">
+            <div class="spot-visualizer-header">
+              <span class="spot-badge" id="spot-badge">0 SPOTS DETECTED</span>
+              <div class="view-toggle-btns">
+                <button type="button" class="toggle-btn active" id="view-highlighted-btn">🔍 Highlighted Spots</button>
+                <button type="button" class="toggle-btn" id="view-preprocessed-btn">🌿 After Preprocessing</button>
+                <button type="button" class="toggle-btn" id="view-original-btn">📸 Original</button>
+              </div>
+            </div>
+            <div class="annotated-image-container" id="annotated-container">
+              <img id="annotated-preview" src="" alt="Annotated Lesion Detection">
+              <div class="magnifier-lens" id="magnifier-lens" style="display: none;"></div>
+            </div>
+            <div class="loupe-hint">🔍 Move cursor or drag on image for 3× Micro-Fovea Optical Loupe</div>
+            <div class="spot-status-text" id="spot-status-text">
+              No pathological spots detected across leaf tissue.
+            </div>
+          </div>
+
+          <!-- EPPO / USDA Plant Disease Index (PDI) Severity Meter -->
+          <div class="pdi-meter-card" id="pdi-meter-card" style="display: none;">
+            <div class="pdi-header">
+              <div class="pdi-title-group">
+                <span class="pdi-icon">📊</span>
+                <div>
+                  <h4>EPPO / USDA Plant Disease Index (PDI)</h4>
+                  <p class="pdi-subtitle">Quantitative tissue necrosis scale & clinical triage</p>
+                </div>
+              </div>
+              <span class="pdi-grade-badge" id="pdi-grade-badge">Grade 0: Clean</span>
+            </div>
+            <div class="pdi-track">
+              <div class="pdi-segment" data-grade="0" title="Grade 0: 0% necrosis (Clean)">Grade 0 (Clean)</div>
+              <div class="pdi-segment" data-grade="1" title="Grade 1: < 2% necrosis (Trace Inoculum)">Grade 1 (&lt;2%)</div>
+              <div class="pdi-segment" data-grade="2" title="Grade 2: 2-10% necrosis (Mild)">Grade 2 (2-10%)</div>
+              <div class="pdi-segment" data-grade="3" title="Grade 3: 10-25% necrosis (Moderate)">Grade 3 (10-25%)</div>
+              <div class="pdi-segment" data-grade="4" title="Grade 4: > 25% necrosis (Critical)">Grade 4 (&gt;25%)</div>
+            </div>
+            <div class="pdi-clinical-box">
+              <strong>Clinical Action Protocol:</strong>
+              <span id="pdi-action-text">No pathological interventions required.</span>
+            </div>
+          </div>
+
+          <!-- Co-Infection & Physiological Coupling Alerts -->
+          <div class="co-alerts-container" id="co-alerts-container" style="display: none;">
+            <div class="co-alerts-header">
+              <span class="co-alerts-icon">⚡</span>
+              <h4>Secondary Pathogen & Physiological Risk Alerts</h4>
+            </div>
+            <div class="co-alerts-list" id="co-alerts-list"></div>
+          </div>
+
+          <!-- Disease Unavailable Notice Banner (Shown when plant has no disease training data) -->
+          <div class="unavailable-banner" id="unavailable-banner" style="display: none;">
+            <div class="unavailable-header">
+              <div class="unavailable-icon">⚠️</div>
+              <div>
+                <h3 class="unavailable-title">Disease Identification Unavailable</h3>
+                <p class="unavailable-subtitle" id="unavailable-plant-text">
+                  No pathological training data exists for this plant species in the current disease dataset.
+                </p>
+              </div>
+            </div>
+            <div class="unavailable-body">
+              <p id="unavailable-description">
+                Our plant disease identification model is specialized for 5 specific indoor plant varieties plus 6 universal pest and mold taxa. While Layer 1 botanical identification successfully recognized this plant, you can screen it for universal pests or select a supported variety.
+              </p>
+              <div class="supported-species-box">
+                <strong>Supported Disease & Pest Diagnosis Varieties:</strong>
+                <div class="supported-chips" id="supported-chips">
+                  <span class="supp-chip" data-plant="Aloe">Aloe Vera</span>
+                  <span class="supp-chip" data-plant="Cactus">Cactus (Opuntia)</span>
+                  <span class="supp-chip" data-plant="Money_Plant">Money Plant (Pothos)</span>
+                  <span class="supp-chip" data-plant="Snake_Plant">Snake Plant (Sansevieria)</span>
+                  <span class="supp-chip" data-plant="Spider_Plant">Spider Plant</span>
+                  <span class="supp-chip" data-plant="Universal">🐛 Universal Pests & Pathogens</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Primary Verdict Banner (Shown when disease data is available) -->
+          <div class="verdict-banner" id="verdict-banner">
+            <div class="verdict-meta">
+              <span class="status-badge" id="status-badge">HEALTHY & THRIVING</span>
+              <span class="verdict-confidence" id="verdict-confidence">98.5% Match</span>
+            </div>
+            <div>
+              <span class="verdict-plant" id="verdict-plant">Cactus (Opuntia)</span>
+              <h3 class="verdict-title" id="verdict-title">Healthy Baseline</h3>
+            </div>
+            <p class="verdict-summary" id="verdict-summary">
+              Firm, plump pads with intact areoles and spines. Zero signs of scale insect damage.
+            </p>
+          </div>
+
+          <!-- Abiotic Stress & Foliar Senescence Panel -->
+          <div class="abiotic-card" id="abiotic-card">
+            <div class="abiotic-header">
+              <div class="abiotic-title-wrap">
+                <span class="abiotic-icon">💧</span>
+                <div>
+                  <h4>Physiological & Abiotic Vigor Assessment</h4>
+                  <p id="abiotic-summary-text">Analyzing cellular turgor, moisture desaturation, and senescence gradient...</p>
+                </div>
+              </div>
+              <div class="abiotic-badges">
+                <span class="abiotic-badge" id="badge-water">Optimal Hydration</span>
+                <span class="abiotic-badge" id="badge-aging">Active Photosynthesis</span>
+              </div>
+            </div>
+            
+            <div class="abiotic-metrics-row">
+              <div class="abiotic-meter">
+                <div class="meter-info">
+                  <span>Chlorophyll Green Vigor</span>
+                  <strong id="val-vigor">--%</strong>
+                </div>
+                <div class="meter-bar-bg"><div class="meter-bar-fill vigor" id="bar-vigor" style="width: 0%"></div></div>
+              </div>
+              <div class="abiotic-meter">
+                <div class="meter-info">
+                  <span>Chlorosis (Yellowing)</span>
+                  <strong id="val-chlorosis">--%</strong>
+                </div>
+                <div class="meter-bar-bg"><div class="meter-bar-fill chlorosis" id="bar-chlorosis" style="width: 0%"></div></div>
+              </div>
+              <div class="abiotic-meter">
+                <div class="meter-info">
+                  <span>Tip Crispness (Drought)</span>
+                  <strong id="val-crispness">--%</strong>
+                </div>
+                <div class="meter-bar-bg"><div class="meter-bar-fill crispness" id="bar-crispness" style="width: 0%"></div></div>
+              </div>
+            </div>
+
+            <div class="abiotic-advisory" id="abiotic-advisory-box" style="display: none;">
+              <strong>🍂 Physiological Care Advice:</strong>
+              <ul id="abiotic-advisory-list"></ul>
+            </div>
+          </div>
+
+          <!-- Structured Care & Treatment Recommendations -->
+          <div class="care-section" id="care-section">
+            <div class="care-tabs">
+              <button type="button" class="care-tab-btn active" data-tab="tab-immediate">🚨 Immediate Actions</button>
+              <button type="button" class="care-tab-btn" data-tab="tab-treatment">💊 Treatment & Remedies</button>
+              <button type="button" class="care-tab-btn" data-tab="tab-prevention">🛡️ Prevention & Care</button>
+              <button type="button" class="care-tab-btn" data-tab="tab-symptoms">🔍 Symptoms & Causes</button>
+            </div>
+
+            <!-- Tab 1: Immediate Actions -->
+            <div class="care-pane active" id="tab-immediate">
+              <ul class="care-list" id="list-immediate"></ul>
+            </div>
+
+            <!-- Tab 2: Treatment & Remedies -->
+            <div class="care-pane" id="tab-treatment">
+              <div class="treatment-subgrid">
+                <div class="treatment-box">
+                  <h5>🌿 Organic & Cultural Remedies</h5>
+                  <ul class="care-list" id="list-treatment-organic"></ul>
+                </div>
+                <div class="treatment-box">
+                  <h5>🧪 Chemical & Targeted Treatments</h5>
+                  <ul class="care-list" id="list-treatment-chemical"></ul>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tab 3: Prevention & Long-Term Care -->
+            <div class="care-pane" id="tab-prevention">
+              <ul class="care-list" id="list-prevention"></ul>
+            </div>
+
+            <!-- Tab 4: Symptoms & Causes -->
+            <div class="care-pane" id="tab-symptoms">
+              <div class="treatment-subgrid">
+                <div class="treatment-box">
+                  <h5>👁️ Key Visual Symptoms</h5>
+                  <ul class="care-list" id="list-symptoms"></ul>
+                </div>
+                <div class="treatment-box">
+                  <h5>⚠️ Primary Contributing Causes</h5>
+                  <ul class="care-list" id="list-causes"></ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Top Predictions Breakdown -->
+          <div class="predictions-breakdown">
+            <h4 id="breakdown-title">Intra-Group Confidence Breakdown (Click any to inspect care guide)</h4>
+            <div id="prediction-list"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Model Stats & Specs Footer Card -->
+    <footer class="model-info-footer">
+      <div class="info-metric">
+        <span class="metric-label">Architecture</span>
+        <span class="metric-value">Two-Layer Hierarchical</span>
+      </div>
+      <div class="info-metric">
+        <span class="metric-label">Blueprint</span>
+        <span class="metric-value">FloraNet-250 Prior + ConvNeXt-Small 384px</span>
+      </div>
+      <div class="info-metric">
+        <span class="metric-label">Clinical Classes</span>
+        <span class="metric-value">31 Classes (90.41% Acc, 2,982 Tests)</span>
+      </div>
+      <div class="info-metric">
+        <span class="metric-label">Hardware Engine</span>
+        <span class="metric-value" id="device-val">NVIDIA RTX 3060</span>
+      </div>
+    </footer>
+
+    <!-- Clinical Encyclopedia Modal -->
+    <div class="modal-backdrop" id="encyclopedia-modal" style="display: none;">
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <span class="modal-icon">📖</span>
+            <div>
+              <h3>PhytoCare Clinical Pathology Encyclopedia</h3>
+              <p>Explore 31 conditions: clinical symptoms, organic neem/alcohol recipes, and targeted chemical treatments</p>
+            </div>
+          </div>
+          <button type="button" class="modal-close" id="close-encyclopedia-btn">✕</button>
+        </div>
+        <div class="modal-filter-bar">
+          <input type="text" id="encyclopedia-search" placeholder="🔍 Search disease or plant (e.g. Thrips, Rust, Mildew, Cactus, Scale, Mites...)" class="encyclopedia-search-input">
+          <div class="encyclopedia-filter-chips">
+            <button type="button" class="enc-chip active" data-filter="all">All (31)</button>
+            <button type="button" class="enc-chip" data-filter="universal">🐛 Universal Pests & Molds (15)</button>
+            <button type="button" class="enc-chip" data-filter="specialized">🪴 Host Specialists (16)</button>
+            <button type="button" class="enc-chip" data-filter="healthy">🌿 Healthy Baselines (5)</button>
+          </div>
+        </div>
+        <div class="modal-body" id="encyclopedia-grid">
+          <div class="modal-loading">Loading clinical knowledge database...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

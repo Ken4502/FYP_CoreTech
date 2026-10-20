@@ -96,3 +96,4 @@ Open [http://localhost:8001](http://localhost:8001) in your browser.
 ## 📊 Datasets & Models
 - Pretrained model checkpoints (`best_model.pth`) and class mappings are prepackaged in each module's `artifacts/` directory for immediate inference.
 - Full training datasets (14,000+ images) are excluded from this repository to adhere to version control best practices.
+

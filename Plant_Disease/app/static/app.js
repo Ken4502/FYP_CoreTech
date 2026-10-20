@@ -20,6 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const spotBadge = document.getElementById("spot-badge");
   const spotStatusText = document.getElementById("spot-status-text");
   const viewHighlightedBtn = document.getElementById("view-highlighted-btn");
+  const viewPreprocessedBtn = document.getElementById("view-preprocessed-btn");
   const viewOriginalBtn = document.getElementById("view-original-btn");
 
   // Verdict Banner
@@ -60,6 +61,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let selectedFile = null;
   let originalImageSrc = "";
   let annotatedImageSrc = "";
+  let preprocessedImageSrc = "";
 
   // 1. Fetch system info
   async function fetchSystemInfo() {
@@ -146,6 +148,7 @@ document.addEventListener("DOMContentLoaded", () => {
     selectedFile = null;
     originalImageSrc = "";
     annotatedImageSrc = "";
+    preprocessedImageSrc = "";
     fileInput.value = "";
     imagePreview.src = "";
     dropPrompt.style.display = "block";
@@ -175,12 +178,23 @@ document.addEventListener("DOMContentLoaded", () => {
   viewHighlightedBtn.addEventListener("click", () => {
     viewHighlightedBtn.classList.add("active");
     viewOriginalBtn.classList.remove("active");
+    if (viewPreprocessedBtn) viewPreprocessedBtn.classList.remove("active");
     annotatedPreview.src = annotatedImageSrc || originalImageSrc;
   });
+
+  if (viewPreprocessedBtn) {
+    viewPreprocessedBtn.addEventListener("click", () => {
+      viewPreprocessedBtn.classList.add("active");
+      viewHighlightedBtn.classList.remove("active");
+      viewOriginalBtn.classList.remove("active");
+      annotatedPreview.src = preprocessedImageSrc || originalImageSrc;
+    });
+  }
 
   viewOriginalBtn.addEventListener("click", () => {
     viewOriginalBtn.classList.add("active");
     viewHighlightedBtn.classList.remove("active");
+    if (viewPreprocessedBtn) viewPreprocessedBtn.classList.remove("active");
     annotatedPreview.src = originalImageSrc;
   });
 
@@ -237,6 +251,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     latencyTag.textContent = `${data.inference_time_ms} ms`;
     latencyTag.style.display = "inline-block";
+
+    preprocessedImageSrc = data.preprocessed_image_base64 || "";
+    if (viewPreprocessedBtn) {
+      viewPreprocessedBtn.style.display = preprocessedImageSrc ? "inline-block" : "none";
+    }
 
     // 1. Render Layer 1 Botanical Identification Strip
     if (layer1SpeciesName && data.species) {

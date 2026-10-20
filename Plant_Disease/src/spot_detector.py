@@ -16,7 +16,16 @@ import scipy.ndimage
 import torch
 import torch.nn.functional as F
 
-from src import config
+import sys
+from pathlib import Path
+CORETECH_ROOT = Path(__file__).resolve().parent.parent.parent
+if str(CORETECH_ROOT) not in sys.path:
+    sys.path.insert(0, str(CORETECH_ROOT))
+
+try:
+    from Plant_Disease.src import config
+except (ImportError, ModuleNotFoundError):
+    from src import config
 
 class LesionSpotDetector:
     """
@@ -27,7 +36,17 @@ class LesionSpotDetector:
         self.model = model
         self.device = device
         self.activations = None
+        self._preprocessor = None
         self._register_hook()
+
+    def _get_preprocessor(self):
+        if self._preprocessor is None:
+            try:
+                from preprocessing.methods import PlantPreprocessors
+                self._preprocessor = PlantPreprocessors()
+            except Exception as e:
+                print(f"Warning: could not load PlantPreprocessors in spot_detector: {e}")
+        return self._preprocessor
 
     def _register_hook(self):
         def hook_fn(module, input, output):
@@ -38,50 +57,31 @@ class LesionSpotDetector:
 
     def extract_plant_mask(self, pil_image: Image.Image) -> np.ndarray:
         """
-        Segments the foreground plant foliage from background objects
-        (wooden tables, walls, pots, saucers, window frames, shadows).
-        Combines agricultural Excess Green Index (ExG) with botanical HSV thresholds
-        and morphological hole-filling.
+        Segments the foreground plant foliage using CoreTech Preprocessing Method 2
+        (Zero-hole lamina enclosure & AI container/soil rejection).
         """
+        preprocessor = self._get_preprocessor()
+        if preprocessor is not None:
+            try:
+                res = preprocessor.process_for_disease_identification(
+                    np.array(pil_image.convert("RGB")),
+                    filter_pot_soil=True,
+                    preserve_leaf_shape=True
+                )
+                mask = res["mask"]
+                if mask is not None and np.count_nonzero(mask) > 0:
+                    return (mask > 0).astype(np.float32)
+            except Exception as e:
+                print(f"Warning: neural matting fallback in spot_detector: {e}")
+
+        # Fallback heuristic
         arr = np.array(pil_image.convert("RGB")).astype(np.float32) / 255.0
         r, g, b = arr[:, :, 0], arr[:, :, 1], arr[:, :, 2]
-
-        # 1. Agricultural Excess Green Index: 2G - R - B
         exg = 2.0 * g - r - b
-
-        # 2. Plant Hue & Saturation in HSV space
-        mx = np.maximum(np.maximum(r, g), b)
-        mn = np.minimum(np.minimum(r, g), b)
-        df = mx - mn + 1e-7
-
-        mask_r = (mx == r)
-        mask_g = (mx == g)
-        mask_b = (mx == b)
-        h = np.zeros_like(r)
-        h[mask_r] = (60.0 * ((g[mask_r] - b[mask_r]) / df[mask_r]) + 360.0) % 360.0
-        h[mask_g] = (60.0 * ((b[mask_g] - r[mask_g]) / df[mask_g]) + 120.0) % 360.0
-        h[mask_b] = (60.0 * ((r[mask_b] - g[mask_b]) / df[mask_b]) + 240.0) % 360.0
-        s = df / (mx + 1e-7)
-        v = mx
-
-        # Plant foliage & lesion chromatic ranges:
-        # - Healthy foliage, stems, pads: Hue between 25° and 185°, Saturation > 0.10
-        # - Chlorotic yellowing, brown necrosis, rust pustules: Hue between 15° and 55°
-        # - ExG positive values (chlorophyll response)
-        foliage = ((h >= 20) & (h <= 190) & (s > 0.10) & (v > 0.08)) | (exg > 0.015)
-
-        # Morphological dilation + hole-filling ensures interior lesions (e.g. pale scale bugs,
-        # black necrotic holes) remain fully enclosed within the leaf perimeter
-        foliage_dilated = scipy.ndimage.binary_dilation(foliage, iterations=8)
+        foliage = (exg > 0.01)
+        foliage_dilated = scipy.ndimage.binary_dilation(foliage, iterations=4)
         filled_plant = scipy.ndimage.binary_fill_holes(foliage_dilated)
-        plant_mask = scipy.ndimage.binary_erosion(filled_plant, iterations=6)
-
-        # Fallback: if leaf segmentation is too sparse (e.g. extreme monochrome lighting),
-        # keep entire image active to prevent crashing
-        if plant_mask.mean() < 0.05:
-            plant_mask = np.ones_like(r, dtype=bool)
-
-        return plant_mask.astype(np.float32)
+        return filled_plant.astype(np.float32)
 
     def detect_and_highlight(
         self,
@@ -91,7 +91,8 @@ class LesionSpotDetector:
         condition_name: str,
         condition_idx: int,
         is_healthy: bool,
-        threshold: float = config.SPOT_ACTIVATION_THRESHOLD
+        threshold: float = config.SPOT_ACTIVATION_THRESHOLD,
+        plant_mask: np.ndarray = None
     ) -> dict:
         """
         Analyzes spatial activations, restricts detection strictly to the plant body,
@@ -100,8 +101,11 @@ class LesionSpotDetector:
         orig_w, orig_h = pil_image.size
         annotated = pil_image.copy().convert("RGBA")
 
-        # Extract plant foreground mask to eliminate tables, pots, walls, and floors
-        plant_mask = self.extract_plant_mask(pil_image)
+        # Use precomputed mask if supplied (from Method 2), or extract it
+        if plant_mask is None:
+            plant_mask = self.extract_plant_mask(pil_image)
+        else:
+            plant_mask = (plant_mask > 0).astype(np.float32)
 
         # If condition is explicitly Healthy:
         if is_healthy:

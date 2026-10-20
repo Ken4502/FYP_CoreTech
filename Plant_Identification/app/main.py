@@ -17,6 +17,9 @@ import io
 # Ensure src is importable
 current_dir = Path(__file__).resolve().parent
 project_root = current_dir.parent
+coretech_root = project_root.parent
+if str(coretech_root) not in sys.path:
+    sys.path.insert(0, str(coretech_root))
 if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
@@ -58,14 +61,20 @@ async def api_predict(file: UploadFile = File(...)):
         image = Image.open(io.BytesIO(contents)).convert("RGB")
         
         start_time = time.time()
-        predictions = predict_image(image, top_k=5)
+        predictions, clean_img = predict_image(image, top_k=5, return_preprocessed=True)
         inference_time_ms = round((time.time() - start_time) * 1000, 1)
+
+        import base64
+        buf = io.BytesIO()
+        clean_img.save(buf, format="JPEG", quality=90)
+        prep_b64 = "data:image/jpeg;base64," + base64.b64encode(buf.getvalue()).decode("utf-8")
 
         return JSONResponse({
             "status": "success",
             "filename": file.filename,
             "inference_time_ms": inference_time_ms,
-            "predictions": predictions
+            "predictions": predictions,
+            "preprocessed_image_base64": prep_b64
         })
     except FileNotFoundError as e:
         raise HTTPException(

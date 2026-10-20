@@ -54,6 +54,10 @@
           </div>
 
           <div class="preview-container" id="preview-container" style="display: none;">
+            <div class="view-toggle-bar" id="view-toggle-bar" style="display: none;">
+              <button type="button" class="preview-toggle-btn active" id="btn-show-original">📸 Original</button>
+              <button type="button" class="preview-toggle-btn" id="btn-show-preprocessed">🌿 After Preprocessing</button>
+            </div>
             <img id="image-preview" src="" alt="Selected Plant Image">
             <button type="button" class="btn-clear" id="clear-btn" title="Remove image">×</button>
           </div>
@@ -88,6 +92,30 @@
             <div class="top-match-badge">Top Match</div>
             <h3 class="top-species-name" id="top-species-name">Monstera Deliciosa</h3>
             <div class="confidence-badge" id="top-confidence-badge">98.4% Confidence</div>
+          </div>
+
+          <!-- Botanical Preprocessing Comparison Card -->
+          <div class="prep-summary-card" id="prep-summary-card" style="display: none;">
+            <div class="prep-header-row">
+              <span class="prep-title">🔬 Botanical Preprocessing (Method 1)</span>
+              <span class="prep-badge">Background & Pot Suppressed</span>
+            </div>
+            <div class="prep-comparison-row">
+              <div class="prep-col">
+                <span class="prep-col-label">Original Photo</span>
+                <div class="prep-thumb-wrap">
+                  <img id="prep-thumb-orig" src="" alt="Original Photo">
+                </div>
+              </div>
+              <div class="prep-arrow">➔</div>
+              <div class="prep-col">
+                <span class="prep-col-label">Segmented Leaf (Model Input)</span>
+                <div class="prep-thumb-wrap prep-clean">
+                  <img id="prep-thumb-clean" src="" alt="Segmented Leaf">
+                </div>
+              </div>
+            </div>
+            <p class="prep-caption">Pots, soil, and background clutter removed; margins and apex preserved for species classification.</p>
           </div>
 
           <!-- Top-5 Probability Breakdown -->

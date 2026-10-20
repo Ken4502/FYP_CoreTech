@@ -17,6 +17,7 @@ RUN grep -v "torch" /app/requirements.txt | grep -v "extra-index-url" > /app/req
     pip install --no-cache-dir -r /app/req_clean.txt
 
 # Copy source code and pre-trained artifacts
+COPY preprocessing /app/preprocessing
 COPY Plant_Disease /app/Plant_Disease
 
 WORKDIR /app/Plant_Disease
@@ -24,3 +25,4 @@ WORKDIR /app/Plant_Disease
 EXPOSE 8001
 
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8001"]
+

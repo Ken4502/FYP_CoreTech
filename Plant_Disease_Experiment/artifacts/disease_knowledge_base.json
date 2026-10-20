@@ -1,0 +1,1182 @@
+{
+  "Aloe_Anthracnose": {
+    "class_id": "Aloe_Anthracnose",
+    "plant_name": "Aloe Vera",
+    "scientific_name": "Aloe barbadensis miller",
+    "condition_name": "Anthracnose Leaf Spot",
+    "is_healthy": false,
+    "severity": "Moderate",
+    "category": "Fungal Infection",
+    "summary": "A fungal disease caused by Colletotrichum species that produces sunken, dark necrotic lesions on succulent aloe leaves.",
+    "symptoms": [
+      "Round to oval sunken lesions with dark brown or black centers",
+      "Water-soaked margins surrounding the spots",
+      "Lesions coalescing into large rotted sunken areas on older leaves",
+      "Spore masses turning pinkish or orange under high humidity"
+    ],
+    "causes": [
+      "Prolonged leaf wetness from overhead watering or misting",
+      "High humidity coupled with poor air circulation",
+      "Fungal spores splashing from contaminated soil or adjacent infected plants"
+    ],
+    "immediate_actions": [
+      "Isolate the plant immediately from other succulents to prevent spore spread.",
+      "Sterilize shears with 70% isopropyl alcohol and excise severely infected leaf sections near the base.",
+      "Cease all foliar misting and keep leaves completely dry."
+    ],
+    "treatment": {
+      "organic": [
+        "Dust freshly cut leaf surfaces with organic sulfur powder or ground cinnamon (natural antifungal sealant).",
+        "Apply cold-pressed organic neem oil spray (1 tsp neem + 1/2 tsp mild castile soap per liter of warm water)."
+      ],
+      "chemical": [
+        "Apply broad-spectrum liquid copper fungicide spray according to label instructions.",
+        "In severe recurrent cases, apply a systemic fungicide containing chlorothalonil or thiophanate-methyl."
+      ]
+    },
+    "prevention": [
+      "Water exclusively at soil level; never pour water into the central leaf rosette.",
+      "Allow the potting mix to dry out 100% between waterings.",
+      "Ensure bright, indirect sunlight and good room ventilation."
+    ]
+  },
+  "Aloe_Healthy": {
+    "class_id": "Aloe_Healthy",
+    "plant_name": "Aloe Vera",
+    "scientific_name": "Aloe barbadensis miller",
+    "condition_name": "Healthy Baseline",
+    "is_healthy": true,
+    "severity": "None",
+    "category": "Healthy",
+    "summary": "Vibrant, plump succulent leaves with firm green foliage and no active pathological infections.",
+    "symptoms": [
+      "Firm, erect, fleshy green to grey-green succulent leaves",
+      "Smooth leaf surface without sunken spots, rot, or lesions",
+      "Serrated edges with pale teeth intact"
+    ],
+    "causes": [
+      "Proper balance of gritty fast-draining substrate, infrequent soak watering, and ample sunlight."
+    ],
+    "immediate_actions": [
+      "No remedial action needed! Your Aloe Vera is thriving."
+    ],
+    "treatment": {
+      "organic": [
+        "Maintain natural care regimen with occasional diluted kelp or worm casting tea in spring."
+      ],
+      "chemical": [
+        "No chemical applications required."
+      ]
+    },
+    "prevention": [
+      "Follow the 'soak-and-dry' watering rule: water deeply only once every 2-3 weeks.",
+      "Provide 6+ hours of bright indirect or filtered direct sunlight daily.",
+      "Maintain cactus/succulent gritty soil with 50% perlite, pumice, or coarse sand."
+    ]
+  },
+  "Aloe_LeafSpot": {
+    "class_id": "Aloe_LeafSpot",
+    "plant_name": "Aloe Vera",
+    "scientific_name": "Aloe barbadensis miller",
+    "condition_name": "Fungal/Bacterial Leaf Spot",
+    "is_healthy": false,
+    "severity": "Mild to Moderate",
+    "category": "Fungal/Bacterial Infection",
+    "summary": "Infection typically caused by Alternaria, Cercospora, or bacterial pathogens producing scattered circular blemishes across leaves.",
+    "symptoms": [
+      "Small circular or irregular reddish-brown to dark spots on leaf surfaces",
+      "Chlorotic yellow halos encircling the blemishes",
+      "Older lower leaves showing denser spot concentrations"
+    ],
+    "causes": [
+      "Overhead watering allowing water droplets to linger on foliage",
+      "Stagnant indoor air and warm, humid microclimates"
+    ],
+    "immediate_actions": [
+      "Move plant to a dry, well-ventilated location with bright light.",
+      "Prune off heavily spotted individual leaves with sanitized blades.",
+      "Wipe surrounding foliage dry with clean paper towels."
+    ],
+    "treatment": {
+      "organic": [
+        "Spray with a solution of 1 tbsp baking soda and 1/2 tsp castile soap in 1 liter of water to alter leaf surface pH.",
+        "Apply sulfur-based garden dust directly to lesions."
+      ],
+      "chemical": [
+        "Apply fixed copper fungicide or mancozeb spray every 7-10 days until new growth emerges spot-free."
+      ]
+    },
+    "prevention": [
+      "Avoid splashing soil onto lower foliage during watering.",
+      "Use pots with generous drainage holes and avoid saucer pooling.",
+      "Space plants at least 15 cm apart to facilitate airflow."
+    ]
+  },
+  "Aloe_Rust": {
+    "class_id": "Aloe_Rust",
+    "plant_name": "Aloe Vera",
+    "scientific_name": "Aloe barbadensis miller",
+    "condition_name": "Aloe Rust",
+    "is_healthy": false,
+    "severity": "Moderate",
+    "category": "Fungal Infection",
+    "summary": "Specialized fungal disease caused by Uromyces aloes that forms elevated brown/black pustules embedded in leaf tissue.",
+    "symptoms": [
+      "Small yellow or pale chlorotic spots that darken rapidly",
+      "Elevated round pustules (uredinia) that turn dark reddish-brown to black",
+      "Circular depressions formed as leaf tissue under pustules collapses",
+      "Permanent black scars remaining on older succulent tissue"
+    ],
+    "causes": [
+      "Spore dissemination through airborne moisture and humid environments",
+      "Wet leaf surfaces and cool to warm temperatures (18-24\u00b0C)"
+    ],
+    "immediate_actions": [
+      "Isolate the aloe immediately; rust spores are highly contagious to other Aloes and Gasterias.",
+      "Prune infected leaves to remove sporulating pustules. Dispose in sealed trash; do NOT compost."
+    ],
+    "treatment": {
+      "organic": [
+        "Dust thoroughly with wettable sulfur powder.",
+        "Wipe uninfected foliage with diluted potassium bicarbonate solution."
+      ],
+      "chemical": [
+        "Apply systemic fungicides containing myclobutanil, propiconazole, or copper oxychloride.",
+        "Repeat applications according to manufacturer instructions until no new pustules appear."
+      ]
+    },
+    "prevention": [
+      "Keep the plant in the sunniest, driest spot available.",
+      "Never allow water to stand on leaves overnight.",
+      "Sanitize all gardening tools with 10% bleach or rubbing alcohol after handling."
+    ]
+  },
+  "Aloe_Sunburn": {
+    "class_id": "Aloe_Sunburn",
+    "plant_name": "Aloe Vera",
+    "scientific_name": "Aloe barbadensis miller",
+    "condition_name": "Sunburn / Photodamage",
+    "is_healthy": false,
+    "severity": "Mild to Moderate",
+    "category": "Abiotic / Environmental Stress",
+    "summary": "Tissue scorch caused by sudden exposure to intense direct sunlight, ultraviolet radiation, or heat stress.",
+    "symptoms": [
+      "Foliage turning reddish-brown, bronze, or orange-tinged",
+      "Bleached white, grey, or straw-colored dried papery patches on top-facing leaf surfaces",
+      "Leaves feeling thin, deflated, and curling inward"
+    ],
+    "causes": [
+      "Abrupt transition from low indoor light to intense direct outdoor or south-facing window sun without hardening off",
+      "Intense magnifying heat through unshaded window glass in summer"
+    ],
+    "immediate_actions": [
+      "Relocate the aloe immediately into bright, filtered or dappled indirect sunlight.",
+      "Do NOT overwater in panic\u2014sunburnt roots cannot absorb excess water and will rot!"
+    ],
+    "treatment": {
+      "organic": [
+        "Allow the plant to naturally metabolize protective anthocyanins in gentle shade.",
+        "New central shoots will grow out vivid green; severely crisp bleached patches can be trimmed once dry."
+      ],
+      "chemical": [
+        "No chemicals needed. This is an abiotic physical injury, not an infection."
+      ]
+    },
+    "prevention": [
+      "Acclimate indoor aloes gradually over 10-14 days when shifting to brighter locations.",
+      "Use sheer curtains on scorching south/west-facing window ledges during midday summer hours."
+    ]
+  },
+  "Cactus_Dactylopius_Opuntia": {
+    "class_id": "Cactus_Dactylopius_Opuntia",
+    "plant_name": "Cactus (Opuntia / Prickly Pear)",
+    "scientific_name": "Opuntia spp.",
+    "condition_name": "Cochineal Scale Bug Infestation",
+    "is_healthy": false,
+    "severity": "Severe",
+    "category": "Pest Infestation",
+    "summary": "Infestation by Dactylopius scale insects that coat themselves in white, waxy, cottony protective filaments while sucking plant sap.",
+    "symptoms": [
+      "Fluffy, white cotton-like clusters congregating around areoles, spine clusters, and pad creases",
+      "Crushing the white tufts yields a bright crimson-red pigment (carminic acid)",
+      "Yellowing, chlorosis, and progressive shriveling of affected cactus pads",
+      "Premature pad drop and stunted new growth"
+    ],
+    "causes": [
+      "Introduction of infested new succulents without quarantine",
+      "Warm, dry, still indoor environments favoring scale reproduction"
+    ],
+    "immediate_actions": [
+      "Quarantine the cactus immediately away from all succulents and cacti.",
+      "Dip cotton swabs in 70% isopropyl alcohol and dab directly onto white clusters to dissolve the wax and kill insects on contact.",
+      "Use a soft toothbrush or tweezers to mechanically scrape off stubborn clusters."
+    ],
+    "treatment": {
+      "organic": [
+        "Spray thoroughly with insecticidal soap or pure cold-pressed neem oil emulsion, reaching into crevices.",
+        "Repeat treatment every 5 to 7 days for at least 3-4 consecutive weeks to eliminate emerging crawler nymphs."
+      ],
+      "chemical": [
+        "For severe infestations, apply a systemic insecticide containing acetamiprid or imidacloprid as a soil drench.",
+        "Use pyrethrin-based contact aerosol sprays directly on localized colonies."
+      ]
+    },
+    "prevention": [
+      "Inspect newly acquired cacti meticulously with a magnifying lens before placing them with your collection.",
+      "Provide strong air circulation and maintain regular foliage checks."
+    ]
+  },
+  "Cactus_Healthy": {
+    "class_id": "Cactus_Healthy",
+    "plant_name": "Cactus",
+    "scientific_name": "Cactaceae family",
+    "condition_name": "Healthy Baseline",
+    "is_healthy": true,
+    "severity": "None",
+    "category": "Healthy",
+    "summary": "Firm, robust succulent cactus pads and stems with healthy areoles, intact spines, and zero pest infestations.",
+    "symptoms": [
+      "Rigid, plump, turgid green or bluish-green pad surfaces",
+      "Clean areoles and strong spine development without discolouration",
+      "No soft mushy spots, yellow halos, or cottony pest masses"
+    ],
+    "causes": [
+      "Optimal desert-like environment: gritty mineral potting mix, abundant sunlight, and disciplined dry cycles."
+    ],
+    "immediate_actions": [
+      "Continue current maintenance practices. Your cactus is in prime condition!"
+    ],
+    "treatment": {
+      "organic": [
+        "Feed once or twice in spring with dilute low-nitrogen cactus fertilizer."
+      ],
+      "chemical": [
+        "No chemicals required."
+      ]
+    },
+    "prevention": [
+      "Keep in maximum bright sunlight (at least 6-8 hours daily).",
+      "Water only when the substrate is 100% dry from top to bottom (once every 3-4 weeks in summer, 6-8 weeks in winter).",
+      "Ensure pot has unrestricted bottom drainage."
+    ]
+  },
+  "Money_Plant_Bacterial_wilt_disease": {
+    "class_id": "Money_Plant_Bacterial_wilt_disease",
+    "plant_name": "Money Plant (Pothos)",
+    "scientific_name": "Epipremnum aureum",
+    "condition_name": "Bacterial Wilt Disease",
+    "is_healthy": false,
+    "severity": "Severe",
+    "category": "Bacterial Infection",
+    "summary": "Lethal vascular bacterial infection (e.g. Ralstonia / Erwinia) clogging water-conducting xylem vessels, causing rapid collapse.",
+    "symptoms": [
+      "Sudden rapid drooping and wilting of vines despite the soil being damp or wet",
+      "Water-soaked, dark translucent lesions along leaf petiole and main veins",
+      "Soft, slimy, blackened rotting stems near the soil line",
+      "Foul sour odor emanating from decomposing stem tissue"
+    ],
+    "causes": [
+      "Waterlogged, poorly aerated potting soil",
+      "Bacterial invasion through damaged root tips or pruning wounds",
+      "Use of unsterilized shears or contaminated re-used potting mix"
+    ],
+    "immediate_actions": [
+      "Quarantine immediately. Bacterial wilt is aggressive and spreads through contact and runoff.",
+      "Cut away all collapsing, blackened vines well above the infected zone using sterilized shears.",
+      "Discard heavily rotted root balls and contaminated soil in household waste (do NOT compost)."
+    ],
+    "treatment": {
+      "organic": [
+        "Take clean, asymptomatic tip cuttings (at least 2 nodes above any rot), sanitize in mild hydrogen peroxide (3% diluted 1:4 with water), and propagate in fresh clean water.",
+        "Dust surviving cut nodes with sulfur or activated charcoal."
+      ],
+      "chemical": [
+        "Drench soil of salvageable plants with agricultural copper bactericide (copper hydroxide).",
+        "Disinfect pots and saucers with a 10% bleach solution before re-potting."
+      ]
+    },
+    "prevention": [
+      "Never allow money plants to sit in stagnant standing water inside outer decorative pots.",
+      "Use an airy, chunky aroid potting mix (potting soil + perlite + orchid bark).",
+      "Allow the top 2 inches of soil to dry completely before watering again."
+    ]
+  },
+  "Money_Plant_Healthy": {
+    "class_id": "Money_Plant_Healthy",
+    "plant_name": "Money Plant (Pothos)",
+    "scientific_name": "Epipremnum aureum",
+    "condition_name": "Healthy Baseline",
+    "is_healthy": true,
+    "severity": "None",
+    "category": "Healthy",
+    "summary": "Lush, glossy heart-shaped foliage with strong turgor pressure, active vine development, and vivid green/variegated coloration.",
+    "symptoms": [
+      "Waxy, vibrant green or gold/white variegated leaves",
+      "Firm, flexible stems with healthy aerial root nodes",
+      "Uniform leaf expansion without curling, spots, or wilting"
+    ],
+    "causes": [
+      "Balanced watering, medium to bright indirect lighting, and proper indoor ambient humidity."
+    ],
+    "immediate_actions": [
+      "No corrective actions needed. Your Money Plant is thriving!"
+    ],
+    "treatment": {
+      "organic": [
+        "Wipe leaves periodically with a damp microfiber cloth to remove dust and maximize photosynthesis."
+      ],
+      "chemical": [
+        "No chemicals required."
+      ]
+    },
+    "prevention": [
+      "Keep in bright indirect light for best variegation (avoid harsh midday direct sun).",
+      "Water when the top 1-2 inches feel dry to the touch.",
+      "Fertilize monthly during spring and summer with balanced houseplant liquid fertilizer at half strength."
+    ]
+  },
+  "Money_Plant_Manganese_Toxicity": {
+    "class_id": "Money_Plant_Manganese_Toxicity",
+    "plant_name": "Money Plant (Pothos)",
+    "scientific_name": "Epipremnum aureum",
+    "condition_name": "Manganese Toxicity Disorder",
+    "is_healthy": false,
+    "severity": "Moderate",
+    "category": "Nutritional / Soil Chemical Disorder",
+    "summary": "Nutrient imbalance caused by excessive manganese availability in acidic soils (pH < 5.2) or over-fertilization, causing leaf necrosis.",
+    "symptoms": [
+      "Interveinal chlorosis (yellowing of leaf tissue between dark green veins) on older leaves",
+      "Small, scattered dark brown to black necrotic spots with halos on mature leaves",
+      "Crinkling, cupping, or necrotic margin scorching of affected foliage",
+      "Stunted leaf development and premature drop of older foliage"
+    ],
+    "causes": [
+      "Excessively low potting soil pH (acidic substrate dissolves excessive manganese into toxic soluble ions)",
+      "Overuse of synthetic micronutrient fertilizers or high-phosphorus fertilizers that destabilize soil chemistry",
+      "Poor soil aeration and prolonged waterlogging accelerating heavy metal uptake"
+    ],
+    "immediate_actions": [
+      "Halt all chemical and synthetic fertilizer applications immediately.",
+      "Thoroughly flush the root zone with copious volumes of distilled, reverse-osmosis, or dechlorinated water (3x pot volume) to leach excess mineral salts."
+    ],
+    "treatment": {
+      "organic": [
+        "Top-dress the soil with a small amount of dolomitic limestone or crushed eggshells to gently raise the pH toward 6.2-6.5.",
+        "Repot into a fresh, balanced potting mix with organic compost, peat, and perlite if soil remains stubbornly acidic."
+      ],
+      "chemical": [
+        "Test soil run-off pH with a digital pH meter; maintain target pH between 6.0 and 6.5 where manganese bioavailability is safe.",
+        "Apply chelated iron (Fe-EDDHA) drench to outcompete and buffer excess manganese uptake."
+      ]
+    },
+    "prevention": [
+      "Always follow fertilizer dosing strictly: use half-strength dilution on indoor houseplants.",
+      "Avoid using acidic peat-only substrates without limestone buffering.",
+      "Repot annually to refresh exhausted potting media."
+    ]
+  },
+  "Snake_Plant_Anthracnose": {
+    "class_id": "Snake_Plant_Anthracnose",
+    "plant_name": "Snake Plant (Sansevieria)",
+    "scientific_name": "Dracaena trifasciata",
+    "condition_name": "Anthracnose Leaf Lesion",
+    "is_healthy": false,
+    "severity": "Moderate to Severe",
+    "category": "Fungal Infection",
+    "summary": "Fungal infection by Colletotrichum sansevieriae producing unsightly sunken lesions that breach the thick cuticle of snake plant blades.",
+    "symptoms": [
+      "Sunken circular to elongated lesions with pronounced reddish-brown margins",
+      "Tan, beige, or bleached necrotic centers inside the lesions",
+      "Lesions drying out and tearing holes through the sword-like blades",
+      "Yellow halos surrounding active lesion boundaries"
+    ],
+    "causes": [
+      "Water settling in leaf folds or overhead splashing",
+      "Warm, humid indoor microclimates with stagnant air",
+      "Mechanical punctures from handling allowing fungal entrance"
+    ],
+    "immediate_actions": [
+      "Quarantine the snake plant away from other houseplants.",
+      "Prune out the affected blade with a sterile razor or shears, cutting below the lesion into healthy green tissue.",
+      "Keep the entire plant completely dry."
+    ],
+    "treatment": {
+      "organic": [
+        "Dust clean cuts with ground cinnamon or bio-fungicide containing Bacillus subtilis.",
+        "Apply cold-pressed neem oil to uninfected leaf areas to establish a protective barrier."
+      ],
+      "chemical": [
+        "Spray affected and neighboring foliage with a liquid copper fungicide or chlorothalonil spray.",
+        "Ensure spray dries quickly by placing a gentle circulating fan nearby."
+      ]
+    },
+    "prevention": [
+      "Water exclusively around the base at the soil rim; never pour water into the rosette or over blades.",
+      "Water only once every 3 to 4 weeks\u2014snake plants prefer extended dry periods.",
+      "Ensure the soil mix has high porosity (cactus mix + perlite)."
+    ]
+  },
+  "Snake_Plant_Healthy": {
+    "class_id": "Snake_Plant_Healthy",
+    "plant_name": "Snake Plant (Sansevieria)",
+    "scientific_name": "Dracaena trifasciata",
+    "condition_name": "Healthy Baseline",
+    "is_healthy": true,
+    "severity": "None",
+    "category": "Healthy",
+    "summary": "Stately, architectural upright sword foliage with firm leathery texture, crisp variegation, and zero fungal decay.",
+    "symptoms": [
+      "Rigid, stiff, erect sword-shaped blades with crisp margins",
+      "Distinct banded marbling of deep green and golden-yellow borders",
+      "Firm root crown with no mushiness or discoloration"
+    ],
+    "causes": [
+      "Proper low-to-bright indirect lighting, fast-draining potting substrate, and disciplined underwatering."
+    ],
+    "immediate_actions": [
+      "No action needed. Your Snake Plant is in excellent health!"
+    ],
+    "treatment": {
+      "organic": [
+        "Dust upright leaves periodically with a dry cloth."
+      ],
+      "chemical": [
+        "No chemicals required."
+      ]
+    },
+    "prevention": [
+      "Water only when soil is bone dry all the way to the bottom (every 3-4 weeks in summer, 6-8 weeks in winter).",
+      "Thrives in almost any indoor light from low light to bright indirect sunshine.",
+      "Keep temperatures above 12\u00b0C to prevent cold shock."
+    ]
+  },
+  "Snake_Plant_Leaf_Withering": {
+    "class_id": "Snake_Plant_Leaf_Withering",
+    "plant_name": "Snake Plant (Sansevieria)",
+    "scientific_name": "Dracaena trifasciata",
+    "condition_name": "Leaf Withering & Desiccation",
+    "is_healthy": false,
+    "severity": "Moderate",
+    "category": "Physiological / Root Stress",
+    "summary": "Loss of leaf turgor and cellular collapse caused by severe root disruption\u2014either chronic dehydration or root rot preventing water intake.",
+    "symptoms": [
+      "Blades losing firmness, puckering, wrinkling, and developing vertical creases",
+      "Leaves becoming limp, drooping, leaning, or bending under their own weight",
+      "Dull, faded leaf luster and paper-thin blade cross-section"
+    ],
+    "causes": [
+      "Primary Cause A (Underwatering): Soil left bone dry for months, causing cellular desiccation.",
+      "Primary Cause B (Root Rot): Chronic overwatering rotted root hairs, preventing the plant from drinking water even in soggy soil!"
+    ],
+    "immediate_actions": [
+      "DIAGNOSTIC TEST: Check root ball moisture immediately!",
+      "If soil is dust-dry and roots are firm/white: Severe dehydration.",
+      "If soil is damp/mushy and roots are brown, slimy, or foul: Root Rot."
+    ],
+    "treatment": {
+      "organic": [
+        "For Dehydration: Bottom-water by setting pot in a basin of lukewarm water for 45 minutes until soil is re-hydrated, then drain thoroughly.",
+        "For Root Rot: Unpot, wash away soggy soil, trim all rotten brown roots with sterilized shears, dust with cinnamon/charcoal, and repot in fresh dry succulent mix."
+      ],
+      "chemical": [
+        "If replanting after root rot, drench with mild potassium phosphite or copper fungicide to suppress lingering Pythium/Phytophthora root pathogens."
+      ]
+    },
+    "prevention": [
+      "Establish a reliable dry-then-drench watering routine.",
+      "Never leave a snake plant standing in water filled decorative cachepots.",
+      "Use heavy terracotta pots that breathe and allow excess moisture to evaporate."
+    ]
+  },
+  "Spider_Plant_Fungal_leaf_spot": {
+    "class_id": "Spider_Plant_Fungal_leaf_spot",
+    "plant_name": "Spider Plant",
+    "scientific_name": "Chlorophytum comosum",
+    "condition_name": "Fungal Leaf Spot Disease",
+    "is_healthy": false,
+    "severity": "Moderate",
+    "category": "Fungal Infection",
+    "summary": "Fungal spotting caused by Alternaria, Fusarium, or Rhizoctonia creating scattered lesions along delicate arching spider plant ribbons.",
+    "symptoms": [
+      "Small circular or irregular water-soaked spots turning dark brown or reddish-black",
+      "Concentric rings or yellow chlorotic borders surrounding leaf lesions",
+      "Spots merging, causing entire leaf blades to collapse and turn necrotic"
+    ],
+    "causes": [
+      "Overhead watering wetting the dense crown of leaves",
+      "High relative humidity combined with poor indoor air circulation",
+      "Overcrowded foliage retaining moisture pockets"
+    ],
+    "immediate_actions": [
+      "Isolate the spider plant to protect neighboring plants.",
+      "Trim off heavily infected ribbon leaves at the base using sterilized scissors.",
+      "Clear away fallen dead debris from the soil surface."
+    ],
+    "treatment": {
+      "organic": [
+        "Spray with organic bio-fungicide containing Bacillus amyloliquefaciens.",
+        "Apply a light neem oil spray (diluted 0.5%) in the evening out of direct sunlight."
+      ],
+      "chemical": [
+        "Spray foliage with liquid copper octanoate or broad-spectrum chlorothalonil fungicide.",
+        "Repeat every 10 days until clean, unspotted new growth emerges from the center."
+      ]
+    },
+    "prevention": [
+      "Water only at the soil level; keep water out of the center crown.",
+      "Provide bright indirect light and increase room air circulation with a fan.",
+      "Thin out overcrowded crowns by propagating or potting up spiderettes."
+    ]
+  },
+  "Spider_Plant_Healthy": {
+    "class_id": "Spider_Plant_Healthy",
+    "plant_name": "Spider Plant",
+    "scientific_name": "Chlorophytum comosum",
+    "condition_name": "Healthy Baseline",
+    "is_healthy": true,
+    "severity": "None",
+    "category": "Healthy",
+    "summary": "Cascading vibrant arching leaves with crisp green and white variegation, healthy tubers, and active plantlet stolons.",
+    "symptoms": [
+      "Lush, arching strap-like leaves with vivid emerald and cream/white variegation",
+      "Clean leaf tips without dark necrosis or yellowing halos",
+      "Prolific production of long stolons bearing small spiderettes and white starry flowers"
+    ],
+    "causes": [
+      "Ideal filtered light, moderate watering, well-draining potting soil, and non-fluoridated water."
+    ],
+    "immediate_actions": [
+      "Your Spider Plant is flourishing! No remedial measures required."
+    ],
+    "treatment": {
+      "organic": [
+        "Snip mature plantlets ('spiderettes') and root them in water or potting soil to grow new plants!"
+      ],
+      "chemical": [
+        "No chemicals required."
+      ]
+    },
+    "prevention": [
+      "Position in bright, indirect light (east or north-facing windows).",
+      "Water when the top 1 inch of soil is dry; allow good pot drainage.",
+      "Feed with diluted organic fertilizer once a month in spring and summer."
+    ]
+  },
+  "Spider_Plant_Leaf_Tip_Necrosis": {
+    "class_id": "Spider_Plant_Leaf_Tip_Necrosis",
+    "plant_name": "Spider Plant",
+    "scientific_name": "Chlorophytum comosum",
+    "condition_name": "Leaf Tip Necrosis / Tip Burn",
+    "is_healthy": false,
+    "severity": "Mild to Moderate",
+    "category": "Physiological / Abiotic Disorder",
+    "summary": "Drying and browning of leaf tips caused by fluoride/boron toxicity from tap water, accumulated fertilizer salts, or low humidity.",
+    "symptoms": [
+      "Crisp, brown, blackened, or papery dry tips on the pointed ends of leaves",
+      "Narrow yellow chlorotic band between dead brown tip and healthy green tissue",
+      "Gradual progression from extreme tip down the leaf blade if irritants persist"
+    ],
+    "causes": [
+      "Fluoride, chlorine, chloramines, or soluble salts present in municipal tap water",
+      "Accumulation of fertilizer mineral salts in the potting mix",
+      "Very dry indoor winter air (humidity below 35%) or erratic watering intervals"
+    ],
+    "immediate_actions": [
+      "Switch watering source immediately: use rainwater, distilled water, or reverse osmosis water (spider plants are exceptionally sensitive to fluoride).",
+      "Trim off dead brown tips with sharp clean scissors: cut at a slight angle following the natural leaf point, leaving a millimeter of brown so you do not wound living green tissue."
+    ],
+    "treatment": {
+      "organic": [
+        "Flush the pot thoroughly with 2-3 liters of distilled water to leach accumulated salts and minerals out of the drainage holes.",
+        "Increase localized humidity by grouping plants together or running an ultrasonic cool mist humidifier (target 50-60% RH)."
+      ],
+      "chemical": [
+        "Avoid superphosphate and perlite containing high fluoride levels.",
+        "Halt chemical fertilizers for 4-6 weeks, then resume at only 1/4 label strength."
+      ]
+    },
+    "prevention": [
+      "Never use municipal fluoridated tap water on spider plants.",
+      "Water consistently when the top 1 inch feels slightly dry\u2014avoid letting soil swing from soggy to desert dry.",
+      "Repot every 1-2 years to prevent tubered roots from compacting and trapping salts."
+    ]
+  },
+  "Universal_Mealybugs": {
+    "class_id": "Universal_Mealybugs",
+    "plant_name": "Universal Houseplants",
+    "scientific_name": "Pseudococcidae",
+    "condition_name": "Mealybugs (Pseudococcidae)",
+    "is_healthy": false,
+    "severity": "Moderate to High",
+    "category": "Insect Infestation",
+    "summary": "Sap-sucking soft-bodied scale insects covered in white cottony wax that cluster in leaf axils and undersides, causing leaf yellowing and honeydew secretion.",
+    "symptoms": [
+      "White cottony or powdery wax masses in leaf joints",
+      "Yellowing, wilting, or distorted foliage growth",
+      "Sticky honeydew accumulation",
+      "Stunted plant development"
+    ],
+    "causes": [
+      "Contaminated nursery soil or unquarantined new plants",
+      "Warm indoor conditions with stagnant, dry airflow",
+      "Over-fertilization with high nitrogen"
+    ],
+    "immediate_actions": [
+      "Isolate plant immediately.",
+      "Dab white cottony clusters with 70% isopropyl alcohol on a cotton swab.",
+      "Rinse leaves with lukewarm water."
+    ],
+    "treatment": {
+      "organic": [
+        "Spray with insecticidal soap every 5 days for 3 cycles.",
+        "Apply cold-pressed neem oil spray."
+      ],
+      "chemical": [
+        "Systemic root drench containing acetamiprid or imidacloprid.",
+        "Pyrethrin contact spray."
+      ]
+    },
+    "prevention": [
+      "Quarantine new plants for 14 days.",
+      "Inspect leaf axils regularly during watering."
+    ]
+  },
+  "Universal_Spider_Mites": {
+    "class_id": "Universal_Spider_Mites",
+    "plant_name": "Universal Houseplants",
+    "scientific_name": "Tetranychidae",
+    "condition_name": "Spider Mites (Tetranychidae)",
+    "is_healthy": false,
+    "severity": "High",
+    "category": "Mite Infestation",
+    "summary": "Microscopic arachnid pests that pierce plant cell walls to feed on chlorophyll, producing fine silky webbing under leaves and stippled yellow foliage.",
+    "symptoms": [
+      "Fine silky webbing between leaf petioles and tips",
+      "Pale yellow or silvery speckling (stippling) on foliage",
+      "Dull, bronzed, or brittle foliage",
+      "Leaf drop in severe infestations"
+    ],
+    "causes": [
+      "Hot, dry indoor environments with low humidity (<40%)",
+      "Lack of foliar moisture and poor ventilation"
+    ],
+    "immediate_actions": [
+      "Isolate specimen immediately away from drafts.",
+      "Take plant to the shower and blast undersides with lukewarm water.",
+      "Mist foliage to raise local humidity."
+    ],
+    "treatment": {
+      "organic": [
+        "Apply neem oil or rosemary-based miticide spray.",
+        "Introduce predatory mites (Phytoseiulus persimilis)."
+      ],
+      "chemical": [
+        "Apply abamectin or bifenazate miticide spray targeting egg and adult cycles."
+      ]
+    },
+    "prevention": [
+      "Maintain indoor relative humidity between 50-65%.",
+      "Wipe down broad leaves with a damp cloth biweekly."
+    ]
+  },
+  "Universal_Powdery_Mildew": {
+    "class_id": "Universal_Powdery_Mildew",
+    "plant_name": "Universal Houseplants",
+    "scientific_name": "Erysiphaceae",
+    "condition_name": "Powdery Mildew (Erysiphaceae)",
+    "is_healthy": false,
+    "severity": "Moderate",
+    "category": "Fungal Infection",
+    "summary": "Superficial fungal parasite creating white talcum powder-like circular patches across upper leaf surfaces, impeding photosynthesis.",
+    "symptoms": [
+      "White to light-gray powdery fungal patches on upper leaf surfaces",
+      "Curling, twisting, or puckering of young leaves",
+      "Yellowing under the fungal spots"
+    ],
+    "causes": [
+      "High relative humidity combined with low light and stagnant air",
+      "Warm days and cool nights promoting spore germination"
+    ],
+    "immediate_actions": [
+      "Quarantine specimen.",
+      "Prune heavily infected leaves and seal in trash.",
+      "Increase room airflow using a gentle oscillating fan."
+    ],
+    "treatment": {
+      "organic": [
+        "Spray potassium bicarbonate solution (1 tbsp per gallon water).",
+        "Diluted milk spray (1 part milk : 9 parts water).",
+        "Neem oil spray."
+      ],
+      "chemical": [
+        "Myclobutanil or sulfur-based fungicide spray."
+      ]
+    },
+    "prevention": [
+      "Space plants adequately for airflow.",
+      "Avoid overhead watering."
+    ]
+  },
+  "Universal_Scale_Insects": {
+    "class_id": "Universal_Scale_Insects",
+    "plant_name": "Universal Houseplants",
+    "scientific_name": "Coccidae",
+    "condition_name": "Soft Scale Insects (Coccidae)",
+    "is_healthy": false,
+    "severity": "High",
+    "category": "Insect Infestation",
+    "summary": "Immobile waxy oval domes adhering firmly to stems and leaf ribs, sucking phloem sap and excreting copious honeydew.",
+    "symptoms": [
+      "Smooth, waxy, convex brown or yellow bumps on stems and leaf midribs",
+      "Sticky honeydew residue on lower foliage and furniture",
+      "Secondary black sooty mold growth"
+    ],
+    "causes": [
+      "Warm, dry indoor microclimates",
+      "Absence of natural predators"
+    ],
+    "immediate_actions": [
+      "Isolate plant.",
+      "Scrape off visible scale bumps using a soft toothbrush dipped in 70% rubbing alcohol.",
+      "Wipe honeydew off leaves."
+    ],
+    "treatment": {
+      "organic": [
+        "Thorough foliar spray with horticultural dormant oil or neem oil to suffocate scales.",
+        "Beneficial lacewing larvae."
+      ],
+      "chemical": [
+        "Systemic dinotefuran or imidacloprid drench."
+      ]
+    },
+    "prevention": [
+      "Inspect undersides of leaves and leaf stems monthly.",
+      "Avoid stressed, underwatered plants."
+    ]
+  },
+  "Universal_Sooty_Mold": {
+    "class_id": "Universal_Sooty_Mold",
+    "plant_name": "Universal Houseplants",
+    "scientific_name": "Capnodiaceae",
+    "condition_name": "Sooty Mold (Capnodiaceae)",
+    "is_healthy": false,
+    "severity": "Moderate",
+    "category": "Secondary Fungal Pathology",
+    "summary": "Non-parasitic black fungal crust that colonizes sticky honeydew secreted by aphids, scales, or whiteflies, suffocating leaf respiration.",
+    "symptoms": [
+      "Black, charcoal-like powdery soot coating foliage",
+      "Underlying sticky sugary sap layer",
+      "Yellowing and poor growth due to light deprivation"
+    ],
+    "causes": [
+      "Underlying infestation of sap-sucking insects (aphids, scales, mealybugs, whiteflies)"
+    ],
+    "immediate_actions": [
+      "Eradicate the primary insect population.",
+      "Gently wash foliage with lukewarm soapy water (mild castile soap).",
+      "Gently wipe leaves with a microfiber towel."
+    ],
+    "treatment": {
+      "organic": [
+        "Spray with 1% horticultural oil to loosen fungal crust.",
+        "Wash with warm water and insecticidal soap."
+      ],
+      "chemical": [
+        "Treat underlying pests with systemic insecticide; sooty mold will starve and flake off."
+      ]
+    },
+    "prevention": [
+      "Prevent honeydew-secreting insects.",
+      "Clean leaf surfaces periodically."
+    ]
+  },
+  "Universal_Aphids": {
+    "class_id": "Universal_Aphids",
+    "plant_name": "Universal Houseplants",
+    "scientific_name": "Aphididae",
+    "condition_name": "Aphids (Aphididae)",
+    "is_healthy": false,
+    "severity": "Moderate to High",
+    "category": "Insect Infestation",
+    "summary": "Prolific soft-bodied pear-shaped insects clustering on tender new shoot tips and bud clusters, causing distorted curling growth and honeydew.",
+    "symptoms": [
+      "Dense clusters of tiny green, black, or yellow insects on new tips",
+      "Curled, twisted, or stunted new leaf growth",
+      "Shed white exoskeletons (casts) on foliage",
+      "Sticky honeydew drops"
+    ],
+    "causes": [
+      "Tender over-fertilized nitrogen-rich flush",
+      "Open windows in spring/summer allowing winged adults entry"
+    ],
+    "immediate_actions": [
+      "Isolate plant.",
+      "Wash tips under a forceful stream of tepid tap water to blast aphids off.",
+      "Squish remaining colonies by hand."
+    ],
+    "treatment": {
+      "organic": [
+        "Spray with insecticidal soap or diluted castile soap (1 tbsp/L).",
+        "Apply neem oil emulsion."
+      ],
+      "chemical": [
+        "Pyrethrin contact spray or systemic acetamiprid."
+      ]
+    },
+    "prevention": [
+      "Check tender tips weekly.",
+      "Do not over-apply synthetic high-nitrogen fertilizers."
+    ]
+  },
+  "Universal_Thrips": {
+    "class_id": "Universal_Thrips",
+    "plant_name": "Universal Houseplants",
+    "scientific_name": "Thripidae",
+    "condition_name": "Thrips (Thripidae)",
+    "is_healthy": false,
+    "severity": "Very High",
+    "category": "Insect Infestation",
+    "summary": "Slender microscopic fringed-wing insects that rasp plant cells and suck pigments, leaving silvery mottled leaf surfaces and black tar-like fecal dots.",
+    "symptoms": [
+      "Silvery, bleached, or translucent patches on leaf surfaces",
+      "Tiny black pepper-like fecal drops (frass) scattered over damaged areas",
+      "Curled, deformed, or brown crinkled leaf margins",
+      "Slender, fast-crawling yellowish or black insects visible under leaves"
+    ],
+    "causes": [
+      "Introduction from outdoor garden flowers or uninspected fresh produce",
+      "Warm indoor air (20-28\u00b0C) speeding up rapid multi-stage reproduction"
+    ],
+    "immediate_actions": [
+      "Isolate the plant immediately in a separate closed room.",
+      "Hang blue or yellow sticky cards at canopy height to capture adult flyers.",
+      "Wipe down all leaves with a damp cloth to remove surface nymphs and frass."
+    ],
+    "treatment": {
+      "organic": [
+        "Apply Spinosad spray every 4-5 days covering top and bottom leaf surfaces thoroughly.",
+        "Spray with insecticidal soap combined with cold-pressed neem oil.",
+        "Introduce predatory mites (Amblyseius swirskii or cucumeris)."
+      ],
+      "chemical": [
+        "Apply systemic insecticide containing acetamiprid or imidacloprid to kill larvae inside leaf tissue.",
+        "Rotate with pyrethroid contact spray to prevent pesticide resistance."
+      ]
+    },
+    "prevention": [
+      "Inspect underside of new growth weekly using a 10x magnifying loupe.",
+      "Avoid placing houseplants near open unscreened windows."
+    ]
+  },
+  "Universal_Whiteflies": {
+    "class_id": "Universal_Whiteflies",
+    "plant_name": "Universal Houseplants",
+    "scientific_name": "Aleyrodidae",
+    "condition_name": "Whiteflies (Aleyrodidae)",
+    "is_healthy": false,
+    "severity": "High",
+    "category": "Insect Infestation",
+    "summary": "Tiny moth-like white insects clustering on lower leaf surfaces that flutter in a white cloud when the plant is disturbed, causing chlorosis and honeydew.",
+    "symptoms": [
+      "Cloud of tiny white winged insects fluttering when foliage is shaken",
+      "Translucent scale-like flat nymphs fixed to the underside of leaves",
+      "Yellowing, wilting foliage with general decline in plant vigor",
+      "Copious sticky honeydew leading to secondary black sooty mold"
+    ],
+    "causes": [
+      "Warm, humid indoor environments with poor air movement",
+      "Introduction from greenhouse-grown nursery plants"
+    ],
+    "immediate_actions": [
+      "Isolate specimen immediately.",
+      "Use a handheld vacuum cleaner with low suction around foliage to capture adult flyers gently.",
+      "Place bright yellow sticky traps directly beside the foliage."
+    ],
+    "treatment": {
+      "organic": [
+        "Spray undersides of leaves with insecticidal soap or horticultural oil every 3-5 days.",
+        "Apply cold-pressed neem oil emulsion to suffocate nymph scales.",
+        "Introduce Encarsia formosa parasitic micro-wasps for large collections."
+      ],
+      "chemical": [
+        "Systemic root drench containing imidacloprid or dinotefuran.",
+        "Contact bifenthrin or pyrethrin spray."
+      ]
+    },
+    "prevention": [
+      "Quarantine new plants for 2 weeks.",
+      "Keep yellow sticky monitoring cards near collections year-round."
+    ]
+  },
+  "Universal_Fungus_Gnats": {
+    "class_id": "Universal_Fungus_Gnats",
+    "plant_name": "Universal Houseplants",
+    "scientific_name": "Sciaridae",
+    "condition_name": "Fungus Gnats (Sciaridae)",
+    "is_healthy": false,
+    "severity": "Moderate to High",
+    "category": "Soil/Root Pest Infestation",
+    "summary": "Tiny dark mosquito-like gnats walking across soil and fluttering near pots; subterranean larvae feed on feeder roots and soil fungi, triggering sudden wilting.",
+    "symptoms": [
+      "Small dark gnats emerging from soil surface and flying erratically around room",
+      "Sudden unexplained leaf yellowing, wilting, and poor moisture uptake",
+      "Loss of fine root hairs upon inspection, leading to secondary Pythium root rot",
+      "Tiny translucent larvae with black head capsules visible in topsoil layer"
+    ],
+    "causes": [
+      "Chronic overwatering and poorly draining potting soil holding excess moisture",
+      "Organic potting mixes rich in uncomposted bark or peat breakdown"
+    ],
+    "immediate_actions": [
+      "Allow the top 2-3 inches of potting soil to dry out completely before watering.",
+      "Insert horizontal yellow sticky cards directly on top of soil to trap egg-laying adults.",
+      "Remove stagnant runoff water from saucers."
+    ],
+    "treatment": {
+      "organic": [
+        "Drench soil with Bacillus thuringiensis israelensis (BTI / Mosquito Dunks) to destroy larvae biologically.",
+        "Water soil with a 1:4 dilution of 3% hydrogen peroxide and water to kill larvae on contact.",
+        "Apply beneficial parasitic nematodes (Steinernema feltiae) to potting soil."
+      ],
+      "chemical": [
+        "Apply pyrethrin soil surface spray or systemic imidacloprid granules."
+      ]
+    },
+    "prevention": [
+      "Top dress potting soil with a 1/2-inch layer of coarse sand or pumice to prevent egg laying.",
+      "Bottom-water plants and never let pots sit in standing water."
+    ]
+  },
+  "Universal_Leaf_Miners": {
+    "class_id": "Universal_Leaf_Miners",
+    "plant_name": "Universal Houseplants",
+    "scientific_name": "Agromyzidae",
+    "condition_name": "Leaf Miners (Agromyzidae)",
+    "is_healthy": false,
+    "severity": "Moderate",
+    "category": "Insect Pathology",
+    "summary": "Fly larvae that bore inside the mesophyll layers of leaves, carving distinct white winding serpentine tunnels and translucent blotches.",
+    "symptoms": [
+      "Distinct serpentine white or translucent squiggly trails winding across leaves",
+      "Blotchy translucent patches where inner leaf tissue has been excavated",
+      "Tiny black dots of frass inside the translucent tunnels",
+      "Premature browning and drop of heavily mined leaves"
+    ],
+    "causes": [
+      "Adult female flies laying eggs directly into leaf epidermal slits",
+      "Open windows or moving plants outdoors during warm seasons"
+    ],
+    "immediate_actions": [
+      "Inspect leaf tunnels; gently squeeze the wide end between your fingers to crush the active larva inside.",
+      "Prune off heavily mined leaves and dispose in sealed trash.",
+      "Isolate the plant to prevent adult emergence."
+    ],
+    "treatment": {
+      "organic": [
+        "Spray foliage with cold-pressed neem oil to disrupt egg laying and larval feeding.",
+        "Apply Spinosad spray which penetrates the leaf cuticle.",
+        "Introduce parasitic Diglyphus isaea wasps."
+      ],
+      "chemical": [
+        "Apply systemic translaminar insecticide (abamectin or acetamiprid)."
+      ]
+    },
+    "prevention": [
+      "Hang yellow sticky traps to intercept adult flies.",
+      "Screen all windows near indoor plant displays."
+    ]
+  },
+  "Universal_Armored_Scales": {
+    "class_id": "Universal_Armored_Scales",
+    "plant_name": "Universal Houseplants",
+    "scientific_name": "Diaspididae",
+    "condition_name": "Armored Scales (Diaspididae)",
+    "is_healthy": false,
+    "severity": "High to Severe",
+    "category": "Insect Infestation",
+    "summary": "Hard-shelled scale insects with rigid waxy armor detached from their bodies; they suck mesophyll fluids without producing honeydew, causing yellow foliar halo rings.",
+    "symptoms": [
+      "Hard, flattened or oyster-shell shaped brown, gray, or white encrustations on stems and leaves",
+      "Yellow chlorotic halos or spotting directly under and around each scale",
+      "Lack of sticky honeydew (distinguishing armored scales from soft scales)",
+      "Leaf yellowing, branch dieback, and bark cracking in severe cases"
+    ],
+    "causes": [
+      "Introduction from commercial greenhouses or infected cuttings",
+      "Dense foliage with low light and poor ventilation"
+    ],
+    "immediate_actions": [
+      "Isolate specimen immediately.",
+      "Use a soft toothbrush or plastic card to scrape off visible armored shells mechanically.",
+      "Prune severely encrusted stems and discard."
+    ],
+    "treatment": {
+      "organic": [
+        "Apply horticultural mineral oil or neem oil spray to smother adult armor and nymphs.",
+        "Repeat oil sprays every 7-10 days for 4 treatments to intercept crawler hatch cycles."
+      ],
+      "chemical": [
+        "Apply systemic insecticide containing dinotefuran or pyriproxyfen (insect growth regulator).",
+        "Contact pyrethroid spray timed during crawler migration."
+      ]
+    },
+    "prevention": [
+      "Scrutinize woody stems and leaf undersides of all new acquisitions.",
+      "Clean pruning shears with alcohol between plants."
+    ]
+  },
+  "Universal_Botrytis_Gray_Mold": {
+    "class_id": "Universal_Botrytis_Gray_Mold",
+    "plant_name": "Universal Houseplants",
+    "scientific_name": "Botrytis cinerea",
+    "condition_name": "Botrytis Gray Mold (Botrytis cinerea)",
+    "is_healthy": false,
+    "severity": "High",
+    "category": "Fungal Infection",
+    "summary": "Aggressive necrotrophic fungus producing fuzzy grayish-brown velvety spore cushions on decaying leaves, flower petals, and soft stem bases in humid stagnant rooms.",
+    "symptoms": [
+      "Fuzzy, grayish-brown velvety mold cushions growing over foliage or flowers",
+      "Water-soaked brown spots on leaves that rapidly enlarge and turn soft",
+      "Brown stem lesions causing sudden collapse (damping off) of stems",
+      "Puff of powdery gray spores released when touched"
+    ],
+    "causes": [
+      "High relative humidity (>85%) combined with cool/moderate temperatures (15-20\u00b0C)",
+      "Poor air circulation and water droplets sitting on leaves or flower petals overnight"
+    ],
+    "immediate_actions": [
+      "Isolate the plant immediately away from all airflow that could blow spores.",
+      "Prune off all infected tissue with sterile shears and immediately bag in plastic.",
+      "Cease all misting and foliar watering."
+    ],
+    "treatment": {
+      "organic": [
+        "Improve air circulation immediately with a low-speed oscillating fan.",
+        "Spray copper-based fungicide or bio-fungicide containing Bacillus subtilis.",
+        "Apply potassium bicarbonate spray."
+      ],
+      "chemical": [
+        "Apply fludioxonil, iprodione, or chlorothalonil fungicide spray."
+      ]
+    },
+    "prevention": [
+      "Water strictly at soil level early in the morning.",
+      "Maintain indoor relative humidity below 65% and keep foliage dry."
+    ]
+  },
+  "Universal_Alternaria_Leaf_Spot": {
+    "class_id": "Universal_Alternaria_Leaf_Spot",
+    "plant_name": "Universal Houseplants",
+    "scientific_name": "Alternaria",
+    "condition_name": "Alternaria Leaf Spot (Alternaria)",
+    "is_healthy": false,
+    "severity": "Moderate to High",
+    "category": "Fungal Infection",
+    "summary": "Fungal leaf pathogen creating dark brown to black circular lesions with distinct concentric target rings and surrounding yellow chlorotic halos.",
+    "symptoms": [
+      "Circular brown or black spots on leaves featuring concentric rings ('target spot' pattern)",
+      "Prominent yellow chlorotic halo surrounding each circular necrotic lesion",
+      "Lesions coalescing into large necrotic blights causing leaf withering",
+      "Premature defoliation starting from lower foliage"
+    ],
+    "causes": [
+      "Foliage remaining wet for 8+ hours from overhead watering or misting",
+      "Warm indoor temperatures (20-27\u00b0C) with humid stagnant air"
+    ],
+    "immediate_actions": [
+      "Quarantine plant.",
+      "Prune spotted leaves using clean alcohol-sterilized scissors.",
+      "Immediately stop all overhead misting."
+    ],
+    "treatment": {
+      "organic": [
+        "Apply liquid copper octanoate or sulfur-based organic fungicide.",
+        "Spray with Bacillus amyloliquefaciens biofungicide.",
+        "Ensure maximum light and rapid foliage drying."
+      ],
+      "chemical": [
+        "Apply broad-spectrum systemic fungicide containing difenoconazole, azoxystrobin, or chlorothalonil."
+      ]
+    },
+    "prevention": [
+      "Always bottom-water or water at soil base; never wet leaves.",
+      "Space pots so leaves do not touch."
+    ]
+  },
+  "Universal_Downy_Mildew": {
+    "class_id": "Universal_Downy_Mildew",
+    "plant_name": "Universal Houseplants",
+    "scientific_name": "Peronosporaceae",
+    "condition_name": "Downy Mildew (Peronosporaceae)",
+    "is_healthy": false,
+    "severity": "High",
+    "category": "Oomycete Pathogen",
+    "summary": "Water mold organism causing angular yellow chlorotic patches constrained by leaf veins on upper leaf surfaces, with purplish-gray downy fuzz underneath.",
+    "symptoms": [
+      "Angular, vein-bounded yellow or pale green patches on upper leaf surfaces",
+      "Delicate purplish-gray downy/felt-like fungal growth on the underside of yellow patches",
+      "Leaves turning brown, dry, and brittle, curling downwards",
+      "Rapid defoliation under cool, humid conditions"
+    ],
+    "causes": [
+      "High relative humidity (>85%) and free water on leaves during cool nights",
+      "Overcrowded plants with zero air circulation"
+    ],
+    "immediate_actions": [
+      "Quarantine specimen immediately.",
+      "Remove all symptomatic leaves and burn or discard in sealed trash.",
+      "Drastically reduce humidity and increase airflow."
+    ],
+    "treatment": {
+      "organic": [
+        "Spray copper-based fungicide to protect unaffected foliage.",
+        "Apply potassium phosphite (phosphonate) systemic plant defense activator."
+      ],
+      "chemical": [
+        "Apply dimethomorph, mefenoxam, or fosetyl-aluminum systemic fungicide."
+      ]
+    },
+    "prevention": [
+      "Avoid cool night temperatures combined with high humidity.",
+      "Provide ample spacing between indoor plants."
+    ]
+  },
+  "Universal_Rust_Fungi": {
+    "class_id": "Universal_Rust_Fungi",
+    "plant_name": "Universal Houseplants",
+    "scientific_name": "Pucciniales",
+    "condition_name": "Rust Fungi (Pucciniales)",
+    "is_healthy": false,
+    "severity": "Moderate to High",
+    "category": "Fungal Infection",
+    "summary": "Obligate fungal parasite producing raised reddish-orange, yellow, or cinnamon-brown blister-like spore pustules (uredinia) that rupture on leaf undersides.",
+    "symptoms": [
+      "Raised orange, bright yellow, or rusty-brown powdery blisters on lower leaf surfaces",
+      "Corresponding pale yellow or chlorotic flecks on the upper leaf surface directly above blisters",
+      "Rusty powder rubs off easily onto fingers when touched",
+      "Heavy leaf distortion, yellowing, and premature leaf drop"
+    ],
+    "causes": [
+      "Extended moisture on leaves (4-6 hours of free water required for spore infection)",
+      "Moderate temperatures (18-24\u00b0C) with still air"
+    ],
+    "immediate_actions": [
+      "Isolate the plant immediately in a separate dry room.",
+      "Carefully snip off infected leaves over a damp towel to prevent rust spores from wafting.",
+      "Cease all foliar spraying and keep leaf surfaces bone-dry."
+    ],
+    "treatment": {
+      "organic": [
+        "Dust or spray with wettable micronized sulfur.",
+        "Apply copper octanoate fungicide every 7-10 days."
+      ],
+      "chemical": [
+        "Apply systemic DMI fungicide such as myclobutanil, tebuconazole, or propiconazole to eradicate systemic mycelium."
+      ]
+    },
+    "prevention": [
+      "Water early in the day at soil line only.",
+      "Provide strong ventilation and maintain dry foliage."
+    ]
+  }
+}

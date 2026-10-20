@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FloraNet-250 | Botanical Training & Pipeline Log</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0a110e;
+      --bg-card: rgba(18, 30, 24, 0.78);
+      --bg-card-border: rgba(46, 125, 84, 0.28);
+      --emerald-300: #6ee7b7;
+      --emerald-400: #34d399;
+      --emerald-500: #10b981;
+      --emerald-600: #059669;
+      --accent-glow: rgba(16, 185, 129, 0.2);
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --text-faint: #6b7280;
+      --radius-lg: 16px;
+      --radius-md: 10px;
+      --radius-sm: 6px;
+      --transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', system-ui, sans-serif; }
+
+    body {
+      background: radial-gradient(circle at 15% 15%, #0f241a 0%, #0a110e 55%, #050a08 100%);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      position: relative;
+      z-index: 10;
+      padding: 1.1rem 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--bg-card-border);
+      background: rgba(10, 17, 14, 0.75);
+      backdrop-filter: blur(14px);
+    }
+
+    .brand { display: flex; align-items: center; gap: 0.9rem; }
+    .logo-icon {
+      width: 42px;
+      height: 42px;
+      background: linear-gradient(135deg, var(--emerald-500), #047857);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+    }
+    .brand h1 { font-size: 1.3rem; font-weight: 700; color: #fff; }
+    .brand h1 span { color: var(--emerald-400); }
+
+    .nav-tabs {
+      display: flex;
+      gap: 0.5rem;
+      background: rgba(0, 0, 0, 0.45);
+      padding: 0.3rem;
+      border-radius: 999px;
+      border: 1px solid var(--bg-card-border);
+    }
+
+    .nav-tab {
+      padding: 0.45rem 1.15rem;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: var(--transition);
+    }
+    .nav-tab:hover { color: #fff; }
+    .nav-tab.active {
+      background: var(--emerald-500);
+      color: #fff;
+      box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+    }
+
+    main {
+      flex: 1;
+      padding: 1.8rem 2.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      max-width: 1600px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* KPI Summary Strip */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 1rem;
+    }
+    @media (max-width: 1100px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 600px) { .kpi-grid { grid-template-columns: 1fr; } }
+
+    .kpi-card {
+      background: var(--bg-card);
+      border: 1px solid var(--bg-card-border);
+      border-radius: var(--radius-md);
+      padding: 1.1rem 1.3rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      backdrop-filter: blur(10px);
+    }
+    .kpi-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); }
+    .kpi-val { font-size: 1.55rem; font-weight: 800; color: #fff; }
+    .kpi-val span { color: var(--emerald-400); }
+    .kpi-sub { font-size: 0.76rem; color: var(--emerald-300); }
+
+    /* Console Container */
+    .console-card {
+      flex: 1;
+      background: #060c08;
+      border: 1px solid rgba(46, 125, 84, 0.35);
+      border-radius: var(--radius-lg);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+      min-height: 520px;
+    }
+
+    .console-header {
+      background: rgba(16, 32, 23, 0.9);
+      border-bottom: 1px solid rgba(46, 125, 84, 0.3);
+      padding: 0.85rem 1.4rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .console-title-group {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+
+    .terminal-dots {
+      display: flex;
+      gap: 6px;
+    }
+    .tdot { width: 11px; height: 11px; border-radius: 50%; }
+    .tdot-red { background: #ef4444; }
+    .tdot-yellow { background: #f59e0b; }
+    .tdot-green { background: #10b981; }
+
+    .console-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.88rem;
+      color: #e5e7eb;
+      font-weight: 600;
+    }
+
+    .console-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .search-box {
+      position: relative;
+    }
+    .search-box input {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--bg-card-border);
+      border-radius: 999px;
+      padding: 0.4rem 0.9rem;
+      font-size: 0.8rem;
+      color: #fff;
+      font-family: 'JetBrains Mono', monospace;
+      width: 220px;
+      outline: none;
+    }
+    .search-box input:focus { border-color: var(--emerald-400); }
+
+    .btn {
+      padding: 0.45rem 1rem;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      transition: var(--transition);
+      text-decoration: none;
+    }
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.08);
+      color: #e5e7eb;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+    .btn-secondary:hover { background: rgba(255, 255, 255, 0.15); color: #fff; }
+    .btn-primary {
+      background: var(--emerald-500);
+      color: #fff;
+    }
+    .btn-primary:hover { background: var(--emerald-600); }
+
+    .live-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      color: var(--emerald-400);
+      background: rgba(16, 185, 129, 0.12);
+      padding: 0.3rem 0.75rem;
+      border-radius: 999px;
+      border: 1px solid rgba(16, 185, 129, 0.25);
+    }
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--emerald-400);
+      box-shadow: 0 0 10px var(--emerald-400);
+      animation: pulse 1.8s infinite;
+    }
+    @keyframes pulse {
+      0% { opacity: 0.4; transform: scale(0.9); }
+      50% { opacity: 1; transform: scale(1.15); }
+      100% { opacity: 0.4; transform: scale(0.9); }
+    }
+
+    /* Terminal Body */
+    .console-body {
+      flex: 1;
+      padding: 1.2rem 1.5rem;
+      overflow-y: auto;
+      font-family: 'JetBrains Mono', Consolas, monospace;
+      font-size: 0.85rem;
+      line-height: 1.6;
+      color: #d1d5db;
+      background: #050a07;
+      white-space: pre-wrap;
+      word-break: break-all;
+      max-height: 68vh;
+    }
+
+    .log-line {
+      margin-bottom: 2px;
+    }
+    .log-section {
+      color: var(--emerald-400);
+      font-weight: 700;
+      background: rgba(16, 185, 129, 0.08);
+      padding: 4px 6px;
+      border-left: 3px solid var(--emerald-400);
+      margin: 8px 0;
+      display: block;
+    }
+    .log-star {
+      color: #fbbf24;
+      font-weight: 700;
+    }
+    .log-warning {
+      color: #9ca3af;
+      font-size: 0.75rem;
+      opacity: 0.6;
+    }
+    .log-highlight {
+      background: rgba(234, 179, 8, 0.25);
+      color: #fef08a;
+      border-radius: 2px;
+      padding: 0 2px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <div class="logo-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2">
+          <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/>
+          <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>
+        </svg>
+      </div>
+      <div>
+        <h1>FloraNet-<span>250</span></h1>
+        <p style="font-size: 0.75rem; color: var(--text-muted);">Real-Time Automated Botanical Expansion & Training Log</p>
+      </div>
+    </div>
+
+    <div class="nav-tabs">
+      <a href="/" class="nav-tab">Single Plant Diagnostic</a>
+      <a href="/compare" class="nav-tab">Multi-Model Arena</a>
+      <a href="/log" class="nav-tab active">📋 Pipeline Log</a>
+    </div>
+  </header>
+
+  <main>
+    <!-- KPI Summary Grid -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-title">Active Taxonomy</div>
+        <div class="kpi-val">250 <span>Species</span></div>
+        <div class="kpi-sub">+59,113 Verified Photos</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-title">Total Corpus</div>
+        <div class="kpi-val">~97,500 <span>Images</span></div>
+        <div class="kpi-sub">68,296 Train • 250 Classes</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-title">Top-1 Val Accuracy</div>
+        <div class="kpi-val">87.96<span>%</span></div>
+        <div class="kpi-sub">Train: 98.99% • EMA Model</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-title">Calibration (T)</div>
+        <div class="kpi-val">T = 0.90</div>
+        <div class="kpi-sub">NLL: 0.5332 (Optimal)</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-title">Flagship Backbone</div>
+        <div class="kpi-val">ConvNeXt<span>-Small</span></div>
+        <div class="kpi-sub">50.2M Params • 384x384px</div>
+      </div>
+    </div>
+
+    <!-- Live Console Output -->
+    <div class="console-card">
+      <div class="console-header">
+        <div class="console-title-group">
+          <div class="terminal-dots">
+            <span class="tdot tdot-red"></span>
+            <span class="tdot tdot-yellow"></span>
+            <span class="tdot tdot-green"></span>
+          </div>
+          <span class="console-title">reports/mega_pipeline.log</span>
+          <div class="live-indicator">
+            <span class="pulse-dot"></span>
+            <span id="liveStatusText">Live Feed Active</span>
+          </div>
+        </div>
+
+        <div class="console-controls">
+          <div class="search-box">
+            <input type="text" id="logSearchInput" placeholder="Search log lines...">
+          </div>
+          <button class="btn btn-secondary" id="autoScrollBtn" onclick="toggleAutoScroll()">
+            Auto-Scroll: <span id="autoScrollStatus">ON</span>
+          </button>
+          <button class="btn btn-secondary" onclick="fetchLog()">
+            ↻ Refresh
+          </button>
+          <a class="btn btn-primary" href="/api/pipeline/download-log" download="mega_pipeline.log">
+            ⬇ Download .log
+          </a>
+        </div>
+      </div>
+
+      <div class="console-body" id="consoleBody">Loading pipeline progress log...</div>
+    </div>
+  </main>
+
+  <script>
+    let autoScroll = true;
+    let rawLogLines = [];
+
+    function toggleAutoScroll() {
+      autoScroll = !autoScroll;
+      document.getElementById('autoScrollStatus').innerText = autoScroll ? 'ON' : 'OFF';
+      if (autoScroll) {
+        const body = document.getElementById('consoleBody');
+        body.scrollTop = body.scrollHeight;
+      }
+    }
+
+    async function fetchLog() {
+      try {
+        const resp = await fetch('/api/pipeline/log');
+        if (!resp.ok) return;
+        const data = await resp.json();
+        if (data.status === 'ok') {
+          rawLogLines = data.content.split('\n');
+          renderLog();
+        }
+      } catch (err) {
+        console.error('Log fetch error:', err);
+      }
+    }
+
+    function renderLog() {
+      const container = document.getElementById('consoleBody');
+      const query = (document.getElementById('logSearchInput').value || '').trim().toLowerCase();
+
+      let html = '';
+      for (let i = 0; i < rawLogLines.length; i++) {
+        const line = rawLogLines[i];
+        if (query && !line.toLowerCase().includes(query)) continue;
+
+        let formatted = escapeHtml(line);
+
+        // Highlight sections
+        if (line.startsWith('===') || line.includes('🎉 FLORANET-250') || line.includes('CALIBRATING SOFTMAX')) {
+          html += `<span class="log-section">${formatted}</span>`;
+        } else if (line.includes('⭐ New best model saved')) {
+          html += `<span class="log-star">${formatted}</span>\n`;
+        } else if (line.includes('UserWarning: Palette images with Transparency')) {
+          // Compact image transparency warnings
+          html += `<span class="log-warning">${formatted}</span>\n`;
+        } else if (line.startsWith('Epoch [') || line.includes('[Harvester]') || line.includes('[Dataset Manager]')) {
+          html += `<strong style="color: #6ee7b7;">${formatted}</strong>\n`;
+        } else {
+          html += formatted + '\n';
+        }
+      }
+
+      container.innerHTML = html;
+      if (autoScroll) {
+        container.scrollTop = container.scrollHeight;
+      }
+    }
+
+    function escapeHtml(text) {
+      return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    }
+
+    document.getElementById('logSearchInput').addEventListener('input', () => {
+      renderLog();
+    });
+
+    // Auto-refresh every 3.5 seconds
+    fetchLog();
+    setInterval(fetchLog, 3500);
+  </script>
+</body>
+</html>
+

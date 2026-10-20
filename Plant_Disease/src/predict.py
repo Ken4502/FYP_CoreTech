@@ -23,15 +23,34 @@ if hasattr(sys.stderr, "reconfigure"):
 
 import io
 import base64
+import numpy as np
 import torch
 import torch.nn.functional as F
 
-from src import config
-from src.dataset import get_transforms
-from src.model import build_model
-from src.spot_detector import LesionSpotDetector
-from src.disease_knowledge import get_disease_info
-from src.plant_identifier import identify_plant, preprocess_image_and_suppress_pot
+CORETECH_ROOT = Path(__file__).resolve().parent.parent.parent
+if str(CORETECH_ROOT) not in sys.path:
+    sys.path.insert(0, str(CORETECH_ROOT))
+
+try:
+    from Plant_Disease.src import config
+    from Plant_Disease.src.dataset import get_transforms
+    from Plant_Disease.src.model import build_model
+    from Plant_Disease.src.spot_detector import LesionSpotDetector
+    from Plant_Disease.src.disease_knowledge import get_disease_info
+    from Plant_Disease.src.plant_identifier import identify_plant
+except (ImportError, ModuleNotFoundError):
+    from src import config
+    from src.dataset import get_transforms
+    from src.model import build_model
+    from src.spot_detector import LesionSpotDetector
+    from src.disease_knowledge import get_disease_info
+    from src.plant_identifier import identify_plant
+
+try:
+    from preprocessing.methods import PlantPreprocessors
+    _preprocessor = PlantPreprocessors()
+except Exception as e:
+    _preprocessor = None
 
 _cached_model = None
 _cached_spot_detector = None
@@ -119,8 +138,11 @@ def diagnose_image(
     # -------------------------------------------------------------------------
     if not disease_available:
         orig_base64 = _pil_to_base64(pil_img)
+        prep_img = id_result.get("preprocessed_image", pil_img)
+        prep_base64 = _pil_to_base64(prep_img)
         return {
             "disease_available": False,
+            "preprocessed_image_base64": prep_base64,
             "status": "disease_unavailable",
             "status_message": (
                 f"Disease identification unavailable for {identified_species}. "
@@ -189,7 +211,24 @@ def diagnose_image(
     # -------------------------------------------------------------------------
     # Branch B: Plant IS supported -> Execute Specialized Disease Diagnosis
     # -------------------------------------------------------------------------
-    clean_img = preprocess_image_and_suppress_pot(pil_img)
+    # Method 2: Zero-hole lamina lesion preservation, selective CLAHE, and symptomatic crop
+    disease_mask = None
+    clean_img = pil_img
+    if _preprocessor is not None:
+        try:
+            prep_res = _preprocessor.process_for_disease_identification(
+                np.array(pil_img),
+                bg_color=(128, 128, 128),
+                padding_ratio=0.08,
+                filter_pot_soil=True,
+                preserve_leaf_shape=True
+            )
+            clean_img = Image.fromarray(prep_res["cropped_image"])
+            disease_mask = prep_res["mask"]
+        except Exception as e:
+            print(f"Warning: Disease Preprocessing Method 2 fallback: {e}")
+            clean_img = pil_img
+
     _, eval_tf = get_transforms(config.IMAGE_SIZE)
     tensor = eval_tf(clean_img).unsqueeze(0).to(config.DEVICE)
 
@@ -223,14 +262,15 @@ def diagnose_image(
 
     top_pred = predictions[0]
 
-    # Spatial Lesion Spot Detection & Highlighting
+    # Spatial Lesion Spot Detection & Highlighting using Method 2 solid plant mask
     spot_results = spot_detector.detect_and_highlight(
         pil_image=pil_img,
         tensor=tensor,
         species_name=active_species,
         condition_name=top_pred["condition_name"],
         condition_idx=top_pred["condition_idx"],
-        is_healthy=top_pred["is_healthy"]
+        is_healthy=top_pred["is_healthy"],
+        plant_mask=disease_mask
     )
 
     # Display name logic
@@ -243,6 +283,7 @@ def diagnose_image(
 
     return {
         "disease_available": True,
+        "preprocessed_image_base64": _pil_to_base64(clean_img),
         "status": "success",
         "status_message": "Diagnosis and spot detection completed successfully.",
         "species": {

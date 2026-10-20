@@ -18,12 +18,20 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torchvision import transforms
 
-from src import config
-from src.model import (
-    HardSwish,
-    InvertedResidual,
-    _make_divisible
-)
+try:
+    from Plant_Disease.src import config
+    from Plant_Disease.src.model import (
+        HardSwish,
+        InvertedResidual,
+        _make_divisible
+    )
+except (ImportError, ModuleNotFoundError):
+    from src import config
+    from src.model import (
+        HardSwish,
+        InvertedResidual,
+        _make_divisible
+    )
 
 # -------------------------------------------------------------------------
 # FloraNet-V3 Botanical Identification Model Definition
@@ -117,38 +125,38 @@ _cached_id_model = None
 _cached_id_classes = None
 _cached_router_model = None
 _cached_router_groups = None
+import sys
+CORETECH_ROOT = Path(__file__).resolve().parent.parent.parent
+if str(CORETECH_ROOT) not in sys.path:
+    sys.path.insert(0, str(CORETECH_ROOT))
+
+try:
+    from preprocessing.methods import PlantPreprocessors
+    _preprocessor = PlantPreprocessors()
+except Exception as e:
+    _preprocessor = None
+
 _eval_transform = None
 
 
 def preprocess_image_and_suppress_pot(pil_img: Image.Image) -> Image.Image:
     """
-    Suppresses dominant pot color noise (e.g. bright red/crimson/terracotta pots)
-    that can mislead botanical classifiers into predicting red/maroon-leaf plants
-    (like Ctenanthe or Anthurium).
-    Masks out saturated red/terracotta pixels in the lower half of the image
-    and replaces them with a neutral background tone (128, 128, 128).
-    Implemented entirely using Pillow and NumPy without external OpenCV dependency.
+    Legacy wrapper retained for backwards compatibility.
+    Delegates to CoreTech Preprocessing Method 1 (Species Identification).
     """
-    rgb_img = pil_img.convert("RGB")
-    img_np = np.array(rgb_img)
-    hsv_np = np.array(pil_img.convert("HSV"))
-
-    # In PIL HSV mode, H, S, V are each mapped to [0, 255]
-    # Red hues wrap around 0 and 255 (corresponding to 0-20 deg and 340-360 deg)
-    hue, sat, val = hsv_np[:, :, 0], hsv_np[:, :, 1], hsv_np[:, :, 2]
-    red_mask = (((hue < 15) | (hue > 240)) & (sat > 80) & (val > 50))
-
-    # Pots physically occupy the lower half / bottom region of potted plant photos
-    h, w, _ = img_np.shape
-    pot_region = np.zeros((h, w), dtype=bool)
-    pot_region[int(h * 0.45):, :] = True
-    active_pot_mask = red_mask & pot_region
-
-    if np.sum(active_pot_mask) > 0.005 * active_pot_mask.size:
-        img_np[active_pot_mask] = [128, 128, 128]
-        return Image.fromarray(img_np)
-
-    return rgb_img
+    if _preprocessor is not None:
+        try:
+            res = _preprocessor.process_for_species_identification(
+                np.array(pil_img.convert("RGB")),
+                bg_color=(128, 128, 128),
+                padding_ratio=0.12,
+                filter_pot_soil=True,
+                preserve_leaf_shape=True
+            )
+            return Image.fromarray(res["cropped_image"])
+        except Exception:
+            return pil_img
+    return pil_img
 
 
 def get_eval_transform(image_size: int = 224):
@@ -206,7 +214,10 @@ def load_router_model(device: torch.device = config.DEVICE):
     if not config.BEST_MODEL_PATH.exists():
         return None, None
 
-    from src.model import build_model
+    try:
+        from Plant_Disease.src.model import build_model
+    except (ImportError, ModuleNotFoundError):
+        from src.model import build_model
     checkpoint = torch.load(config.BEST_MODEL_PATH, map_location=device)
     groups = checkpoint.get("plant_groups", config.PLANT_GROUPS)
     model = build_model(plant_groups=groups)
@@ -368,6 +379,7 @@ def identify_plant(
         "confidence": confidence,
         "mapped_disease_group": mapped_group,
         "is_supported": mapped_group is not None,
-        "top_candidates": candidates
+        "top_candidates": candidates,
+        "preprocessed_image": clean_img
     }
 

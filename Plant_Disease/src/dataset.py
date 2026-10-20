@@ -9,7 +9,10 @@ import torch
 from torchvision import transforms, datasets
 from torch.utils.data import DataLoader, Dataset
 import numpy as np
-from src import config
+try:
+    from Plant_Disease.src import config
+except (ImportError, ModuleNotFoundError):
+    from src import config
 
 def pil_rgb_loader(path: str) -> Image.Image:
     """Robust image loader ensuring 3-channel RGB output."""

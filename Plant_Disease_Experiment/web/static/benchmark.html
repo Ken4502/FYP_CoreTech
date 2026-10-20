@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PhytoCare Ultra | 500-Specimen Wild Disease Benchmark Arena</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0a110e;
+      --bg-card: rgba(18, 30, 24, 0.85);
+      --bg-card-border: rgba(46, 125, 84, 0.32);
+      --emerald-300: #6ee7b7;
+      --emerald-400: #34d399;
+      --emerald-500: #10b981;
+      --emerald-600: #059669;
+      --accent-glow: rgba(16, 185, 129, 0.25);
+      --cyan-400: #38bdf8;
+      --amber-400: #fbbf24;
+      --rose-400: #f43f5e;
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --text-faint: #6b7280;
+      --radius-lg: 16px;
+      --radius-md: 12px;
+      --radius-sm: 8px;
+      --transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', system-ui, sans-serif; }
+
+    body {
+      background: radial-gradient(circle at 15% 15%, #0d2319 0%, #09120e 55%, #050a08 100%);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Ambient glow elements */
+    .glow-orb {
+      position: fixed;
+      width: 550px;
+      height: 550px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.12) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+      filter: blur(40px);
+    }
+    .glow-1 { top: -100px; left: -100px; }
+    .glow-2 { bottom: -120px; right: -120px; }
+
+    /* Header */
+    header {
+      position: relative;
+      z-index: 10;
+      padding: 1.1rem 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--bg-card-border);
+      background: rgba(10, 17, 14, 0.85);
+      backdrop-filter: blur(14px);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.9rem;
+    }
+
+    .logo-icon {
+      width: 44px;
+      height: 44px;
+      background: linear-gradient(135deg, var(--emerald-500), #047857);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+    }
+
+    .brand-text h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #fff;
+    }
+    .brand-text h1 span { color: var(--emerald-400); }
+    .brand-text p {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 0.6rem;
+      align-items: center;
+    }
+
+    .nav-btn {
+      padding: 0.5rem 1.1rem;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-decoration: none;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--bg-card-border);
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .nav-btn:hover {
+      color: #fff;
+      background: rgba(16, 185, 129, 0.15);
+      border-color: var(--emerald-500);
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0.45rem 1.1rem;
+      border-radius: 999px;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      color: var(--emerald-400);
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--emerald-400);
+      box-shadow: 0 0 8px var(--emerald-400);
+    }
+
+    .status-dot.pulsing {
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(0.9); opacity: 0.6; }
+      50% { transform: scale(1.3); opacity: 1; box-shadow: 0 0 14px var(--emerald-400); }
+      100% { transform: scale(0.9); opacity: 0.6; }
+    }
+
+    /* Main Container */
+    main {
+      position: relative;
+      z-index: 10;
+      max-width: 1440px;
+      width: 100%;
+      margin: 1.5rem auto;
+      padding: 0 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      flex: 1;
+    }
+
+    /* Control Panel */
+    .control-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--bg-card-border);
+      border-radius: var(--radius-lg);
+      padding: 1.4rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1.2rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .control-group {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .control-label {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    select.ctrl-select {
+      background: #0d1a14;
+      border: 1px solid var(--bg-card-border);
+      color: #fff;
+      padding: 0.6rem 1rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      font-weight: 600;
+      outline: none;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    select.ctrl-select:hover, select.ctrl-select:focus {
+      border-color: var(--emerald-400);
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.25);
+    }
+
+    .btn-action {
+      padding: 0.65rem 1.4rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: var(--transition);
+    }
+
+    .btn-start {
+      background: linear-gradient(135deg, var(--emerald-500), #047857);
+      color: #fff;
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+    }
+    .btn-start:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 0 28px rgba(16, 185, 129, 0.6);
+    }
+
+    .btn-stop {
+      background: rgba(244, 63, 94, 0.15);
+      border: 1px solid rgba(244, 63, 94, 0.4);
+      color: var(--rose-400);
+    }
+    .btn-stop:hover:not(:disabled) {
+      background: var(--rose-400);
+      color: #fff;
+      box-shadow: 0 0 20px rgba(244, 63, 94, 0.4);
+    }
+
+    .btn-export {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--bg-card-border);
+      color: var(--text-main);
+    }
+    .btn-export:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: var(--emerald-400);
+      color: #fff;
+    }
+
+    .btn-action:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    /* KPI Grid */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 1.1rem;
+    }
+
+    .kpi-card {
+      background: var(--bg-card);
+      border: 1px solid var(--bg-card-border);
+      border-radius: var(--radius-md);
+      padding: 1.25rem 1.4rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+    }
+
+    .kpi-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--emerald-400), transparent);
+      opacity: 0.4;
+    }
+
+    .kpi-label {
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .kpi-val {
+      font-size: 1.85rem;
+      font-weight: 800;
+      color: #fff;
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+    }
+
+    .kpi-sub {
+      font-size: 0.78rem;
+      color: var(--text-faint);
+    }
+
+    .kpi-card.highlight .kpi-val {
+      color: var(--emerald-300);
+      text-shadow: 0 0 20px rgba(16, 185, 129, 0.35);
+    }
+
+    /* Progress Banner */
+    .progress-card {
+      background: var(--bg-card);
+      border: 1px solid var(--bg-card-border);
+      border-radius: var(--radius-md);
+      padding: 1.2rem 1.8rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+    }
+
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+
+    .progress-bar-bg {
+      width: 100%;
+      height: 12px;
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 999px;
+      overflow: hidden;
+      border: 1px solid rgba(46, 125, 84, 0.4);
+      position: relative;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--emerald-600), var(--emerald-400), var(--cyan-400));
+      border-radius: 999px;
+      transition: width 0.3s ease;
+      position: relative;
+    }
+
+    .progress-meta-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    /* Evaluation Feed Section */
+    .feed-section {
+      background: var(--bg-card);
+      border: 1px solid var(--bg-card-border);
+      border-radius: var(--radius-lg);
+      padding: 1.4rem 1.8rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .feed-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .feed-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .filter-pills {
+      display: inline-flex;
+      background: rgba(0, 0, 0, 0.45);
+      padding: 0.3rem;
+      border-radius: var(--radius-sm);
+      gap: 4px;
+      border: 1px solid var(--bg-card-border);
+    }
+
+    .filter-pill {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 0.4rem 0.9rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .filter-pill:hover { color: #fff; }
+    .filter-pill.active {
+      background: var(--emerald-500);
+      color: #fff;
+    }
+
+    /* Cards Grid */
+    .specimens-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+      gap: 1rem;
+      max-height: 580px;
+      overflow-y: auto;
+      padding-right: 6px;
+    }
+
+    .specimens-grid::-webkit-scrollbar {
+      width: 6px;
+    }
+    .specimens-grid::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 999px;
+    }
+    .specimens-grid::-webkit-scrollbar-thumb {
+      background: var(--emerald-600);
+      border-radius: 999px;
+    }
+
+    .specimen-card {
+      background: rgba(10, 18, 14, 0.9);
+      border: 1px solid rgba(46, 125, 84, 0.28);
+      border-radius: var(--radius-md);
+      padding: 0.9rem;
+      display: flex;
+      gap: 0.9rem;
+      align-items: center;
+      transition: var(--transition);
+    }
+
+    .specimen-card:hover {
+      border-color: var(--emerald-400);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+    }
+
+    .specimen-thumb-wrap {
+      width: 72px;
+      height: 72px;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      background: #000;
+      flex-shrink: 0;
+      position: relative;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .specimen-thumb {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.3s;
+    }
+    .specimen-thumb-wrap:hover .specimen-thumb {
+      transform: scale(1.15);
+    }
+
+    .specimen-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      min-width: 0;
+    }
+
+    .specimen-idx-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .specimen-idx {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--text-faint);
+    }
+
+    .match-pill {
+      font-size: 0.68rem;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .match-pill.exact { background: rgba(16, 185, 129, 0.2); color: var(--emerald-300); border: 1px solid var(--emerald-500); }
+    .match-pill.sister { background: rgba(56, 189, 248, 0.2); color: var(--cyan-400); border: 1px solid var(--cyan-400); }
+    .match-pill.top3 { background: rgba(251, 191, 36, 0.2); color: var(--amber-400); border: 1px solid var(--amber-400); }
+    .match-pill.error { background: rgba(244, 63, 94, 0.2); color: var(--rose-400); border: 1px solid var(--rose-400); }
+
+    .gt-title {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #fff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .pred-row {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .pred-row strong {
+      color: var(--emerald-300);
+    }
+
+    .specimen-subrow {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      font-size: 0.68rem;
+      color: var(--text-faint);
+      margin-top: 2px;
+    }
+
+    .pdi-badge-mini {
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-weight: 700;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-main);
+    }
+
+    /* 31-Class Breakdown Matrix */
+    .matrix-section {
+      background: var(--bg-card);
+      border: 1px solid var(--bg-card-border);
+      border-radius: var(--radius-lg);
+      padding: 1.4rem 1.8rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .matrix-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .matrix-header h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .matrix-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 0.7rem;
+    }
+
+    .matrix-item {
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(46, 125, 84, 0.2);
+      border-radius: var(--radius-sm);
+      padding: 0.65rem 0.85rem;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .matrix-item-top {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.76rem;
+      font-weight: 600;
+    }
+
+    .matrix-name {
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 180px;
+    }
+
+    .matrix-acc {
+      font-weight: 800;
+      color: var(--emerald-400);
+    }
+
+    .matrix-bar-bg {
+      height: 4px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .matrix-bar-fill {
+      height: 100%;
+      background: var(--emerald-400);
+      border-radius: 999px;
+      transition: width 0.3s ease;
+    }
+
+    /* Empty state */
+    .feed-empty {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--text-faint);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.8rem;
+    }
+    .feed-empty-icon { font-size: 2.8rem; }
+  </style>
+</head>
+<body>
+  <div class="glow-orb glow-1"></div>
+  <div class="glow-orb glow-2"></div>
+
+  <!-- Header -->
+  <header>
+    <div class="brand">
+      <div class="logo-icon">🧪</div>
+      <div class="brand-text">
+        <h1>PhytoCare Ultra <span>| 500-Specimen Benchmark Arena</span></h1>
+        <p>Independent High-Throughput Stress Test Across 31 Pathology Taxa</p>
+      </div>
+    </div>
+    <div class="nav-links">
+      <a href="/" class="nav-btn" title="Back to Single-Foliage Diagnosis">🔬 Single Diagnosis (Port 8001)</a>
+      <a href="http://127.0.0.1:8000" target="_blank" class="nav-btn" title="Open FloraNet-250 Species Identification">🌿 FloraNet-250 (Port 8000) ↗</a>
+      <a href="/log" target="_blank" class="nav-btn" title="View Real-Time GPU Logs">📜 Live Telemetry</a>
+      <div class="status-badge" id="engine-status">
+        <span class="status-dot" id="engine-dot"></span>
+        <span id="engine-text">Ready (RTX 3060)</span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Control Bar -->
+    <section class="control-panel">
+      <div class="control-group">
+        <div class="control-label">
+          <span>📊 Test Batch Size:</span>
+          <select id="test-size-select" class="ctrl-select">
+            <option value="50">50 Random Specimens (Quick Scan)</option>
+            <option value="100">100 Specimens (Standard)</option>
+            <option value="250">250 Specimens (Comprehensive)</option>
+            <option value="500" selected>500 Specimens (Full Flagship Benchmark)</option>
+          </select>
+        </div>
+
+        <div class="control-label">
+          <span>🌐 Data Source:</span>
+          <select id="source-select" class="ctrl-select">
+            <option value="hybrid" selected>Hybrid Research-Grade Benchmark & Test Corpus</option>
+            <option value="live_inaturalist">Fresh Live iNaturalist Observations (Wild Stream)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <button type="button" class="btn-action btn-start" id="start-btn">
+          <span>▶</span> <span id="start-btn-text">Start 500-Specimen Benchmark</span>
+        </button>
+        <button type="button" class="btn-action btn-stop" id="stop-btn" style="display: none;">
+          <span>⏹</span> <span>Stop Evaluation</span>
+        </button>
+        <button type="button" class="btn-action btn-export" id="export-btn" title="Download benchmark results CSV">
+          <span>📥</span> <span>Export CSV</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- KPI HUD -->
+    <section class="kpi-grid">
+      <div class="kpi-card highlight">
+        <div class="kpi-label">
+          <span>Top-1 Exact Accuracy</span>
+          <span>🎯</span>
+        </div>
+        <div class="kpi-val" id="kpi-top1">0.0%</div>
+        <div class="kpi-sub" id="kpi-top1-sub">0 / 0 exact matches</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-label">
+          <span>Top-3 Accuracy</span>
+          <span>🌟</span>
+        </div>
+        <div class="kpi-val" id="kpi-top3">0.0%</div>
+        <div class="kpi-sub" id="kpi-top3-sub">0 / 0 in top-3 candidates</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-label">
+          <span>Sister-Taxon Tolerance</span>
+          <span>🌿</span>
+        </div>
+        <div class="kpi-val" id="kpi-sister">0.0%</div>
+        <div class="kpi-sub">Biologically compatible taxa</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-label">
+          <span>Health Gate Accuracy</span>
+          <span>🛡️</span>
+        </div>
+        <div class="kpi-val" id="kpi-health">0.0%</div>
+        <div class="kpi-sub">Clean vs Necrotic triage</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-label">
+          <span>Average Latency</span>
+          <span>⚡</span>
+        </div>
+        <div class="kpi-val" id="kpi-latency">0.0 <span style="font-size: 1rem; color: var(--text-muted);">ms</span></div>
+        <div class="kpi-sub">5-Crop Micro-Fovea TTA</div>
+      </div>
+    </section>
+
+    <!-- Progress Card -->
+    <section class="progress-card">
+      <div class="progress-header">
+        <span id="progress-status-label">Ready to start benchmark. Select size above and click Start.</span>
+        <span id="progress-pct-label">0.0%</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progress-fill"></div>
+      </div>
+      <div class="progress-meta-row">
+        <span id="meta-counts">Evaluated: 0 / 500</span>
+        <span id="meta-speed">Speed: 0.0 fps</span>
+        <span id="meta-time">Elapsed: 0.0s | ETA: --</span>
+      </div>
+    </section>
+
+    <!-- Live Evaluation Feed -->
+    <section class="feed-section">
+      <div class="feed-header">
+        <h3 class="feed-title">
+          <span>📸</span> Real-Time Specimen Evaluation Stream
+        </h3>
+        <div class="filter-pills">
+          <button type="button" class="filter-pill active" data-filter="all">All (<span id="cnt-all">0</span>)</button>
+          <button type="button" class="filter-pill" data-filter="exact">✅ Exact Top-1 (<span id="cnt-exact">0</span>)</button>
+          <button type="button" class="filter-pill" data-filter="sister">🌿 Sister Taxa (<span id="cnt-sister">0</span>)</button>
+          <button type="button" class="filter-pill" data-filter="top3">🌟 Top-3 Hits (<span id="cnt-top3">0</span>)</button>
+          <button type="button" class="filter-pill" data-filter="error">❌ Errors (<span id="cnt-error">0</span>)</button>
+        </div>
+      </div>
+
+      <div class="specimens-grid" id="specimens-grid">
+        <div class="feed-empty">
+          <span class="feed-empty-icon">🍃</span>
+          <h4>No Evaluated Specimens Yet</h4>
+          <p>Click "Start Benchmark" above to begin high-throughput evaluation across all 31 classes.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 31-Class Matrix Breakdown -->
+    <section class="matrix-section">
+      <div class="matrix-header" id="toggle-matrix-btn">
+        <h3><span>📊</span> 31-Class Clinical Performance Breakdown</h3>
+        <span style="font-size: 0.82rem; color: var(--emerald-400);">Click to expand/collapse ▼</span>
+      </div>
+      <div class="matrix-grid" id="matrix-grid" style="display: grid;">
+        <!-- Filled dynamically -->
+      </div>
+    </section>
+  </main>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const startBtn = document.getElementById("start-btn");
+      const startBtnText = document.getElementById("start-btn-text");
+      const stopBtn = document.getElementById("stop-btn");
+      const exportBtn = document.getElementById("export-btn");
+      const testSizeSelect = document.getElementById("test-size-select");
+      const sourceSelect = document.getElementById("source-select");
+
+      const kpiTop1 = document.getElementById("kpi-top1");
+      const kpiTop1Sub = document.getElementById("kpi-top1-sub");
+      const kpiTop3 = document.getElementById("kpi-top3");
+      const kpiTop3Sub = document.getElementById("kpi-top3-sub");
+      const kpiSister = document.getElementById("kpi-sister");
+      const kpiHealth = document.getElementById("kpi-health");
+      const kpiLatency = document.getElementById("kpi-latency");
+
+      const progressFill = document.getElementById("progress-fill");
+      const progressStatusLabel = document.getElementById("progress-status-label");
+      const progressPctLabel = document.getElementById("progress-pct-label");
+      const metaCounts = document.getElementById("meta-counts");
+      const metaSpeed = document.getElementById("meta-speed");
+      const metaTime = document.getElementById("meta-time");
+
+      const engineDot = document.getElementById("engine-dot");
+      const engineText = document.getElementById("engine-text");
+
+      const specimensGrid = document.getElementById("specimens-grid");
+      const matrixGrid = document.getElementById("matrix-grid");
+      const toggleMatrixBtn = document.getElementById("toggle-matrix-btn");
+      const filterPills = document.querySelectorAll(".filter-pill");
+
+      const cntAll = document.getElementById("cnt-all");
+      const cntExact = document.getElementById("cnt-exact");
+      const cntSister = document.getElementById("cnt-sister");
+      const cntTop3 = document.getElementById("cnt-top3");
+      const cntError = document.getElementById("cnt-error");
+
+      let pollTimer = null;
+      let allResults = [];
+      let activeFilter = "all";
+
+      // Toggle Matrix
+      toggleMatrixBtn.addEventListener("click", () => {
+        matrixGrid.style.display = matrixGrid.style.display === "none" ? "grid" : "none";
+      });
+
+      // Filter pills
+      filterPills.forEach(pill => {
+        pill.addEventListener("click", () => {
+          filterPills.forEach(p => p.classList.remove("active"));
+          pill.classList.add("active");
+          activeFilter = pill.dataset.filter;
+          renderSpecimenCards();
+        });
+      });
+
+      // Start Benchmark
+      startBtn.addEventListener("click", async () => {
+        const total = parseInt(testSizeSelect.value, 10);
+        const source = sourceSelect.value;
+
+        startBtn.disabled = true;
+        startBtnText.textContent = "Launching Benchmark...";
+
+        try {
+          const res = await fetch("/api/benchmark/start", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ total_images: total, source: source })
+          });
+          const data = await res.json();
+          if (data.status === "started" || data.status === "already_running") {
+            startPolling();
+          } else {
+            alert(`Failed to start: ${data.message || "Unknown error"}`);
+            startBtn.disabled = false;
+            startBtnText.textContent = `Start ${total}-Specimen Benchmark`;
+          }
+        } catch (e) {
+          alert(`Error launching benchmark: ${e.message}`);
+          startBtn.disabled = false;
+          startBtnText.textContent = "Start Benchmark";
+        }
+      });
+
+      // Stop Benchmark
+      stopBtn.addEventListener("click", async () => {
+        stopBtn.disabled = true;
+        try {
+          await fetch("/api/benchmark/stop", { method: "POST" });
+        } catch (e) {}
+      });
+
+      // Export CSV
+      exportBtn.addEventListener("click", () => {
+        window.location.href = "/api/benchmark/export";
+      });
+
+      function startPolling() {
+        if (pollTimer) clearInterval(pollTimer);
+        pollTimer = setInterval(fetchStatus, 900);
+        fetchStatus();
+      }
+
+      async function fetchStatus() {
+        try {
+          const res = await fetch("/api/benchmark/status?limit=60");
+          if (!res.ok) return;
+          const data = await res.json();
+          updateUI(data);
+
+          if (data.status === "completed" || data.status === "stopped" || data.status === "error") {
+            if (pollTimer && data.status !== "running") {
+              clearInterval(pollTimer);
+              pollTimer = null;
+            }
+          }
+        } catch (e) {}
+      }
+
+      function updateUI(data) {
+        const isRunning = data.status === "running";
+        startBtn.style.display = isRunning ? "none" : "inline-flex";
+        startBtn.disabled = isRunning;
+        startBtnText.textContent = `Start ${testSizeSelect.value}-Specimen Benchmark`;
+        stopBtn.style.display = isRunning ? "inline-flex" : "none";
+        stopBtn.disabled = !isRunning;
+
+        if (isRunning) {
+          engineDot.className = "status-dot pulsing";
+          engineText.textContent = `Evaluating (${data.completed}/${data.total})`;
+        } else if (data.status === "completed") {
+          engineDot.className = "status-dot";
+          engineText.textContent = "Benchmark Completed";
+        } else {
+          engineDot.className = "status-dot";
+          engineText.textContent = "Ready (RTX 3060)";
+        }
+
+        // Progress bar
+        progressFill.style.width = `${data.progress_pct}%`;
+        progressPctLabel.textContent = `${data.progress_pct}%`;
+        progressStatusLabel.textContent = isRunning
+          ? `Evaluating Specimen ${data.completed} of ${data.total} across 31 classes...`
+          : (data.status === "completed"
+              ? `Benchmark Complete: ${data.completed} specimens evaluated at ${data.stats.top1_acc_pct}% Top-1 Accuracy.`
+              : "Ready to start benchmark.");
+
+        metaCounts.textContent = `Evaluated: ${data.completed} / ${data.total}`;
+        metaSpeed.textContent = `Speed: ${data.speed_fps} fps`;
+        metaTime.textContent = `Elapsed: ${data.elapsed_sec}s | ETA: ${data.eta_sec}s`;
+
+        // KPIs
+        const st = data.stats || {};
+        kpiTop1.textContent = `${st.top1_acc_pct || 0.0}%`;
+        kpiTop1Sub.textContent = `${st.top1_correct || 0} / ${data.completed} exact matches`;
+
+        kpiTop3.textContent = `${st.top3_acc_pct || 0.0}%`;
+        kpiTop3Sub.textContent = `${st.top3_correct || 0} / ${data.completed} in top-3`;
+
+        kpiSister.textContent = `${st.sister_acc_pct || 0.0}%`;
+        kpiHealth.textContent = `${st.health_acc_pct || 0.0}%`;
+        kpiLatency.innerHTML = `${st.avg_latency_ms || 0.0} <span style="font-size: 1rem; color: var(--text-muted);">ms</span>`;
+
+        // Update Specimen List
+        if (data.recent_results) {
+          allResults = data.recent_results;
+          updateFilterCounts(allResults);
+          renderSpecimenCards();
+        }
+
+        // Update 31-Class Matrix
+        if (data.class_breakdown) {
+          renderClassMatrix(data.class_breakdown);
+        }
+      }
+
+      function updateFilterCounts(results) {
+        let exact = 0, sister = 0, top3 = 0, error = 0;
+        results.forEach(r => {
+          if (r.match_status === "EXACT_MATCH") exact++;
+          else if (r.match_status === "SISTER_TAXON") sister++;
+          else if (r.match_status === "TOP3_MATCH") top3++;
+          else error++;
+        });
+        cntAll.textContent = results.length;
+        cntExact.textContent = exact;
+        cntSister.textContent = sister;
+        cntTop3.textContent = top3;
+        cntError.textContent = error;
+      }
+
+      function renderSpecimenCards() {
+        if (!allResults || allResults.length === 0) {
+          specimensGrid.innerHTML = `
+            <div class="feed-empty">
+              <span class="feed-empty-icon">🍃</span>
+              <h4>Awaiting Benchmark Execution</h4>
+              <p>Click "Start Benchmark" above to begin high-throughput evaluation.</p>
+            </div>
+          `;
+          return;
+        }
+
+        const filtered = allResults.filter(r => {
+          if (activeFilter === "all") return true;
+          if (activeFilter === "exact") return r.match_status === "EXACT_MATCH";
+          if (activeFilter === "sister") return r.match_status === "SISTER_TAXON";
+          if (activeFilter === "top3") return r.match_status === "TOP3_MATCH";
+          if (activeFilter === "error") return r.match_status === "HARD_ERROR";
+          return true;
+        });
+
+        if (filtered.length === 0) {
+          specimensGrid.innerHTML = `<div class="feed-empty"><h4>No specimens match "${activeFilter}" filter.</h4></div>`;
+          return;
+        }
+
+        specimensGrid.innerHTML = filtered.map(r => {
+          const pillClass = r.match_status === "EXACT_MATCH" ? "exact" :
+                            (r.match_status === "SISTER_TAXON" ? "sister" :
+                            (r.match_status === "TOP3_MATCH" ? "top3" : "error"));
+          const pillText = r.match_status === "EXACT_MATCH" ? "Exact Match" :
+                           (r.match_status === "SISTER_TAXON" ? "Sister Taxon" :
+                           (r.match_status === "TOP3_MATCH" ? "Top-3 Hit" : "Error"));
+
+          return `
+            <div class="specimen-card">
+              <div class="specimen-thumb-wrap">
+                <img src="${r.image_url}" alt="${r.ground_truth}" class="specimen-thumb" loading="lazy" onerror="this.src='/static/favicon.ico'">
+              </div>
+              <div class="specimen-info">
+                <div class="specimen-idx-row">
+                  <span class="specimen-idx">#${r.idx} • ${r.source.includes("iNat") ? "iNat Wild" : "Test Set"}</span>
+                  <span class="match-pill ${pillClass}">${pillText}</span>
+                </div>
+                <div class="gt-title" title="Ground Truth: ${r.ground_truth}">
+                  ${r.ground_truth.replace(/_/g, ' ')}
+                </div>
+                <div class="pred-row" title="Predicted: ${r.predicted} (${r.confidence}%)">
+                  Pred: <strong>${r.predicted.replace(/_/g, ' ')}</strong> (${r.confidence}%)
+                </div>
+                <div class="specimen-subrow">
+                  <span class="pdi-badge-mini">${r.pdi_label}</span>
+                  <span>${r.spots_count} spots</span>
+                  <span>${r.latency_ms}ms</span>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join("");
+      }
+
+      function renderClassMatrix(breakdown) {
+        const keys = Object.keys(breakdown);
+        if (keys.length === 0) return;
+
+        matrixGrid.innerHTML = keys.map(k => {
+          const item = breakdown[k];
+          const acc = item.total > 0 ? Math.round((item.top1 / item.total) * 100) : 0;
+          return `
+            <div class="matrix-item">
+              <div class="matrix-item-top">
+                <span class="matrix-name" title="${k}">${k.replace(/_/g, ' ')}</span>
+                <span class="matrix-acc">${acc}% (${item.top1}/${item.total})</span>
+              </div>
+              <div class="matrix-bar-bg">
+                <div class="matrix-bar-fill" style="width: ${acc}%"></div>
+              </div>
+            </div>
+          `;
+        }).join("");
+      }
+
+      // Initial check on load
+      fetchStatus();
+    });
+  </script>
+</body>
+</html>
+

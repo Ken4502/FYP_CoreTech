@@ -28,9 +28,14 @@ data/
 *.jfif
 
 # ==============================================================================
-# Heavy Training Artifacts (Keep best_model.pth, exclude duplicate last checkpoints)
+# Heavy Training Artifacts (Keep production models, exclude intermediate/duplicate checkpoints)
 # ==============================================================================
 **/artifacts/last_model.pth
+**/artifacts/best_model_flagship.pth
+**/artifacts/best_model_pre_step2.pth
+**/artifacts/best_model_swin_384.pth
+**/artifacts/best_model_22class.pth
+**/artifacts/best_model_31class.pth
 
 # ==============================================================================
 # IDEs & OS generated files
@@ -49,3 +54,4 @@ ehthumbs.db
 # ==============================================================================
 *.log
 .pytest_cache/
+

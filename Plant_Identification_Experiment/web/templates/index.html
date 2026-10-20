@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FloraNet-100 | Botanical Identification</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0a110e;
+      --bg-card: rgba(18, 30, 24, 0.75);
+      --bg-card-border: rgba(46, 125, 84, 0.25);
+      --emerald-50: #f0fdf4;
+      --emerald-100: #dcfce7;
+      --emerald-400: #34d399;
+      --emerald-500: #10b981;
+      --emerald-600: #059669;
+      --emerald-700: #047857;
+      --emerald-900: #064e3b;
+      --accent-glow: rgba(16, 185, 129, 0.18);
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --text-faint: #6b7280;
+      --glass-blur: blur(14px);
+      --radius-lg: 18px;
+      --radius-md: 12px;
+      --radius-sm: 8px;
+      --transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      background: radial-gradient(circle at 15% 15%, #0f241a 0%, #0a110e 55%, #050a08 100%);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* Ambient background foliage light glow */
+    .glow-orb {
+      position: fixed;
+      width: 550px;
+      height: 550px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.12) 0%, rgba(5, 150, 105, 0) 70%);
+      pointer-events: none;
+      z-index: 0;
+      filter: blur(40px);
+    }
+    .glow-1 { top: -100px; left: -100px; }
+    .glow-2 { bottom: -120px; right: -120px; background: radial-gradient(circle, rgba(52, 211, 153, 0.08) 0%, rgba(5, 150, 105, 0) 70%); }
+
+    /* Header */
+    header {
+      position: relative;
+      z-index: 10;
+      padding: 1.5rem 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--bg-card-border);
+      background: rgba(10, 17, 14, 0.6);
+      backdrop-filter: var(--glass-blur);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.9rem;
+    }
+
+    .logo-icon {
+      width: 44px;
+      height: 44px;
+      background: linear-gradient(135deg, var(--emerald-500), var(--emerald-700));
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+    }
+
+    .brand h1 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: #fff;
+    }
+
+    .brand h1 span {
+      color: var(--emerald-400);
+      font-weight: 800;
+    }
+
+    .model-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(52, 211, 153, 0.3);
+      padding: 0.35rem 0.85rem;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--emerald-400);
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--emerald-400);
+      box-shadow: 0 0 10px var(--emerald-400);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    /* Main Container */
+    main {
+      position: relative;
+      z-index: 1;
+      max-width: 1400px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 2.2rem 2.5rem;
+      display: grid;
+      grid-template-columns: 1fr 1.15fr;
+      gap: 2rem;
+      flex: 1;
+    }
+
+    @media (max-width: 1024px) {
+      main {
+        grid-template-columns: 1fr;
+        padding: 1.5rem;
+      }
+      header {
+        padding: 1.2rem 1.5rem;
+      }
+    }
+
+    /* Cards */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--bg-card-border);
+      border-radius: var(--radius-lg);
+      backdrop-filter: var(--glass-blur);
+      padding: 1.8rem;
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.4);
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .card-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      color: #fff;
+    }
+
+    .card-title svg {
+      color: var(--emerald-400);
+    }
+
+    /* Upload Zone */
+    .dropzone {
+      border: 2px dashed rgba(52, 211, 153, 0.35);
+      border-radius: var(--radius-md);
+      padding: 2.5rem 1.5rem;
+      text-align: center;
+      cursor: pointer;
+      background: rgba(16, 185, 129, 0.03);
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .dropzone:hover, .dropzone.dragover {
+      border-color: var(--emerald-400);
+      background: rgba(16, 185, 129, 0.08);
+      box-shadow: 0 0 25px var(--accent-glow);
+      transform: translateY(-2px);
+    }
+
+    .dropzone input[type="file"] {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .upload-icon-circle {
+      width: 60px;
+      height: 60px;
+      margin: 0 auto 1rem;
+      background: rgba(16, 185, 129, 0.12);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--emerald-400);
+    }
+
+    .dropzone h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-bottom: 0.35rem;
+      color: #fff;
+    }
+
+    .dropzone p {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 0.8rem;
+    }
+
+    .btn {
+      flex: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.2rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      border: none;
+      outline: none;
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text-main);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Samples Shelf */
+    .sample-shelf-container {
+      margin-top: 0.5rem;
+    }
+
+    .section-label {
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      font-weight: 700;
+      margin-bottom: 0.8rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .samples-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 0.7rem;
+      max-height: 250px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .samples-grid::-webkit-scrollbar {
+      width: 5px;
+    }
+    .samples-grid::-webkit-scrollbar-thumb {
+      background: rgba(52, 211, 153, 0.25);
+      border-radius: 999px;
+    }
+
+    .sample-pill {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-sm);
+      padding: 0.6rem 0.75rem;
+      font-size: 0.78rem;
+      color: var(--text-main);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: var(--transition);
+      text-align: left;
+    }
+
+    .sample-pill:hover {
+      background: rgba(16, 185, 129, 0.16);
+      border-color: var(--emerald-500);
+      color: #fff;
+      transform: translateY(-2px);
+    }
+
+    .sample-pill span.leaf-emoji {
+      font-size: 1.1rem;
+    }
+
+    /* Preview & Results Panel */
+    .results-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 480px;
+      text-align: center;
+      color: var(--text-muted);
+      border: 1px dashed rgba(255, 255, 255, 0.1);
+      border-radius: var(--radius-md);
+      padding: 3rem 2rem;
+    }
+
+    .results-empty svg {
+      width: 72px;
+      height: 72px;
+      color: var(--emerald-900);
+      margin-bottom: 1.2rem;
+      stroke-width: 1.2;
+    }
+
+    .results-content {
+      display: none;
+      flex-direction: column;
+      gap: 1.5rem;
+      animation: fadeIn 0.4s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Top Result Highlight Banner */
+    .top-result-card {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.18) 0%, rgba(4, 120, 87, 0.08) 100%);
+      border: 1px solid rgba(52, 211, 153, 0.4);
+      border-radius: var(--radius-md);
+      padding: 1.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .top-result-card::after {
+      content: '';
+      position: absolute;
+      top: -40px;
+      right: -40px;
+      width: 120px;
+      height: 120px;
+      background: radial-gradient(circle, rgba(52, 211, 153, 0.25) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+
+    .top-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 0.6rem;
+    }
+
+    .top-tag {
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--emerald-400);
+      background: rgba(16, 185, 129, 0.15);
+      padding: 0.25rem 0.65rem;
+      border-radius: 999px;
+    }
+
+    .top-confidence {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: #fff;
+      display: flex;
+      align-items: baseline;
+      gap: 0.2rem;
+    }
+
+    .top-confidence small {
+      font-size: 0.85rem;
+      color: var(--emerald-400);
+      font-weight: 600;
+    }
+
+    .top-name {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 0.3rem;
+      letter-spacing: -0.01em;
+    }
+
+    .top-scientific {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      color: var(--emerald-100);
+      font-size: 1.05rem;
+    }
+
+    .latency-pill {
+      margin-top: 1rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      background: rgba(0, 0, 0, 0.3);
+      padding: 0.25rem 0.6rem;
+      border-radius: 6px;
+    }
+
+    /* Side by side Image comparison */
+    .visual-comparison {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .img-box {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .img-box-header {
+      padding: 0.5rem 0.8rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: rgba(255, 255, 255, 0.04);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .img-box-content {
+      height: 190px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #000;
+      position: relative;
+    }
+
+    .img-box-content img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    /* Top 5 Confidence Bars */
+    .top5-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .bar-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+
+    .bar-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.83rem;
+    }
+
+    .bar-species {
+      font-weight: 600;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+
+    .bar-rank {
+      font-size: 0.72rem;
+      color: var(--text-faint);
+      font-weight: 700;
+    }
+
+    .bar-percent {
+      font-weight: 700;
+      color: var(--emerald-400);
+    }
+
+    .bar-track {
+      width: 100%;
+      height: 7px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--emerald-500), var(--emerald-400));
+      width: 0%;
+      transition: width 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .bar-item:nth-child(2) .bar-fill { background: rgba(52, 211, 153, 0.75); }
+    .bar-item:nth-child(3) .bar-fill { background: rgba(52, 211, 153, 0.55); }
+    .bar-item:nth-child(4) .bar-fill { background: rgba(52, 211, 153, 0.4); }
+    .bar-item:nth-child(5) .bar-fill { background: rgba(52, 211, 153, 0.25); }
+
+    /* Loading Spinner */
+    .loading-overlay {
+      display: none;
+      position: absolute;
+      inset: 0;
+      background: rgba(10, 17, 14, 0.85);
+      backdrop-filter: blur(8px);
+      border-radius: var(--radius-lg);
+      z-index: 50;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+    }
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 3px solid rgba(52, 211, 153, 0.15);
+      border-top-color: var(--emerald-400);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Webcam Modal */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(10px);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+
+    .modal-card {
+      background: #0f1d16;
+      border: 1px solid var(--emerald-700);
+      border-radius: var(--radius-lg);
+      max-width: 600px;
+      width: 100%;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+    }
+
+    .video-viewport {
+      width: 100%;
+      height: 380px;
+      background: #000;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .video-viewport video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    footer {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      padding: 1.5rem;
+      font-size: 0.8rem;
+      color: var(--text-faint);
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+  </style>
+</head>
+<body>
+  <div class="glow-orb glow-1"></div>
+  <div class="glow-orb glow-2"></div>
+
+  <!-- Header -->
+  <header>
+    <div class="brand">
+      <div class="logo-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/>
+          <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>
+        </svg>
+      </div>
+      <div>
+        <h1>FloraNet-<span>250</span></h1>
+        <p style="font-size: 0.78rem; color: var(--text-muted);">Expanded Botanical Classifier & Foliage Segmentation</p>
+      </div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 1.5rem;">
+      <div style="display: flex; gap: 0.5rem; background: rgba(0, 0, 0, 0.4); padding: 0.3rem; border-radius: 999px; border: 1px solid var(--bg-card-border);">
+        <a href="/" style="padding: 0.45rem 1.1rem; border-radius: 999px; font-size: 0.82rem; font-weight: 600; text-decoration: none; background: var(--emerald-500); color: #fff;">Single Diagnostic</a>
+        <a href="/compare" style="padding: 0.45rem 1.1rem; border-radius: 999px; font-size: 0.82rem; font-weight: 600; text-decoration: none; color: var(--text-muted);">Multi-Model Arena</a>
+        <a href="/log" style="padding: 0.45rem 1.1rem; border-radius: 999px; font-size: 0.82rem; font-weight: 600; text-decoration: none; color: var(--text-muted);">📋 Pipeline Log</a>
+        <a href="http://127.0.0.1:8001" target="_blank" style="padding: 0.45rem 1.1rem; border-radius: 999px; font-size: 0.82rem; font-weight: 700; text-decoration: none; background: #2563eb; color: #fff; display: inline-flex; align-items: center; gap: 4px;">🔬 PhytoCare Ultra (Disease & Pests) ↗</a>
+      </div>
+      <div class="model-badge">
+        <span class="pulse-dot"></span>
+        <span>ConvNeXt-Small Flagship (384px) • 250 Classes • 5-Crop TTA Active</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Grid -->
+  <main>
+    <!-- Left Column: Image Upload & Preset Shelf -->
+    <div class="card" style="position: relative;">
+      <div class="card-title">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="17 8 12 3 7 8"/>
+          <line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+        Input Plant Specimen
+      </div>
+
+      <!-- Drag & Drop Zone -->
+      <div class="dropzone" id="dropzone">
+        <input type="file" id="fileInput" accept="image/*">
+        <div class="upload-icon-circle">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
+            <circle cx="9" cy="9" r="2"/>
+            <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+          </svg>
+        </div>
+        <h3>Drop plant leaf photo here</h3>
+        <p>or click to browse from your device (JPG, PNG, WebP)</p>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="action-buttons">
+        <button class="btn btn-secondary" id="webcamBtn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+            <circle cx="12" cy="13" r="4"/>
+          </svg>
+          Snapshot via Camera
+        </button>
+      </div>
+
+      <!-- 1-Click Test Plant Preset Shelf -->
+      <div class="sample-shelf-container">
+        <div class="section-label">
+          <span>1-Click Test Specimen Shelf</span>
+          <span style="font-size: 0.72rem; color: var(--emerald-400);">Instant Load</span>
+        </div>
+        <div class="samples-grid" id="samplesGrid">
+          <!-- Dynamically populated from /api/samples -->
+          <div style="font-size: 0.8rem; color: var(--text-faint);">Loading specimen presets...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Inference Results & Isolation Inspector -->
+    <div class="card" style="position: relative;" id="resultsCard">
+      <!-- Loading Overlay -->
+      <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+        <div style="font-weight: 600; color: var(--emerald-400);">Analyzing Specimen...</div>
+        <div style="font-size: 0.8rem; color: var(--text-muted);">Segmenting leaf mask & executing GPU forward pass</div>
+      </div>
+
+      <div class="card-title">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        Botanical Diagnostic Results
+      </div>
+
+      <!-- Placeholder before upload -->
+      <div class="results-empty" id="resultsEmpty">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2Zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8Z"/>
+          <path d="M12 6v6l4 2"/>
+        </svg>
+        <h4 style="color: #fff; font-size: 1.1rem; margin-bottom: 0.4rem;">No Specimen Loaded</h4>
+        <p style="font-size: 0.85rem; max-width: 320px;">Upload a leaf photo or pick a specimen from the preset shelf on the left to view botanical identification.</p>
+      </div>
+
+      <!-- Populated Results Content -->
+      <div class="results-content" id="resultsContent">
+        <!-- Top Prediction Banner -->
+        <div class="top-result-card">
+          <div class="top-meta">
+            <span class="top-tag">Top-1 Botanical Match</span>
+            <div class="top-confidence">
+              <span id="topConfidenceVal">99.4</span><small>%</small>
+            </div>
+          </div>
+          <div class="top-name" id="topSpeciesName">Watermelon Peperomia</div>
+          <div class="top-scientific" id="topScientificName">Peperomia argyreia</div>
+          <div class="latency-pill">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+            </svg>
+            Inference: <span id="inferenceLatency" style="color: #fff; font-weight: 600;">18.5 ms</span> on NVIDIA RTX 3060
+          </div>
+        </div>
+
+        <!-- Visual Comparison: Original Input vs Isolated Foliage Preprocessing -->
+        <div>
+          <div class="section-label">
+            <span>Foliage Isolation Inspector (Method 1)</span>
+            <span style="font-size: 0.72rem; color: var(--emerald-400);">ExG + HSV Leaf Mask</span>
+          </div>
+          <div class="visual-comparison">
+            <div class="img-box">
+              <div class="img-box-header">Original Upload</div>
+              <div class="img-box-content">
+                <img id="origImgPreview" src="" alt="Original Specimen">
+              </div>
+            </div>
+            <div class="img-box">
+              <div class="img-box-header">Preprocessed Foliage Crop</div>
+              <div class="img-box-content">
+                <img id="preprocessedImgPreview" src="" alt="Preprocessed Foliage">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Top-5 Probability Breakdown -->
+        <div>
+          <div class="section-label">Top-5 Probable Species</div>
+          <div class="top5-list" id="top5List">
+            <!-- Dynamically injected -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Webcam Modal -->
+  <div class="modal-backdrop" id="cameraModal">
+    <div class="modal-card">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h3 style="font-size: 1.1rem; color: #fff;">Capture Specimen Photo</h3>
+        <button id="closeModalBtn" style="background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.2rem;">✕</button>
+      </div>
+      <div class="video-viewport">
+        <video id="webcamVideo" autoplay playsinline></video>
+      </div>
+      <div style="display: flex; gap: 0.8rem;">
+        <button class="btn btn-secondary" id="cancelCameraBtn">Cancel</button>
+        <button class="btn" id="snapPhotoBtn" style="background: var(--emerald-500); color: #fff;">Snap & Classify</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    FloraNet-100 Botanical Classifier • Deepened & Widened Architecture • Final Year Project (FYP) CoreTech
+  </footer>
+
+  <script>
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('fileInput');
+    const samplesGrid = document.getElementById('samplesGrid');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const resultsEmpty = document.getElementById('resultsEmpty');
+    const resultsContent = document.getElementById('resultsContent');
+    const origImgPreview = document.getElementById('origImgPreview');
+    const preprocessedImgPreview = document.getElementById('preprocessedImgPreview');
+    const topSpeciesName = document.getElementById('topSpeciesName');
+    const topScientificName = document.getElementById('topScientificName');
+    const topConfidenceVal = document.getElementById('topConfidenceVal');
+    const inferenceLatency = document.getElementById('inferenceLatency');
+    const top5List = document.getElementById('top5List');
+
+    // Load presets
+    async function loadSamplePresets() {
+      try {
+        const res = await fetch('/api/samples');
+        const data = await res.json();
+        samplesGrid.innerHTML = '';
+        if (!data.samples || data.samples.length === 0) {
+          samplesGrid.innerHTML = '<div style="font-size:0.8rem; color:var(--text-faint);">No presets available</div>';
+          return;
+        }
+
+        data.samples.forEach(sample => {
+          const pill = document.createElement('button');
+          pill.className = 'sample-pill';
+          const shortName = sample.species.split('(')[0].trim();
+          pill.innerHTML = `
+            <span class="leaf-emoji">🌿</span>
+            <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+              <strong style="display:block; font-size:0.82rem;">${shortName}</strong>
+              <small style="font-size:0.7rem; color:var(--text-muted);">${sample.scientific}</small>
+            </div>
+          `;
+          pill.onclick = () => loadSampleImage(sample.species);
+          samplesGrid.appendChild(pill);
+        });
+      } catch (err) {
+        samplesGrid.innerHTML = '<div style="font-size:0.8rem; color:#ef4444;">Failed to load presets</div>';
+      }
+    }
+
+    async function loadSampleImage(speciesName) {
+      showLoading(true);
+      try {
+        const imgUrl = `/api/sample-image?species=${encodeURIComponent(speciesName)}`;
+        const res = await fetch(imgUrl);
+        const blob = await res.blob();
+        const file = new File([blob], `${speciesName}.jpg`, { type: 'image/jpeg' });
+        await uploadAndClassify(file);
+      } catch (err) {
+        alert("Error loading sample image: " + err);
+        showLoading(false);
+      }
+    }
+
+    // Drag and drop handlers
+    dropzone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropzone.classList.add('dragover');
+    });
+
+    dropzone.addEventListener('dragleave', () => {
+      dropzone.classList.remove('dragover');
+    });
+
+    dropzone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropzone.classList.remove('dragover');
+      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        handleFile(e.dataTransfer.files[0]);
+      }
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files && e.target.files.length > 0) {
+        handleFile(e.target.files[0]);
+      }
+    });
+
+    function handleFile(file) {
+      if (!file.type.startsWith('image/')) {
+        alert('Please select an image file (JPG, PNG, WebP).');
+        return;
+      }
+      uploadAndClassify(file);
+    }
+
+    async function uploadAndClassify(file) {
+      // Local preview immediately
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        origImgPreview.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+
+      showLoading(true);
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+        const res = await fetch('/api/predict', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!res.ok) {
+          const errData = await res.json();
+          throw new Error(errData.detail || 'Server error');
+        }
+
+        const data = await res.json();
+        renderResults(data);
+      } catch (err) {
+        alert("Classification failed: " + err.message);
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    function renderResults(data) {
+      resultsEmpty.style.display = 'none';
+      resultsContent.style.display = 'flex';
+
+      topSpeciesName.textContent = data.top_species;
+      topScientificName.textContent = data.scientific_name;
+      topConfidenceVal.textContent = data.confidence.toFixed(1);
+      inferenceLatency.textContent = `${data.inference_time_ms} ms`;
+
+      if (data.preprocessed_image) {
+        preprocessedImgPreview.src = data.preprocessed_image;
+      }
+
+      top5List.innerHTML = '';
+      data.predictions.forEach(p => {
+        const item = document.createElement('div');
+        item.className = 'bar-item';
+        item.innerHTML = `
+          <div class="bar-meta">
+            <span class="bar-species">
+              <span class="bar-rank">#${p.rank}</span>
+              ${p.species}
+            </span>
+            <span class="bar-percent">${p.confidence.toFixed(1)}%</span>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill" style="width: ${p.confidence}%"></div>
+          </div>
+        `;
+        top5List.appendChild(item);
+      });
+    }
+
+    function showLoading(show) {
+      loadingOverlay.style.display = show ? 'flex' : 'none';
+    }
+
+    // Camera handling
+    const cameraModal = document.getElementById('cameraModal');
+    const webcamBtn = document.getElementById('webcamBtn');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const cancelCameraBtn = document.getElementById('cancelCameraBtn');
+    const snapPhotoBtn = document.getElementById('snapPhotoBtn');
+    const webcamVideo = document.getElementById('webcamVideo');
+    let mediaStream = null;
+
+    webcamBtn.addEventListener('click', async () => {
+      try {
+        mediaStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+        webcamVideo.srcObject = mediaStream;
+        cameraModal.style.display = 'flex';
+      } catch (err) {
+        alert("Could not access camera: " + err.message);
+      }
+    });
+
+    function closeCamera() {
+      if (mediaStream) {
+        mediaStream.getTracks().forEach(t => t.stop());
+        mediaStream = null;
+      }
+      cameraModal.style.display = 'none';
+    }
+
+    closeModalBtn.addEventListener('click', closeCamera);
+    cancelCameraBtn.addEventListener('click', closeCamera);
+
+    snapPhotoBtn.addEventListener('click', () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = webcamVideo.videoWidth || 640;
+      canvas.height = webcamVideo.videoHeight || 480;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(webcamVideo, 0, 0, canvas.width, canvas.height);
+      closeCamera();
+
+      canvas.toBlob((blob) => {
+        const file = new File([blob], 'snapshot.jpg', { type: 'image/jpeg' });
+        uploadAndClassify(file);
+      }, 'image/jpeg', 0.95);
+    });
+
+    // Initialize
+    loadSamplePresets();
+  </script>
+</body>
+</html>
+
