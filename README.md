@@ -19,81 +19,96 @@ A dual-module deep learning and computer vision framework for indoor botanical c
 
 ```text
 FYP_CoreTech/
-├── Plant_Identification/          # Species identification module
-│   ├── app/                       # FastAPI web prototype (port 8000) & static UI
-│   ├── artifacts/                 # Trained model weights (best_model.pth), class indices
-│   ├── src/                       # PyTorch model architecture, dataset loaders, inference logic
-│   ├── reports/                   # Training history & confusion matrix graphs
-│   ├── Dockerfile                 # Standalone container build for FloraID
-│   └── requirements.txt           # Python dependencies
-├── Plant_Disease/                 # Disease diagnosis and treatment advisory module
-│   ├── app/                       # FastAPI web prototype (port 8001) & static UI
-│   ├── artifacts/                 # Trained model weights (best_model.pth), knowledge base
-│   ├── src/                       # Diagnostics engine, treatment advisor, evaluation
-│   ├── reports/                   # Confusion matrix & performance reports
-│   ├── Dockerfile                 # Standalone container build for PhytoCare
-│   └── requirements.txt           # Python dependencies
-├── .dockerignore                  # Docker ignore rules (keeps builds lightweight)
-├── .gitignore                     # Git ignore rules (protects repo from large binaries)
-├── docker-compose.yml             # Single-command orchestrator for both services
-└── README.md                      # Project documentation
+├── Plant_Identification_Experiment/  # Flagship FloraNet-250 (ConvNeXt + Swin Ensemble, 250 species, Port 8000)
+│   ├── web/                          # Web UI, visual benchmark, and API server
+│   ├── artifacts/                    # Trained model weights (best_model.pth, Swin), class indices
+│   ├── src/                          # Model architecture, 5-crop TTA, ensemble prediction
+│   ├── reports/                      # 500-specimen tournament benchmarks and logs
+│   └── run_web.py                    # Entrypoint runner for FloraNet-250 (Port 8000)
+├── Plant_Disease_Experiment/         # Flagship PhytoCare Ultra v5.0 (31 classes, Health Gate, Port 8001)
+│   ├── web/                          # Clinical diagnosis UI, 500-test live arena, API server
+│   ├── artifacts/                    # Model weights (best_model.pth, health_gate.pth), knowledge base
+│   ├── src/                          # 5-crop fovea TTA, spot localization, treatment advisory
+│   ├── reports/                      # 500-specimen Internet benchmark reports & CSV
+│   └── run_web.py                    # Entrypoint runner for PhytoCare Ultra (Port 8001)
+├── Plant_Identification/             # Baseline species identification module (47 classes)
+├── Plant_Disease/                    # Baseline disease diagnosis module (16 classes)
+├── preprocessing/                    # Adaptive color normalization & foliage segmentation
+├── requirements.txt                  # Unified Python dependencies
+├── .gitattributes                    # Git LFS tracking for deep learning model checkpoints
+├── .gitignore                        # Excludes raw datasets & temporary checkpoints
+└── README.md                         # Documentation
 ```
 
 ---
 
-## 🚀 Quick Start (Plug & Play)
+## 🚀 Quick Start (Cloning & Running)
 
-### Option 1: Run with Docker (Recommended for instant plug-and-play)
-No Python or CUDA configuration required. With Docker installed on any device:
+### ⚠️ Prerequisite: Git Large File Storage (Git LFS)
+The trained model weights (`.pth` files) are tracked via **Git LFS**. Before cloning, ensure Git LFS is installed:
 
 ```bash
-# Build and launch both FloraID and PhytoCare AI
-docker compose up -d
-```
-Access the applications:
-* **FloraID (Species Identification):** [http://localhost:8000](http://localhost:8000)
-* **PhytoCare AI (Disease Diagnosis):** [http://localhost:8001](http://localhost:8001)
+# 1. Install Git LFS (one-time setup)
+git lfs install
 
-To stop the services:
-```bash
-docker compose down
+# 2. Clone the repository
+git clone https://github.com/Ken4502/FYP_CoreTech.git
+cd FYP_CoreTech
+
+# 3. If you already cloned without LFS, pull the binary weights:
+git lfs pull
 ```
 
 ---
 
-### Option 2: Run Locally with Python
+### Environment Setup (Python 3.10+)
 
-#### 1. Plant Identification (FloraID)
 ```bash
-cd Plant_Identification
+# Create and activate virtual environment
 python -m venv .venv
+
 # On Windows:
-.\.venv\Scripts\activate
-# On Mac/Linux:
+.venv\Scripts\activate
+# On macOS / Linux:
 source .venv/bin/activate
 
+# Install dependencies (CPU or GPU)
 pip install -r requirements.txt
-python app/main.py
 ```
-Open [http://localhost:8000](http://localhost:8000) in your browser.
 
-#### 2. Plant Disease Diagnosis (PhytoCare AI)
+> **GPU Acceleration (Optional, recommended):**
+> ```bash
+> pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
+> ```
+
+---
+
+### Running the Applications
+
+#### 🌟 1. Flagship FloraNet-250 (Species Identification — Port 8000)
 ```bash
-cd Plant_Disease
-python -m venv .venv
-# On Windows:
-.\.venv\Scripts\activate
-# On Mac/Linux:
-source .venv/bin/activate
-
-pip install -r requirements.txt
-python app/main.py
+cd Plant_Identification_Experiment
+python run_web.py
 ```
-Open [http://localhost:8001](http://localhost:8001) in your browser.
+Open **[http://localhost:8000](http://localhost:8000)** in your browser.
+
+#### 🌿 2. Flagship PhytoCare Ultra v5.0 (Disease Diagnosis & 500-Test Arena — Port 8001)
+```bash
+cd Plant_Disease_Experiment
+python run_web.py
+```
+* **Clinical Diagnostic UI:** **[http://localhost:8001](http://localhost:8001)**
+* **500-Specimen Benchmark Arena:** **[http://localhost:8001/benchmark](http://localhost:8001/benchmark)**
+
+---
+
+#### 📌 3. Baseline Applications (MobileNetV3)
+* **Plant Identification Baseline (Port 8000):** `cd Plant_Identification && python app/main.py`
+* **Plant Disease Baseline (Port 8001):** `cd Plant_Disease && python app/main.py`
 
 ---
 
 ## 📊 Datasets & Models
-- Pretrained model checkpoints (`best_model.pth`) and class mappings are prepackaged in each module's `artifacts/` directory for immediate inference.
-- Full training datasets (14,000+ images) are excluded from this repository to adhere to version control best practices.
+- Trained model checkpoints (`best_model.pth`, `health_gate.pth`) and knowledge bases are included via Git LFS for immediate out-of-the-box inference.
+- Raw training datasets (tens of gigabytes) are excluded from Git to follow repository best practices. All inference, validation, and live iNaturalist benchmarking run directly without requiring training data.
 
