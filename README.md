@@ -42,9 +42,34 @@ FYP_CoreTech/
 
 ---
 
-## 🚀 Quick Start (Cloning & Running)
+## 🚀 Quick Start (Plug & Play)
 
-### ⚠️ Prerequisite: Git Large File Storage (Git LFS)
+### ⚡ 1. One-Click Launch (Easiest Method)
+Once you clone the repository, you can start both AI engines simultaneously with a single click:
+
+* **On Windows**: Simply double-click **`start.bat`** (or run `start.bat` in Command Prompt / PowerShell).
+* **On macOS / Linux**: Run:
+  ```bash
+  chmod +x start.sh
+  ./start.sh
+  ```
+* **Using Python directly**:
+  ```bash
+  python launch.py
+  ```
+
+> **What `start.bat` / `launch.py` handles automatically:**
+> 1. ✅ Verifies model weights and automatically runs `git lfs pull` if weights are missing.
+> 2. ✅ Creates `.venv` and installs dependencies on first run.
+> 3. ✅ Boots **FloraNet-250 (Port 8000)** and **PhytoCare Ultra (Port 8001)** simultaneously.
+> 4. ✅ Automatically opens your web browser to both portals.
+> 5. ✅ Handles clean single-key (`Ctrl+C`) shutdown for both servers.
+
+---
+
+### 🛠️ 2. Manual Setup (If preferred)
+
+#### Prerequisites: Git LFS (for model weights)
 The trained model weights (`.pth` files) are tracked via **Git LFS**. Before cloning, ensure Git LFS is installed:
 
 ```bash
@@ -59,12 +84,8 @@ cd FYP_CoreTech
 git lfs pull
 ```
 
----
-
-### Environment Setup (Python 3.10+)
-
+#### Environment Setup (Python 3.10+)
 ```bash
-# Create and activate virtual environment
 python -m venv .venv
 
 # On Windows:
@@ -72,39 +93,21 @@ python -m venv .venv
 # On macOS / Linux:
 source .venv/bin/activate
 
-# Install dependencies (CPU or GPU)
 pip install -r requirements.txt
 ```
 
-> **GPU Acceleration (Optional, recommended):**
-> ```bash
-> pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
-> ```
-
----
-
-### Running the Applications
-
-#### 🌟 1. Flagship FloraNet-250 (Species Identification — Port 8000)
-```bash
-cd Plant_Identification_Experiment
-python run_web.py
-```
-Open **[http://localhost:8000](http://localhost:8000)** in your browser.
-
-#### 🌿 2. Flagship PhytoCare Ultra v5.0 (Disease Diagnosis & 500-Test Arena — Port 8001)
-```bash
-cd Plant_Disease_Experiment
-python run_web.py
-```
-* **Clinical Diagnostic UI:** **[http://localhost:8001](http://localhost:8001)**
-* **500-Specimen Benchmark Arena:** **[http://localhost:8001/benchmark](http://localhost:8001/benchmark)**
-
----
-
-#### 📌 3. Baseline Applications (MobileNetV3)
-* **Plant Identification Baseline (Port 8000):** `cd Plant_Identification && python app/main.py`
-* **Plant Disease Baseline (Port 8001):** `cd Plant_Disease && python app/main.py`
+#### Running Individual Services Manually
+* **FloraNet-250 (Species Identification — Port 8000)**:
+  ```bash
+  cd Plant_Identification_Experiment && python run_web.py
+  ```
+* **PhytoCare Ultra v5.0 (Disease Diagnosis & 500-Test Arena — Port 8001)**:
+  ```bash
+  cd Plant_Disease_Experiment && python run_web.py
+  ```
+* **Baseline Applications (MobileNetV3)**:
+  - `cd Plant_Identification && python app/main.py` (Port 8000)
+  - `cd Plant_Disease && python app/main.py` (Port 8001)
 
 ---
 
