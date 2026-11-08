@@ -1,4 +1,5 @@
 {
+  "total_classes": 251,
   "classes": [
     "African Violet (Saintpaulia ionantha)",
     "Air Plant (Tillandsia ionantha)",
@@ -249,7 +250,8 @@
     "Yucca",
     "ZZ Plant (Zamioculcas zamiifolia)",
     "Zebra Haworthia (Haworthiopsis fasciata)",
-    "Zucchini (Cucurbita pepo)"
+    "Zucchini (Cucurbita pepo)",
+    "Pandan (Pandanus amaryllifolius)"
   ],
   "class_to_idx": {
     "African Violet (Saintpaulia ionantha)": 0,
@@ -501,7 +503,7 @@
     "Yucca": 246,
     "ZZ Plant (Zamioculcas zamiifolia)": 247,
     "Zebra Haworthia (Haworthiopsis fasciata)": 248,
-    "Zucchini (Cucurbita pepo)": 249
-  },
-  "total_classes": 250
+    "Zucchini (Cucurbita pepo)": 249,
+    "Pandan (Pandanus amaryllifolius)": 250
+  }
 }
