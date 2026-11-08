@@ -1,7 +1,7 @@
 """
 FYP CoreTech: One-Click Master Launcher
 ========================================
-Launches both FloraNet-250 (Port 8000) and PhytoCare Ultra (Port 8001)
+Launches both FloraNet-261 (Port 8000) and PhytoCare Ultra (Port 8001)
 concurrently with automatic health checks, Git LFS verification,
 and automatic browser opening.
 
@@ -85,7 +85,7 @@ def main():
     if args.mode == "flagship":
         id_script = ROOT_DIR / "Plant_Identification_Experiment" / "run_web.py"
         disease_script = ROOT_DIR / "Plant_Disease_Experiment" / "run_web.py"
-        id_title = "FloraNet-250 (ConvNeXt-Swin Ensemble — 250 Species)"
+        id_title = "FloraNet-261 (ConvNeXt-Small + SEA Expansion — 261 Species)"
         disease_title = "PhytoCare Ultra v5.0 (31 Classes + 500-Test Arena)"
     else:
         id_script = ROOT_DIR / "Plant_Identification" / "app" / "main.py"

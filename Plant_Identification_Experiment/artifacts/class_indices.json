@@ -1,5 +1,5 @@
 {
-  "total_classes": 251,
+  "total_classes": 261,
   "classes": [
     "African Violet (Saintpaulia ionantha)",
     "Air Plant (Tillandsia ionantha)",
@@ -251,7 +251,17 @@
     "ZZ Plant (Zamioculcas zamiifolia)",
     "Zebra Haworthia (Haworthiopsis fasciata)",
     "Zucchini (Cucurbita pepo)",
-    "Pandan (Pandanus amaryllifolius)"
+    "Pandan (Pandanus amaryllifolius)",
+    "Curry Leaf Tree (Murraya koenigii)",
+    "Kaffir Lime (Citrus hystrix)",
+    "Calamansi (Citrus microcarpa)",
+    "Butterfly Pea (Clitoria ternatea)",
+    "Vietnamese Coriander (Persicaria odorata)",
+    "Turmeric (Curcuma longa)",
+    "Torch Ginger (Etlingera elatior)",
+    "Betel Leaf (Piper betle)",
+    "Water Spinach (Ipomoea aquatica)",
+    "Bitter Gourd (Momordica charantia)"
   ],
   "class_to_idx": {
     "African Violet (Saintpaulia ionantha)": 0,
@@ -504,6 +514,16 @@
     "ZZ Plant (Zamioculcas zamiifolia)": 247,
     "Zebra Haworthia (Haworthiopsis fasciata)": 248,
     "Zucchini (Cucurbita pepo)": 249,
-    "Pandan (Pandanus amaryllifolius)": 250
+    "Pandan (Pandanus amaryllifolius)": 250,
+    "Curry Leaf Tree (Murraya koenigii)": 251,
+    "Kaffir Lime (Citrus hystrix)": 252,
+    "Calamansi (Citrus microcarpa)": 253,
+    "Butterfly Pea (Clitoria ternatea)": 254,
+    "Vietnamese Coriander (Persicaria odorata)": 255,
+    "Turmeric (Curcuma longa)": 256,
+    "Torch Ginger (Etlingera elatior)": 257,
+    "Betel Leaf (Piper betle)": 258,
+    "Water Spinach (Ipomoea aquatica)": 259,
+    "Bitter Gourd (Momordica charantia)": 260
   }
 }

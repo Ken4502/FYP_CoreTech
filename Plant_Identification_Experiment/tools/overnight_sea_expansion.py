@@ -228,7 +228,7 @@ def harvest_species(sci_name: str, out_dir: Path, target: int = 400):
 
     for grade in ["research", "any"]:
         for page in range(1, 10):
-            if len(candidates) >= target * 3:
+            if len(candidates) >= target * 2:
                 break
             params = {
                 "taxon_name": sci_name,
@@ -244,7 +244,7 @@ def harvest_species(sci_name: str, out_dir: Path, target: int = 400):
             url = f"{base_url}?{urllib.parse.urlencode(params)}"
             try:
                 req = urllib.request.Request(url, headers=headers)
-                with urllib.request.urlopen(req, timeout=12) as resp:
+                with urllib.request.urlopen(req, timeout=45) as resp:
                     data = json.loads(resp.read().decode("utf-8"))
                 results = data.get("results", [])
                 if not results:
@@ -257,19 +257,21 @@ def harvest_species(sci_name: str, out_dir: Path, target: int = 400):
                             seen_urls.add(u)
                             hi_res = u.replace("square.", "medium.").replace("small.", "medium.")
                             candidates.append((hi_res, obs_id, p_idx))
-            except Exception:
-                pass
-            time.sleep(0.2)
-        if len(candidates) >= target * 3:
+                print(f"    [+] Query page {page} ({grade}): {len(candidates)} photo candidates collected...", flush=True)
+            except Exception as e:
+                print(f"    [!] Query page {page} note: {e}", flush=True)
+            time.sleep(0.3)
+        if len(candidates) >= target * 2:
             break
 
+    print(f"    [*] Starting parallel downloads across {len(candidates)} candidate photos...", flush=True)
     lock = threading.Lock()
 
     def download_one(cand):
         u, o_id, p_i = cand
         try:
             r = urllib.request.Request(u, headers={"User-Agent": "Mozilla/5.0"})
-            with urllib.request.urlopen(r, timeout=10) as resp:
+            with urllib.request.urlopen(r, timeout=15) as resp:
                 b = resp.read()
             if len(b) < 4000:
                 return False
@@ -292,7 +294,7 @@ def harvest_species(sci_name: str, out_dir: Path, target: int = 400):
         except Exception:
             return False
 
-    with ThreadPoolExecutor(max_workers=16) as executor:
+    with ThreadPoolExecutor(max_workers=24) as executor:
         futs = [executor.submit(download_one, c) for c in candidates]
         for f in as_completed(futs):
             if len(known_hashes) >= target:
