@@ -23,7 +23,7 @@ sys.path.insert(0, str(EXPERIMENT_ROOT))
 
 from src import config
 from src.predict import diagnose_plant, load_diagnostic_system
-from src.botanical_identifier import identify_botanical_species, map_species_to_disease_group
+from src.botanical_identifier import identify_botanical_species, map_species_to_disease_group, load_botanical_identifier
 from src.abiotic_analyzer import analyze_abiotic_stress
 from web.disease_benchmark import disease_benchmark_manager
 
@@ -180,8 +180,56 @@ async def api_predict(file: UploadFile = File(...), plant: str = Form("auto")):
         pil_img.resize((384, 384), Image.BILINEAR).save(prep_buf, format="JPEG", quality=85)
         prep_b64 = "data:image/jpeg;base64," + base64.b64encode(prep_buf.getvalue()).decode("utf-8")
 
-        # 1. LAYER 1: BOTANICAL PLANT IDENTIFICATION (FloraNet-261)
+        # 1. LAYER 1: BOTANICAL PLANT IDENTIFICATION & VERIFICATION GATE
         id_res = identify_botanical_species(pil_img, top_k=5)
+        is_plant = id_res.get("is_plant", True)
+
+        if not is_plant:
+            inference_time_ms = round((time.time() - t0) * 1000, 1)
+            rejection_msg = id_res.get("rejection_reason", "No recognizable plant foliage, leaf tissue, or botanical structure detected.")
+            return {
+                "status": "success",
+                "is_plant": False,
+                "inference_time_ms": inference_time_ms,
+                "disease_available": False,
+                "status_message": rejection_msg,
+                "species": {
+                    "name": "No Plant Detected",
+                    "confidence": 0.0,
+                    "detected_mode": "Open-Set Botanical Gate (Non-Plant Rejection)",
+                    "top_candidates": []
+                },
+                "diagnosis": {
+                    "condition_name": "No Plant Detected",
+                    "category": "Non-Plant Specimen",
+                    "is_healthy": True,
+                    "confidence": 0.0,
+                    "severity": "None"
+                },
+                "spots": {
+                    "has_spots": False,
+                    "spots_count": 0,
+                    "infected_area_pct": 0.0,
+                    "status_message": "Spot detection skipped: Subject is not a recognized botanical specimen.",
+                    "annotated_image_base64": prep_b64
+                },
+                "care_guide": {
+                    "summary": "The uploaded photo does not appear to contain recognizable plant leaves, stems, or flowers.",
+                    "immediate_actions": [
+                        "Point the camera directly at plant leaves, stems, or flowers.",
+                        "Ensure the botanical specimen fills at least 50% of the frame.",
+                        "Check that ambient lighting is adequate and avoids strong reflections."
+                    ],
+                    "treatment": {"organic": [], "chemical": []},
+                    "prevention": ["Photograph living plant tissue rather than furniture, screens, or backgrounds."],
+                    "symptoms": ["Non-botanical subject matter detected."],
+                    "causes": ["Camera focused on background, electronic devices, walls, or non-plant objects."]
+                },
+                "predictions": [],
+                "abiotic": None,
+                "preprocessed_image_base64": prep_b64
+            }
+
         botanical_species = id_res["top_species"]
         botanical_conf = id_res["confidence"]
         auto_group = id_res["mapped_disease_group"]
@@ -234,6 +282,7 @@ async def api_predict(file: UploadFile = File(...), plant: str = Form("auto")):
             inference_time_ms = round((time.time() - t0) * 1000, 1)
             return {
                 "status": "success",
+                "is_plant": True,
                 "inference_time_ms": inference_time_ms,
                 "disease_available": False,
                 "status_message": f"Identified as {botanical_species} ({botanical_conf}% confidence). The pathology diagnostic model currently specializes in Aloe Vera, Cacti, Money Plant (Pothos), Snake Plant, and Spider Plant.",
@@ -471,6 +520,7 @@ async def api_predict(file: UploadFile = File(...), plant: str = Form("auto")):
 
         return {
             "status": "success",
+            "is_plant": True,
             "inference_time_ms": inference_time_ms,
             "disease_available": True,
             "species": {
