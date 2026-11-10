@@ -1,6 +1,6 @@
 """
 PhytoCare Layer 1 Botanical Plant Identifier
-Integrates FloraNet-250 tournament botanical priors to identify plant species 
+Integrates FloraNet-261 tournament botanical priors to identify plant species 
 before executing intra-species pathology diagnosis.
 """
 
@@ -23,7 +23,7 @@ _cached_flora_model = None
 _cached_flora_classes = None
 
 def load_botanical_identifier(device: torch.device = config.DEVICE):
-    """Loads and caches the 250-species FloraNet botanical model."""
+    """Loads and caches the FloraNet botanical model (261 species)."""
     global _cached_flora_model, _cached_flora_classes
 
     if _cached_flora_model is not None and _cached_flora_classes is not None:

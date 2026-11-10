@@ -91,6 +91,8 @@ async def serve_log_page():
 @app.get("/api/info")
 async def api_info():
     model, classes, spot_detector, kb = load_diagnostic_system()
+    flora_model, flora_classes = load_botanical_identifier()
+    flora_count = len(flora_classes) if flora_classes else 261
     device_str = "NVIDIA RTX 3060 (CUDA)" if "cuda" in str(config.DEVICE).lower() else "CPU"
     return {
         "status": "online",
@@ -99,7 +101,8 @@ async def api_info():
         "num_classes": len(classes),
         "classes": classes,
         "supported_plants": ["Aloe_Vera", "Cactus", "Money_Plant", "Snake_Plant", "Spider_Plant", "Universal_Pests"],
-        "model_architecture": "PhytoCare Ultra ConvNeXt-Small 384px (31 Classes + FloraNet-250 Prior)"
+        "botanical_prior_classes": flora_count,
+        "model_architecture": f"PhytoCare Ultra ConvNeXt-Small 384px ({len(classes)} Classes + FloraNet-{flora_count} Prior)"
     }
 
 @app.get("/api/encyclopedia")
@@ -177,7 +180,7 @@ async def api_predict(file: UploadFile = File(...), plant: str = Form("auto")):
         pil_img.resize((384, 384), Image.BILINEAR).save(prep_buf, format="JPEG", quality=85)
         prep_b64 = "data:image/jpeg;base64," + base64.b64encode(prep_buf.getvalue()).decode("utf-8")
 
-        # 1. LAYER 1: BOTANICAL PLANT IDENTIFICATION (FloraNet-250)
+        # 1. LAYER 1: BOTANICAL PLANT IDENTIFICATION (FloraNet-261)
         id_res = identify_botanical_species(pil_img, top_k=5)
         botanical_species = id_res["top_species"]
         botanical_conf = id_res["confidence"]
@@ -203,10 +206,10 @@ async def api_predict(file: UploadFile = File(...), plant: str = Form("auto")):
             detected_mode = f"User Selected ({plant.replace('_', ' ')})"
             is_supported = True
         elif auto_group is not None and botanical_conf >= 45.0:
-            # High-confidence botanical match from FloraNet-250
+            # High-confidence botanical match from FloraNet-261
             target_group = auto_group
             display_plant = botanical_species
-            detected_mode = "FloraNet-250 Botanical Classifier"
+            detected_mode = "FloraNet-261 Botanical Classifier"
             is_supported = True
         elif top_path_cf >= 50.0:
             # Close-up lesion crop where microscopic pathology features dominate
@@ -217,13 +220,13 @@ async def api_predict(file: UploadFile = File(...), plant: str = Form("auto")):
         elif auto_group is not None:
             target_group = auto_group
             display_plant = botanical_species
-            detected_mode = "FloraNet-250 Consensus"
+            detected_mode = "FloraNet-261 Consensus"
             is_supported = True
         else:
-            # Universal pest screening for all other 245 FloraNet plant species!
+            # Universal pest screening for all other FloraNet plant species!
             target_group = "Universal"
             display_plant = botanical_species
-            detected_mode = "FloraNet-250 Botanical Prior (Universal Pest Screening)"
+            detected_mode = "FloraNet-261 Botanical Prior (Universal Pest Screening)"
             is_supported = True
 
         # 2. Branch: Outside Supported Pathology Taxa
