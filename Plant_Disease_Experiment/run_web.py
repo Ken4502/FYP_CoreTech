@@ -25,7 +25,7 @@ if __name__ == "__main__":
     print("=" * 65)
     print("[PhytoCare Ultra] Plant Disease Clinical Diagnosis & Advisory")
     print("[PhytoCare Ultra] Model: ConvNeXt-Small 384px + Swin-T Ensemble")
-    print("[PhytoCare Ultra] Web Service: http://127.0.0.1:8001")
+    print("[PhytoCare Ultra] Web Service: http://localhost:8001 (Listening on 0.0.0.0)")
     print("=" * 65)
-    uvicorn.run("web.app:app", host="127.0.0.1", port=8001, log_level="info")
+    uvicorn.run("web.app:app", host="0.0.0.0", port=8001, log_level="info")
 

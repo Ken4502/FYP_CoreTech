@@ -3,7 +3,7 @@ setlocal enabledelayedexpansion
 title UrbanGreen AI Core Services (FloraNet-261 & PhytoCare Ultra)
 
 echo =======================================================================
-echo     UrbanGreen CoreTech: One-Click Local AI Inference Launcher
+echo          UrbanGreen CoreTech: Local & Online AI Launcher
 echo =======================================================================
 echo.
 
@@ -37,19 +37,7 @@ if "!PYTHON_EXE!"=="" (
         pause
         exit /b 1
     )
-    if not exist ".venv" (
-        echo [*] Setting up local virtual environment in .venv...
-        python -m venv .venv
-        if %errorlevel% neq 0 (
-            echo [ERROR] Failed to create virtual environment!
-            pause
-            exit /b 1
-        )
-        call .venv\Scripts\activate.bat
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-    )
-    set "PYTHON_EXE=%CD%\.venv\Scripts\python.exe"
+    set "PYTHON_EXE=python"
 )
 
 REM 3. Check and Pull Git LFS Model Weights
@@ -60,11 +48,31 @@ if %errorlevel% equ 0 (
     echo.
 )
 
-REM 4. Launch Services
+REM 4. Mode Selection
+set "EXTRA_FLAGS="
+if "%1"=="" (
+    echo Select AI Hosting Mode:
+    echo   [1] Online Cloudflare Tunnel (Free Public HTTPS - Accessible Anywhere on Phone)
+    echo   [2] Local Mode Only (Localhost ^& Home Wi-Fi LAN)
+    echo.
+    set /p "CHOICE=Enter choice [1 or 2, default is 1]: "
+    if "!CHOICE!"=="2" (
+        set "EXTRA_FLAGS="
+        echo [*] Selected Local Mode.
+    ) else (
+        set "EXTRA_FLAGS=--tunnel"
+        echo [*] Selected Online Cloudflare Tunnel Mode.
+    )
+    echo.
+) else (
+    set "EXTRA_FLAGS=%*"
+)
+
+REM 5. Launch Services
 echo [*] Launching FloraNet-261 on Port 8000 and PhytoCare Ultra on Port 8001...
 echo [*] Python executable: !PYTHON_EXE!
 echo.
-"!PYTHON_EXE!" launch.py %*
+"!PYTHON_EXE!" launch.py !EXTRA_FLAGS!
 
 if %errorlevel% neq 0 (
     echo.

@@ -22,9 +22,9 @@ import uvicorn
 
 if __name__ == "__main__":
     print("=" * 60)
-    print("[FloraNet-250] Interactive Botanical Web App")
-    print("[FloraNet-250] Model: MobileNetV3-Large (250 Botanical Classes, RTX 3060 AMP)")
-    print("[FloraNet-250] Web Server: http://127.0.0.1:8000")
+    print("[FloraNet-261] Interactive Botanical Web App")
+    print("[FloraNet-261] Model: ConvNeXt-Small (261 Botanical Classes, RTX 3060 AMP)")
+    print("[FloraNet-261] Web Server: http://localhost:8000 (Listening on 0.0.0.0)")
     print("=" * 60)
-    uvicorn.run("web.app:app", host="127.0.0.1", port=8000, log_level="info")
+    uvicorn.run("web.app:app", host="0.0.0.0", port=8000, log_level="info")
 
