@@ -72,11 +72,14 @@ def get_gemini_api_key(explicit_key: Optional[str] = None) -> Optional[str]:
                 content = p.read_text(encoding="utf-8").strip()
                 for line in content.splitlines():
                     line = line.strip()
+                    if not line or line.startswith("#"):
+                        continue
                     if line.startswith("GEMINI_API_KEY="):
                         return line.split("=", 1)[1].strip().strip('"').strip("'")
                     if line.startswith("GOOGLE_API_KEY="):
                         return line.split("=", 1)[1].strip().strip('"').strip("'")
-                    if line.startswith("AIza"):
+                    # Any clean alphanumeric/dot key token > 20 chars
+                    if len(line) >= 20 and not " " in line:
                         return line
             except Exception:
                 pass
@@ -110,17 +113,30 @@ def verify_via_gemini(img: Image.Image, api_key: str) -> Optional[Tuple[bool, st
             "}"
         )
 
-        response = client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=[
-                types.Part.from_bytes(data=image_bytes, mime_type="image/jpeg"),
-                prompt
-            ],
-            config=types.GenerateContentConfig(
-                response_mime_type="application/json",
-                temperature=0.1
-            )
-        )
+        response = None
+        # Try best fast vision models in priority order
+        model_candidates = ["gemini-3.5-flash-lite", "gemini-3.1-flash-lite", "gemini-2.5-flash"]
+        for m in model_candidates:
+            try:
+                response = client.models.generate_content(
+                    model=m,
+                    contents=[
+                        types.Part.from_bytes(data=image_bytes, mime_type="image/jpeg"),
+                        prompt
+                    ],
+                    config=types.GenerateContentConfig(
+                        response_mime_type="application/json",
+                        temperature=0.1
+                    )
+                )
+                if response and response.text:
+                    break
+            except Exception as model_err:
+                # Try next model candidate
+                continue
+
+        if not response or not response.text:
+            return None
 
         raw_text = response.text.strip()
         data = json.loads(raw_text)
