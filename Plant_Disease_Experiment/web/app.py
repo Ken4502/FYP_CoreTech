@@ -24,6 +24,7 @@ sys.path.insert(0, str(EXPERIMENT_ROOT))
 from src import config
 from src.predict import diagnose_plant, load_diagnostic_system
 from src.botanical_identifier import identify_botanical_species, map_species_to_disease_group, load_botanical_identifier
+from src.plant_verifier import get_gemini_api_key
 from src.abiotic_analyzer import analyze_abiotic_stress
 from web.disease_benchmark import disease_benchmark_manager
 
@@ -102,6 +103,7 @@ async def api_info():
         "classes": classes,
         "supported_plants": ["Aloe_Vera", "Cactus", "Money_Plant", "Snake_Plant", "Spider_Plant", "Universal_Pests"],
         "botanical_prior_classes": flora_count,
+        "gemini_vision_gate_active": get_gemini_api_key() is not None,
         "model_architecture": f"PhytoCare Ultra ConvNeXt-Small 384px ({len(classes)} Classes + FloraNet-{flora_count} Prior)"
     }
 
@@ -166,7 +168,11 @@ async def api_benchmark_image(idx: int):
 
 @app.post("/api/predict")
 @app.post("/api/diagnose")
-async def api_predict(file: UploadFile = File(...), plant: str = Form("auto")):
+async def api_predict(
+    file: UploadFile = File(...),
+    plant: str = Form("auto"),
+    gemini_api_key: Optional[str] = Form(None)
+):
     t0 = time.time()
     try:
         contents = await file.read()
@@ -181,7 +187,7 @@ async def api_predict(file: UploadFile = File(...), plant: str = Form("auto")):
         prep_b64 = "data:image/jpeg;base64," + base64.b64encode(prep_buf.getvalue()).decode("utf-8")
 
         # 1. LAYER 1: BOTANICAL PLANT IDENTIFICATION & VERIFICATION GATE
-        id_res = identify_botanical_species(pil_img, top_k=5)
+        id_res = identify_botanical_species(pil_img, top_k=5, gemini_api_key=gemini_api_key)
         is_plant = id_res.get("is_plant", True)
 
         if not is_plant:

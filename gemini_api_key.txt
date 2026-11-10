@@ -1,0 +1,5 @@
+# Paste your Google Gemini API Key here (starts with AIza...)
+# You can generate a 100% free API key from Google AI Studio at:
+# https://aistudio.google.com/apikey
+# Once pasted, save this file to enable Google Gemini Vision as the primary Plant Verification Gate!
+
