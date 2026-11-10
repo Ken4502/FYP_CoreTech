@@ -29,3 +29,11 @@ DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 NUM_CLASSES = 16
 DEFAULT_RESOLUTION = 384
 
+# -------------------------------------------------------------------------
+# EXPERIMENTAL TESTING FLAGS (Easily revertible)
+# -------------------------------------------------------------------------
+# Set to True to enable Family-Level Softmax Aggregation for plant identification.
+# Set to False to instantly revert to legacy individual species argmax.
+TEST_FAMILY_LEVEL_AGGREGATION = True
+
+

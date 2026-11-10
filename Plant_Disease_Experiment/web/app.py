@@ -104,6 +104,7 @@ async def api_info():
         "supported_plants": ["Aloe_Vera", "Cactus", "Money_Plant", "Snake_Plant", "Spider_Plant", "Universal_Pests"],
         "botanical_prior_classes": flora_count,
         "gemini_vision_gate_active": get_gemini_api_key() is not None,
+        "family_aggregation_active": getattr(config, "TEST_FAMILY_LEVEL_AGGREGATION", False),
         "model_architecture": f"PhytoCare Ultra ConvNeXt-Small 384px ({len(classes)} Classes + FloraNet-{flora_count} Prior)"
     }
 
@@ -533,7 +534,8 @@ async def api_predict(
                 "name": display_plant,
                 "confidence": botanical_conf if plant == "auto" else 100.0,
                 "detected_mode": detected_mode,
-                "top_candidates": candidates
+                "top_candidates": candidates,
+                "family_aggregation": id_res.get("family_aggregation", {"active": False})
             },
             "diagnosis": {
                 "condition_name": top_condition_name,

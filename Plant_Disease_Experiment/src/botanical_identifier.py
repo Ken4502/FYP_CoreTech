@@ -96,6 +96,84 @@ def map_species_to_disease_group(species_name: str) -> Optional[str]:
 
     return None
 
+def get_botanical_family(species_name: str) -> str:
+    """Categorizes botanical species into plant families / morphological groups."""
+    s = species_name.lower()
+    if any(k in s for k in ['cactus', 'opuntia', 'pachycereus', 'disocactus', 'echinocactus', 'schlumbergera']):
+        return 'Cactaceae (Cactus Family)'
+    if any(k in s for k in ['aloe', 'haworthiopsis', 'haworthia']):
+        return 'Asphodelaceae (Aloe & Haworthia Family)'
+    if any(k in s for k in ['sanseviera', 'dracaena angolensis']) or ('snake plant' in s and 'rattlesnake' not in s):
+        return 'Dracaenaceae (Snake Plant Group)'
+    if any(k in s for k in ['pothos', 'scindapsus']):
+        return 'Epipremnum (Pothos / Money Plant Group)'
+    if any(k in s for k in ['monstera', 'philodendron', 'alocasia', 'anthurium', 'syngonium', 'dieffenbachia', 'aglaonema', 'zamioculcas', 'zantedeschia', 'caladium']):
+        return 'Araceae (Aroid Family)'
+    if any(k in s for k in ['crassula', 'echeveria', 'graptopetalum', 'kalanchoe', 'sedum']):
+        return 'Crassulaceae (Fleshy Succulents)'
+    if any(k in s for k in ['ficus', 'fig ']):
+        return 'Moraceae (Fig & Rubber Tree Family)'
+    if any(k in s for k in ['palm', 'dypsis', 'chamaedorea', 'howea', 'ravenea', 'caryota']):
+        return 'Arecaceae (Palm Family)'
+    if any(k in s for k in ['calathea', 'maranta', 'goeppertia', 'stromanthe', 'ctenanthe', 'rattlesnake']):
+        return 'Marantaceae (Prayer Plant Family)'
+    if any(k in s for k in ['tomato', 'potato', 'eggplant', 'pepper', 'capsicum', 'solanum']):
+        return 'Solanaceae (Nightshade Family)'
+    if any(k in s for k in ['basil', 'mint', 'mentha', 'salvia', 'rosemary', 'thyme', 'oregano', 'lavender', 'nepeta', 'coleus', 'melissa', 'majorana', 'glechoma', 'lamium']):
+        return 'Lamiaceae (Mint & Herb Family)'
+    if any(k in s for k in ['fern', 'nephrolepis', 'asplenium', 'platycerium', 'adiantum', 'microsorum']):
+        return 'Polypodiopsida (Fern Family)'
+    if any(k in s for k in ['begonia']):
+        return 'Begoniaceae (Begonia Family)'
+    if any(k in s for k in ['citrus', 'murraya', 'lemon', 'lime', 'orange']):
+        return 'Rutaceae (Citrus Family)'
+    if any(k in s for k in ['cucumber', 'pumpkin', 'zucchini', 'watermelon', 'cantaloupe', 'momordica', 'cucurbita', 'cucumis', 'citrullus']):
+        return 'Cucurbitaceae (Gourd & Squash Family)'
+    if any(k in s for k in ['cabbage', 'broccoli', 'kale', 'radish', 'capsella', 'brassica', 'raphanus']):
+        return 'Brassicaceae (Crucifer Family)'
+    if any(k in s for k in ['pea', 'bean', 'clover', 'medicago', 'phaseolus', 'pisum', 'trifolium', 'clitoria']):
+        return 'Fabaceae (Legume Family)'
+    if any(k in s for k in ['sunflower', 'daisy', 'zinnia', 'cosmos', 'dahlia', 'marigold', 'dandelion', 'coneflower', 'chamomile', 'cirsium', 'tagetes', 'rudbeckia', 'taraxacum', 'echinacea', 'artemisia']):
+        return 'Asteraceae (Sunflower & Daisy Family)'
+    if any(k in s for k in ['rose', 'strawberry', 'apple', 'blackberry', 'raspberry', 'peach', 'spiraea', 'rosa', 'fragaria', 'malus', 'rubus', 'prunus']):
+        return 'Rosaceae (Rose & Fruit Family)'
+    if any(k in s for k in ['peperomia', 'piper']):
+        return 'Piperaceae (Peperomia Family)'
+    return f'Other Taxa ({species_name})'
+
+def aggregate_family_softmax(probs: torch.Tensor, classes: List[str]) -> Tuple[str, str, float, List[Dict[str, Any]]]:
+    """
+    Experimental Family-Level Softmax Aggregation:
+    Sums probabilities belonging to the same botanical family / morphological genus,
+    preventing fragmented predictions across fine-grained 261 classes.
+    """
+    family_sums = {}
+    family_exemplars = {}
+
+    for idx, p in enumerate(probs):
+        cls_name = classes[idx]
+        fam = get_botanical_family(cls_name)
+        val = p.item()
+        family_sums[fam] = family_sums.get(fam, 0.0) + val
+        if fam not in family_exemplars or val > family_exemplars[fam][1]:
+            family_exemplars[fam] = (cls_name, val)
+
+    sorted_families = sorted(family_sums.items(), key=lambda x: x[1], reverse=True)
+    top_family, top_family_score = sorted_families[0]
+    top_exemplar, ex_score = family_exemplars[top_family]
+
+    family_rankings = [
+        {
+            "rank": r,
+            "family": fam,
+            "confidence": round(score * 100, 2),
+            "top_exemplar": family_exemplars[fam][0]
+        }
+        for r, (fam, score) in enumerate(sorted_families[:5], start=1)
+    ]
+
+    return top_family, top_exemplar, top_family_score, family_rankings
+
 import numpy as np
 
 from src.plant_verifier import verify_is_plant
@@ -159,17 +237,71 @@ def identify_botanical_species(img: Image.Image, top_k: int = 5, gemini_api_key:
             "confidence": round(prob.item() * 100, 2)
         })
 
-    top_pred = candidates[0]
-    top_species = top_pred["species"]
-    top_conf = top_pred["confidence"]
-    mapped_group = map_species_to_disease_group(top_species)
+    # ---------------------------------------------------------
+    # Experimental Family-Level Softmax Aggregation (Toggleable)
+    # ---------------------------------------------------------
+    use_family_agg = getattr(config, "TEST_FAMILY_LEVEL_AGGREGATION", False)
 
-    return {
-        "is_plant": True,
-        "top_species": top_species,
-        "confidence": top_conf,
-        "mapped_disease_group": mapped_group,
-        "is_supported": mapped_group is not None,
-        "candidates": candidates
-    }
+    if use_family_agg:
+        top_fam, top_exemplar, top_fam_score, fam_rankings = aggregate_family_softmax(probs, classes)
+
+        # Map family directly to pathology group
+        if "Cactaceae" in top_fam:
+            mapped_group = "Cactus"
+            top_species = top_exemplar
+            top_conf = round(top_fam_score * 100, 2)
+            detected_mode = f"Family-Level Softmax Aggregation ({top_fam})"
+        elif "Asphodelaceae" in top_fam:
+            mapped_group = "Aloe"
+            top_species = top_exemplar
+            top_conf = round(top_fam_score * 100, 2)
+            detected_mode = f"Family-Level Softmax Aggregation ({top_fam})"
+        elif "Dracaenaceae" in top_fam:
+            mapped_group = "Snake_Plant"
+            top_species = top_exemplar
+            top_conf = round(top_fam_score * 100, 2)
+            detected_mode = f"Family-Level Softmax Aggregation ({top_fam})"
+        elif "Epipremnum" in top_fam:
+            mapped_group = "Money_Plant"
+            top_species = top_exemplar
+            top_conf = round(top_fam_score * 100, 2)
+            detected_mode = f"Family-Level Softmax Aggregation ({top_fam})"
+        else:
+            mapped_group = map_species_to_disease_group(top_exemplar)
+            top_species = top_exemplar
+            top_conf = round(top_fam_score * 100, 2)
+            detected_mode = f"Family-Level Softmax Aggregation ({top_fam})"
+
+        return {
+            "is_plant": True,
+            "top_species": top_species,
+            "confidence": top_conf,
+            "mapped_disease_group": mapped_group,
+            "is_supported": mapped_group is not None,
+            "candidates": candidates,
+            "family_aggregation": {
+                "active": True,
+                "top_family": top_fam,
+                "family_confidence": round(top_fam_score * 100, 2),
+                "family_rankings": fam_rankings
+            }
+        }
+    else:
+        # Standard legacy single-species argmax
+        top_pred = candidates[0]
+        top_species = top_pred["species"]
+        top_conf = top_pred["confidence"]
+        mapped_group = map_species_to_disease_group(top_species)
+
+        return {
+            "is_plant": True,
+            "top_species": top_species,
+            "confidence": top_conf,
+            "mapped_disease_group": mapped_group,
+            "is_supported": mapped_group is not None,
+            "candidates": candidates,
+            "family_aggregation": {
+                "active": False
+            }
+        }
 
