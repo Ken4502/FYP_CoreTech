@@ -98,66 +98,116 @@ def map_species_to_disease_group(species_name: str) -> Optional[str]:
 
 import numpy as np
 
+_cached_verifier_model = None
+_cached_verifier_tf = None
+_cached_verifier_cats = None
+
+PLANT_SYNSET_KEYWORDS = {
+    'pot', 'flowerpot', 'vase', 'greenhouse', 'daisy', 'rose', 'corn', 'cardoon',
+    'artichoke', 'broccoli', 'cabbage', 'cauliflower', 'zucchini', 'squash', 'cucumber',
+    'bell pepper', 'mushroom', 'agaric', 'gyromitra', 'stinkhorn', 'earthstar',
+    'hen-of-the-woods', 'bolete', 'orange', 'lemon', 'fig', 'pineapple', 'banana',
+    'jackfruit', 'custard apple', 'pomegranate', 'hay', 'straw', 'acorn', 'rapeseed',
+    'leaf beetle', 'cabbage butterfly', 'leafhopper', 'tree', 'plant', 'grasshopper'
+}
+
+UNAMBIGUOUS_NON_PLANT = {
+    'laptop', 'notebook', 'cellular telephone', 'mouse', 'keyboard', 'coffee mug',
+    'cup', 'dining table', 'desk', 'couch', 'bed', 'wardrobe', 'shoe', 'running shoe',
+    'car', 'sports car', 'convertible', 'minivan', 'truck', 'bus', 'train', 'airplane',
+    'bicycle', 'motorcycle', 'monitor', 'screen', 'television', 'remote control',
+    'clock', 'wall clock', 'watch', 'book', 'paper', 'envelope', 'pen', 'pencil',
+    'bottle', 'water bottle', 'beer bottle', 'wine bottle', 'plate', 'fork', 'knife',
+    'spoon', 'guitar', 'violin', 'piano', 'drum', 'backpack', 'handbag', 'purse',
+    'wallet', 'suit', 'jersey', 'jeans', 't-shirt', 'sandal', 'boot', 'chair', 'stool',
+    'wardrobe', 'cabinet', 'refrigerator', 'microwave', 'toaster', 'iron', 'vacuum'
+}
+
+def load_open_set_verifier(device: torch.device = config.DEVICE):
+    global _cached_verifier_model, _cached_verifier_tf, _cached_verifier_cats
+    if _cached_verifier_model is not None:
+        return _cached_verifier_model, _cached_verifier_tf, _cached_verifier_cats
+    try:
+        w = models.MobileNet_V3_Small_Weights.DEFAULT
+        m = models.mobilenet_v3_small(weights=w).to(device).eval()
+        _cached_verifier_model = m
+        _cached_verifier_tf = w.transforms()
+        _cached_verifier_cats = w.meta['categories']
+        return _cached_verifier_model, _cached_verifier_tf, _cached_verifier_cats
+    except Exception as e:
+        print(f"[Warning] Could not load open-set verifier: {e}")
+        return None, None, None
+
 def check_plant_presence(img: Image.Image) -> tuple[bool, str, dict]:
     """
-    Multi-stage Botanical Verification Gate:
-    Rejects non-plant images (keyboards, desks, walls, screens, human skin, clothes)
-    before feeding into closed-set plant neural networks.
+    Two-Stage Open-Set Botanical Verification Gate:
+    1. Semantic Open-Set Verification (ImageNet 1,000 Everyday Classes via MobileNetV3)
+    2. Quantitative Chlorophyll Foliage & Spatial Variance Analysis
     """
+    # 1. ImageNet Semantic Object Classification
+    v_model, v_tf, v_cats = load_open_set_verifier()
+    plant_score = 0.0
+    top_cat = "unknown"
+    top_conf = 0.0
+    
+    if v_model is not None and v_tf is not None:
+        try:
+            t = v_tf(img).unsqueeze(0).to(config.DEVICE)
+            with torch.no_grad():
+                out = v_model(t)
+                probs = F.softmax(out, dim=1)[0]
+                top_p, top_i = probs.topk(10)
+            
+            top_cats = [v_cats[idx.item()] for idx in top_i]
+            top_scores = [prob.item() for prob in top_p]
+            top_cat = top_cats[0]
+            top_conf = top_scores[0]
+            
+            plant_score = sum(s for c, s in zip(top_cats, top_scores) if any(k in c.lower() for k in PLANT_SYNSET_KEYWORDS))
+            
+            # Explicit Non-Plant Artifact Filter
+            # If ImageNet confidently detects a known everyday man-made object (laptop, mug, mouse, etc.)
+            if any(k in top_cat.lower() for k in UNAMBIGUOUS_NON_PLANT) and top_conf >= 0.22 and plant_score < 0.08:
+                return False, f"Detected non-plant object: {top_cat} ({top_conf*100:.1f}%)", {
+                    "top_detected_object": top_cat,
+                    "object_confidence": round(top_conf * 100, 1),
+                    "plant_score": round(plant_score * 100, 1)
+                }
+        except Exception as e:
+            print(f"[Verifier Error] {e}")
+
+    # 2. Quantitative Foliage Greenness & Surface Variance
     rgb = np.array(img.convert('RGB'), dtype=np.float32)
-    hsv = np.array(img.convert('HSV'), dtype=np.float32)
-
     r, g, b = rgb[:, :, 0], rgb[:, :, 1], rgb[:, :, 2]
-    h, s, v = hsv[:, :, 0], hsv[:, :, 1] / 255.0, hsv[:, :, 2] / 255.0
-
-    # 1. Texture Gradient Variance (detects featureless walls, solid objects, digital noise)
+    
     gray = 0.299 * r + 0.587 * g + 0.114 * b
     grad_y = np.abs(np.diff(gray, axis=0))
     grad_x = np.abs(np.diff(gray, axis=1))
     texture_var = float(np.var(gray))
     texture_grad = float(np.mean(grad_x) + np.mean(grad_y))
-
-    # 2. Chlorophyll Foliage Detection (ExG index: 2G - R - B)
-    # Excess green positive, green strictly greater than red and blue, saturation > 0.12
-    foliage_green = (g > r * 1.04) & (g > b * 1.08) & (s > 0.12) & (v > 0.15) & (v < 0.98)
+    
+    # Living Chlorophyll Foliage (G strictly greater than R and B, and non-dark)
+    foliage_green = (g > r * 1.04) & (g > b * 1.08) & (g > 25)
     green_pct = float(np.mean(foliage_green) * 100.0)
-
-    # 3. Organic Botanical Tones (floral petals + succulent pads + woody stems + cactus bodies)
-    petals = (s > 0.28) & (v > 0.20) & ((h < 25) | (h > 180))
-    succulents = (s > 0.10) & (s < 0.65) & (v > 0.18) & (v < 0.85) & (
-        ((h >= 25) & (h <= 110)) |
-        ((h >= 12) & (h < 25) & (r > b * 1.15))
-    )
-
-    # 4. Human Skin Tone Rejection
-    is_skin = (r > g) & (g > b) & (r > 60) & ((r - g) >= 15) & (r > b * 1.25) & (s > 0.15)
-    skin_pct = float(np.mean(is_skin) * 100.0)
-
-    botanical_mask = (foliage_green | petals | succulents) & (~is_skin)
-    botanical_pct = float(np.mean(botanical_mask) * 100.0)
-
+    
     metrics = {
-        'green_pct': round(green_pct, 1),
-        'botanical_pct': round(botanical_pct, 1),
-        'skin_pct': round(skin_pct, 1),
-        'texture_var': round(texture_var, 1),
-        'texture_grad': round(texture_grad, 1)
+        "green_pct": round(green_pct, 1),
+        "plant_score": round(plant_score * 100, 1),
+        "top_detected_object": top_cat,
+        "object_confidence": round(top_conf * 100, 1),
+        "texture_var": round(texture_var, 1)
     }
-
-    # Gate Decisions:
-    # A) Solid / blank surfaces (white wall, blank paper, solid desk, dark monitor)
+    
+    # Featureless blank surface rejection
     if texture_var < 15.0 or texture_grad < 0.8:
-        return False, 'Image appears to be a blank, featureless, or solid non-botanical surface', metrics
-
-    # B) Severe lack of any foliar, floral, or botanical pigmentation
-    if botanical_pct < 2.5 and green_pct < 1.0:
-        return False, 'No recognizable plant foliage, petals, or botanical tissue detected', metrics
-
-    # C) Dominant human skin tone with near-zero foliage
-    if skin_pct > 40.0 and green_pct < 2.0:
-        return False, 'Subject appears to be human skin or a non-plant portrait with no foliage', metrics
-
-    return True, 'Botanical features verified', metrics
+        return False, "Image appears to be a blank, featureless, or solid non-botanical surface", metrics
+        
+    # Plant Presence Requirement:
+    # Must have living green foliar tissue (>= 5.0%) OR be classified as a botanical/floral/potted specimen (>= 8.0%)
+    if green_pct < 5.0 and plant_score < 0.08:
+        return False, f"No recognizable plant foliage or flowers detected (Subject appears to be: {top_cat})", metrics
+        
+    return True, "Botanical specimen verified", metrics
 
 def identify_botanical_species(img: Image.Image, top_k: int = 5) -> Dict[str, Any]:
     """
