@@ -280,7 +280,6 @@ async def api_predict(
                 "is_dried": is_desiccated,
                 "desiccation_grade": stress.get("desiccation_grade", "Severe Desiccation") if is_desiccated else "Normal",
             })
-            })
             v2_res["abiotic"] = abiotic_analysis
 
             # Enrich predictions for Web UI interactive breakdown
