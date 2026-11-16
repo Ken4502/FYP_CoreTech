@@ -1,9 +1,9 @@
 @echo off
 setlocal enabledelayedexpansion
-title UrbanGreen AI Core Services (FloraNet-261 & PhytoCare Ultra)
+title UrbanGreen AI Core Services - FloraNet-261 and PhytoCare Ultra
 
 echo =======================================================================
-echo          UrbanGreen CoreTech: Local & Online AI Launcher
+echo          UrbanGreen CoreTech: Local and Online AI Launcher
 echo =======================================================================
 echo.
 
@@ -49,25 +49,27 @@ if %errorlevel% equ 0 (
 )
 
 REM 4. Mode Selection
-set "EXTRA_FLAGS="
-if "%1"=="" (
-    echo Select AI Hosting Mode:
-    echo   [1] Online Cloudflare Tunnel (Free Public HTTPS - Accessible Anywhere on Phone)
-    echo   [2] Local Mode Only (Localhost ^& Home Wi-Fi LAN)
-    echo.
-    set /p "CHOICE=Enter choice [1 or 2, default is 1]: "
-    if "!CHOICE!"=="2" (
-        set "EXTRA_FLAGS="
-        echo [*] Selected Local Mode.
-    ) else (
-        set "EXTRA_FLAGS=--tunnel"
-        echo [*] Selected Online Cloudflare Tunnel Mode.
-    )
-    echo.
-) else (
+if not "%1"=="" (
     set "EXTRA_FLAGS=%*"
+    goto :run_services
 )
 
+echo Select AI Hosting Mode:
+echo   [1] Online Cloudflare Tunnel - Free Public HTTPS, Accessible Anywhere on Phone
+echo   [2] Local Mode Only - Localhost and Home Wi-Fi LAN
+echo.
+set "CHOICE=1"
+set /p "CHOICE=Enter choice [1 or 2, default is 1]: "
+if "!CHOICE!"=="2" (
+    set "EXTRA_FLAGS="
+    echo [*] Selected Local Mode.
+) else (
+    set "EXTRA_FLAGS=--tunnel"
+    echo [*] Selected Online Cloudflare Tunnel Mode.
+)
+echo.
+
+:run_services
 REM 5. Launch Services
 echo [*] Launching FloraNet-261 on Port 8000 and PhytoCare Ultra on Port 8001...
 echo [*] Python executable: !PYTHON_EXE!
