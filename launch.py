@@ -15,6 +15,7 @@ Usage:
 import sys
 import os
 import re
+import json
 import time
 import signal
 import socket
@@ -45,6 +46,88 @@ BANNER = r"""
                                   |___/|_|                           
 =============================================================================
 """
+
+DISCOVERY_TOPIC = "urbangreen_coretech_ai_discovery"
+
+def publish_discovery_payload(tunnel_url: str | None, local_ip: str, port: int = 8001) -> bool:
+    """Publishes active server URL to cloud discovery topic for automatic mobile discovery."""
+    data = {
+        "tunnel_url": tunnel_url,
+        "local_url": f"http://{local_ip}:{port}",
+        "local_ip": local_ip,
+        "port": port,
+        "timestamp": int(time.time()),
+        "status": "online"
+    }
+    payload = json.dumps(data).encode("utf-8")
+    try:
+        req = urllib.request.Request(
+            f"https://ntfy.sh/{DISCOVERY_TOPIC}",
+            data=payload,
+            headers={
+                "Content-Type": "application/json",
+                "Title": "CoreTech AI Online Beacon"
+            }
+        )
+        with urllib.request.urlopen(req, timeout=4) as resp:
+            return resp.status == 200
+    except Exception:
+        return False
+
+def start_discovery_beacon(tunnel_url: str | None, local_ip: str, port: int = 8001):
+    """Starts background heartbeat publisher and UDP LAN beacon listener."""
+    # 1. Initial cloud publish
+    publish_discovery_payload(tunnel_url, local_ip, port)
+
+    stop_event = threading.Event()
+
+    # 2. Heartbeat thread (re-publishes every 3 minutes)
+    def heartbeat_loop():
+        while not stop_event.is_set():
+            time.sleep(180)
+            if stop_event.is_set():
+                break
+            publish_discovery_payload(tunnel_url, local_ip, port)
+
+    t_heartbeat = threading.Thread(target=heartbeat_loop, daemon=True)
+    t_heartbeat.start()
+
+    # 3. Local LAN UDP Beacon thread (Port 8002)
+    def udp_beacon_loop():
+        try:
+            sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            sock.bind(("0.0.0.0", 8002))
+            sock.settimeout(1.0)
+            while not stop_event.is_set():
+                try:
+                    data, addr = sock.recvfrom(1024)
+                    msg = data.decode("utf-8", errors="ignore")
+                    if "URBANGREEN_DISCOVERY_PING" in msg or "DISCOVER_AI_SERVER" in msg:
+                        resp_data = json.dumps({
+                            "status": "online",
+                            "tunnel_url": tunnel_url,
+                            "local_url": f"http://{local_ip}:{port}",
+                            "local_ip": local_ip,
+                            "port": port,
+                            "timestamp": int(time.time())
+                        }).encode("utf-8")
+                        sock.sendto(resp_data, addr)
+                except socket.timeout:
+                    continue
+                except Exception:
+                    pass
+            try:
+                sock.close()
+            except Exception:
+                pass
+        except Exception:
+            pass
+
+    t_udp = threading.Thread(target=udp_beacon_loop, daemon=True)
+    t_udp.start()
+
+    return stop_event
 
 def get_local_ip() -> str:
     """Detects active local Wi-Fi / LAN IP address."""
@@ -142,10 +225,13 @@ def main():
 
     p_tunnel = None
     tunnel_url = None
+    discovery_stop_event = None
 
     # Graceful shutdown handler
     def cleanup(signum=None, frame=None):
         print("\n\n[*] Shutting down all services cleanly...")
+        if discovery_stop_event is not None:
+            discovery_stop_event.set()
         for p in (p1, p2, p_tunnel):
             if p is not None:
                 try:
@@ -191,19 +277,24 @@ def main():
                 if time.time() - start_t > 25:
                     break
 
-            if tunnel_url:
-                target_files = [
-                    ROOT_DIR / "cloud_ai_url.txt",
-                    ROOT_DIR.parent / "cloud_ai_url.txt",
-                    ROOT_DIR.parent / "AppIntegration" / "cloud_ai_url.txt"
-                ]
-                for tf in target_files:
-                    try:
-                        tf.parent.mkdir(parents=True, exist_ok=True)
-                        with open(tf, "w", encoding="utf-8") as f:
-                            f.write(tunnel_url.strip() + "\n")
-                    except Exception:
-                        pass
+    # Write active URLs to target files for local access and tools
+    target_files = [
+        ROOT_DIR / "cloud_ai_url.txt",
+        ROOT_DIR.parent / "cloud_ai_url.txt",
+        ROOT_DIR.parent / "AppIntegration" / "cloud_ai_url.txt",
+        ROOT_DIR.parent / "AppIntegration" / "active_server_url.txt"
+    ]
+    active_address = (tunnel_url if tunnel_url else f"http://{local_ip}:8001").strip()
+    for tf in target_files:
+        try:
+            tf.parent.mkdir(parents=True, exist_ok=True)
+            with open(tf, "w", encoding="utf-8") as f:
+                f.write(active_address + "\n")
+        except Exception:
+            pass
+
+    # Start Dynamic Discovery Beacons (Cloud ntfy topic + Local UDP beacon)
+    discovery_stop_event = start_discovery_beacon(tunnel_url, local_ip, 8001)
 
     print("\n" + "="*78)
     print(" 🌿 FYP CORETECH AI SERVICES ACTIVE & READY")
@@ -216,12 +307,12 @@ def main():
         print("  🌐 CLOUDFLARE PUBLIC HTTPS TUNNEL (WORLDWIDE FREE MOBILE ACCESS):")
         print(f"  • Public HTTPS URL    : {tunnel_url}")
         print(f"  • Mobile API Endpoint : {tunnel_url}/api/predict")
-        print(f"  • Saved To            : cloud_ai_url.txt")
-        print("-" * 78)
-        print("  📱 HOW TO CONNECT MOBILE APP ANYWHERE IN THE WORLD:")
-        print("  1. In the UrbanGreen Flutter app, tap Settings on Camera screen.")
-        print(f"  2. Paste this URL: {tunnel_url}")
-        print("  3. Tap 'Test Ping' to confirm green checkmark, then 'Save & Retry'.")
+    print("-" * 78)
+    print("  🚀 ZERO-MANUAL CONFIGURATION: DYNAMIC AUTO-DISCOVERY ACTIVE")
+    print("  • The UrbanGreen mobile app discovers and connects to this server automatically!")
+    print(f"  • Cloud Discovery Channel : https://ntfy.sh/{DISCOVERY_TOPIC}")
+    print(f"  • Local LAN Beacon        : Port 8002 (UDP Broadcast)")
+    print("  • You do NOT need to manually copy or paste any links into the app.")
     print("="*78)
     print("  Press Ctrl+C at any time in this window to stop all services.")
     print("="*78 + "\n")

@@ -1,0 +1,2423 @@
+{
+  "African Violet (Saintpaulia ionantha)": {
+    "total": 500,
+    "splits": {
+      "train": 380,
+      "val": 60,
+      "test": 60
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Air Plant (Tillandsia ionantha)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Alocasia Amazonica (Alocasia amazonica)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Araceae (Aroid & Pothos Family)"
+  },
+  "Alocasia Zebrina (Alocasia zebrina)": {
+    "total": 240,
+    "splits": {
+      "test": 29,
+      "val": 29,
+      "train": 182
+    },
+    "family": "Araceae (Aroid & Pothos Family)"
+  },
+  "Aloe Vera": {
+    "total": 650,
+    "splits": {
+      "test": 75,
+      "val": 75,
+      "train": 500
+    },
+    "family": "Asphodelaceae (Aloe & Haworthia)"
+  },
+  "Aluminum Plant (Pilea cadierei)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Annual Bluegrass (Poa annua)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Anthurium (Anthurium andraeanum)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Araceae (Aroid & Pothos Family)"
+  },
+  "Apple Tree (Malus domestica)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Rosaceae (Rose & Fruit Family)"
+  },
+  "Areca Palm (Dypsis lutescens)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Arecaceae / Cycadales (Palms)"
+  },
+  "Arrowhead Plant (Syngonium podophyllum)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Araceae (Aroid & Pothos Family)"
+  },
+  "Asparagus (Asparagus officinalis)": {
+    "total": 491,
+    "splits": {
+      "test": 59,
+      "val": 59,
+      "train": 373
+    },
+    "family": "Asparagaceae (Snake, Spider & Dracaena)"
+  },
+  "Asparagus Fern (Asparagus setaceus)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Asparagaceae (Snake, Spider & Dracaena)"
+  },
+  "Avocado Tree (Persea americana)": {
+    "total": 481,
+    "splits": {
+      "test": 58,
+      "val": 61,
+      "train": 362
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Barnyard Grass (Echinochloa crus-galli)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Barrel Cactus (Ferocactus)": {
+    "total": 650,
+    "splits": {
+      "test": 76,
+      "val": 75,
+      "train": 499
+    },
+    "family": "Cactaceae (Cactus Family)"
+  },
+  "Bay Laurel (Laurus nobilis)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Beetroot (Beta vulgaris)": {
+    "total": 489,
+    "splits": {
+      "test": 59,
+      "val": 59,
+      "train": 371
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Begonia (Begonia spp.)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Begoniaceae (Begonia Family)"
+  },
+  "Bell Pepper (Capsicum annuum)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Solanaceae (Nightshade Family)"
+  },
+  "Bermuda Grass (Cynodon dactylon)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Betel Leaf (Piper betle)": {
+    "total": 550,
+    "splits": {
+      "test": 66,
+      "val": 66,
+      "train": 418
+    },
+    "family": "Piperaceae (Peperomia & Pepper Family)"
+  },
+  "Bird of Paradise (Strelitzia reginae)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Birds Nest Fern (Asplenium nidus)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 61,
+      "train": 379
+    },
+    "family": "Polypodiopsida (Ferns)"
+  },
+  "Bitter Gourd (Momordica charantia)": {
+    "total": 490,
+    "splits": {
+      "test": 59,
+      "val": 62,
+      "train": 369
+    },
+    "family": "Cucurbitaceae (Gourd & Squash)"
+  },
+  "Bittersweet Nightshade (Solanum dulcamara)": {
+    "total": 474,
+    "splits": {
+      "test": 57,
+      "val": 57,
+      "train": 360
+    },
+    "family": "Solanaceae (Nightshade Family)"
+  },
+  "Black Medick (Medicago lupulina)": {
+    "total": 461,
+    "splits": {
+      "test": 59,
+      "val": 55,
+      "train": 347
+    },
+    "family": "Fabaceae (Legume Family)"
+  },
+  "Black Nightshade (Solanum nigrum)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Solanaceae (Nightshade Family)"
+  },
+  "Black-Eyed Susan (Rudbeckia hirta)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Blackberry (Rubus fruticosus)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Rosaceae (Rose & Fruit Family)"
+  },
+  "Bleeding Heart (Lamprocapnos spectabilis)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Blueberry (Vaccinium corymbosum)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Borage (Borago officinalis)": {
+    "total": 451,
+    "splits": {
+      "test": 54,
+      "val": 54,
+      "train": 343
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Boston Fern (Nephrolepis exaltata)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Polypodiopsida (Ferns)"
+  },
+  "Broadleaf Plantain (Plantago major)": {
+    "total": 464,
+    "splits": {
+      "test": 56,
+      "val": 56,
+      "train": 352
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Broccoli (Brassica oleracea var. italica)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Brassicaceae (Mustard & Brassicas)"
+  },
+  "Bromeliad (Guzmania lingulata)": {
+    "total": 486,
+    "splits": {
+      "test": 58,
+      "val": 58,
+      "train": 370
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Bull Thistle (Cirsium vulgare)": {
+    "total": 464,
+    "splits": {
+      "test": 56,
+      "val": 56,
+      "train": 352
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Bunny Ears Cactus (Opuntia microdasys)": {
+    "total": 650,
+    "splits": {
+      "test": 77,
+      "val": 75,
+      "train": 498
+    },
+    "family": "Cactaceae (Cactus Family)"
+  },
+  "Butterfly Bush (Buddleja davidii)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Butterfly Pea (Clitoria ternatea)": {
+    "total": 529,
+    "splits": {
+      "test": 63,
+      "val": 63,
+      "train": 403
+    },
+    "family": "Fabaceae (Legume Family)"
+  },
+  "Cabbage (Brassica oleracea var. capitata)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 61,
+      "train": 379
+    },
+    "family": "Brassicaceae (Mustard & Brassicas)"
+  },
+  "Calamansi (Citrus microcarpa)": {
+    "total": 438,
+    "splits": {
+      "test": 55,
+      "val": 53,
+      "train": 330
+    },
+    "family": "Rutaceae (Citrus Family)"
+  },
+  "Calathea": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Marantaceae (Prayer Plant Family)"
+  },
+  "Calathea Medallion (Goeppertia roseopicta)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Marantaceae (Prayer Plant Family)"
+  },
+  "Calathea Rufibarba (Goeppertia rufibarba)": {
+    "total": 334,
+    "splits": {
+      "test": 40,
+      "val": 40,
+      "train": 254
+    },
+    "family": "Marantaceae (Prayer Plant Family)"
+  },
+  "Calathea Warscewiczii (Goeppertia warszewiczii)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Marantaceae (Prayer Plant Family)"
+  },
+  "Calathea Zebrina (Goeppertia zebrina)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Marantaceae (Prayer Plant Family)"
+  },
+  "Calla Lily (Zantedeschia aethiopica)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Araceae (Aroid & Pothos Family)"
+  },
+  "Canada Thistle (Cirsium arvense)": {
+    "total": 492,
+    "splits": {
+      "test": 59,
+      "val": 59,
+      "train": 374
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Cantaloupe (Cucumis melo)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Cucurbitaceae (Gourd & Squash)"
+  },
+  "Cape Leadwort (Plumbago auriculata)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Carrot (Daucus carota)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Cast Iron Plant (Aspidistra elatior)": {
+    "total": 500,
+    "splits": {
+      "test": 61,
+      "val": 60,
+      "train": 379
+    },
+    "family": "Asparagaceae (Snake, Spider & Dracaena)"
+  },
+  "Catnip (Nepeta cataria)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Lamiaceae (Mint & Herb Family)"
+  },
+  "Celery (Apium graveolens)": {
+    "total": 467,
+    "splits": {
+      "test": 56,
+      "val": 56,
+      "train": 355
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Chamomile (Matricaria chamomilla)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Chili Pepper (Capsicum frutescens)": {
+    "total": 437,
+    "splits": {
+      "test": 52,
+      "val": 52,
+      "train": 333
+    },
+    "family": "Solanaceae (Nightshade Family)"
+  },
+  "Chinese Hibiscus (Hibiscus rosa-sinensis)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Rosaceae (Rose & Fruit Family)"
+  },
+  "Chinese Money Plant (Pilea peperomioides)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Chinese Peony (Paeonia lactiflora)": {
+    "total": 429,
+    "splits": {
+      "test": 51,
+      "val": 51,
+      "train": 327
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Chinese Wisteria (Wisteria sinensis)": {
+    "total": 475,
+    "splits": {
+      "test": 57,
+      "val": 57,
+      "train": 361
+    },
+    "family": "Fabaceae (Legume Family)"
+  },
+  "Chinese evergreen (Aglaonema)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Araceae (Aroid & Pothos Family)"
+  },
+  "Chives (Allium schoenoprasum)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Christmas Cactus (Schlumbergera bridgesii)": {
+    "total": 650,
+    "splits": {
+      "test": 76,
+      "val": 75,
+      "train": 499
+    },
+    "family": "Cactaceae (Cactus Family)"
+  },
+  "Chrysanthemum": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Cilantro (Coriandrum sativum)": {
+    "total": 488,
+    "splits": {
+      "test": 59,
+      "val": 59,
+      "train": 370
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Clematis (Clematis)": {
+    "total": 500,
+    "splits": {
+      "test": 63,
+      "val": 60,
+      "train": 377
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Coleus (Coleus scutellarioides)": {
+    "total": 453,
+    "splits": {
+      "test": 54,
+      "val": 54,
+      "train": 345
+    },
+    "family": "Lamiaceae (Mint & Herb Family)"
+  },
+  "Columnar Cactus (Pachycereus pringlei)": {
+    "total": 650,
+    "splits": {
+      "test": 75,
+      "val": 75,
+      "train": 500
+    },
+    "family": "Cactaceae (Cactus Family)"
+  },
+  "Common Boxwood (Buxus sempervirens)": {
+    "total": 429,
+    "splits": {
+      "test": 51,
+      "val": 51,
+      "train": 327
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Common Chickweed (Stellaria media)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Common Columbine (Aquilegia vulgaris)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Common Dandelion (Taraxacum officinale)": {
+    "total": 476,
+    "splits": {
+      "test": 57,
+      "val": 57,
+      "train": 362
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Common Foxglove (Digitalis purpurea)": {
+    "total": 448,
+    "splits": {
+      "test": 54,
+      "val": 54,
+      "train": 340
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Common Gardenia (Gardenia jasminoides)": {
+    "total": 482,
+    "splits": {
+      "test": 58,
+      "val": 58,
+      "train": 366
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Common Hollyhock (Alcea rosea)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Rosaceae (Rose & Fruit Family)"
+  },
+  "Common Lambsquarters (Chenopodium album)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Common Lilac (Syringa vulgaris)": {
+    "total": 500,
+    "splits": {
+      "test": 61,
+      "val": 60,
+      "train": 379
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Common Mallow (Malva neglecta)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Common Morning Glory (Ipomoea purpurea)": {
+    "total": 463,
+    "splits": {
+      "test": 56,
+      "val": 56,
+      "train": 351
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Common Purslane (Portulaca oleracea)": {
+    "total": 454,
+    "splits": {
+      "test": 54,
+      "val": 54,
+      "train": 346
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Common Ragweed (Ambrosia artemisiifolia)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Common Sage (Salvia officinalis)": {
+    "total": 462,
+    "splits": {
+      "test": 55,
+      "val": 55,
+      "train": 352
+    },
+    "family": "Lamiaceae (Mint & Herb Family)"
+  },
+  "Common Sunflower (Helianthus annuus)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Common Zinnia (Zinnia elegans)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Corn Plant (Dracaena fragrans)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Asparagaceae (Snake, Spider & Dracaena)"
+  },
+  "Creeping Charlie (Glechoma hederacea)": {
+    "total": 454,
+    "splits": {
+      "test": 54,
+      "val": 54,
+      "train": 346
+    },
+    "family": "Lamiaceae (Mint & Herb Family)"
+  },
+  "Croton (Codiaeum variegatum)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Ctenanthe": {
+    "total": 500,
+    "splits": {
+      "test": 61,
+      "val": 60,
+      "train": 379
+    },
+    "family": "Marantaceae (Prayer Plant Family)"
+  },
+  "Cucumber (Cucumis sativus)": {
+    "total": 435,
+    "splits": {
+      "test": 52,
+      "val": 52,
+      "train": 331
+    },
+    "family": "Cucurbitaceae (Gourd & Squash)"
+  },
+  "Curry Leaf Tree (Murraya koenigii)": {
+    "total": 432,
+    "splits": {
+      "test": 52,
+      "val": 53,
+      "train": 327
+    },
+    "family": "Rutaceae (Citrus Family)"
+  },
+  "Cylindrical Snake Plant (Dracaena angolensis)": {
+    "total": 650,
+    "splits": {
+      "test": 75,
+      "val": 78,
+      "train": 497
+    },
+    "family": "Asparagaceae (Snake, Spider & Dracaena)"
+  },
+  "Daffodils (Narcissus spp.)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Dill (Anethum graveolens)": {
+    "total": 455,
+    "splits": {
+      "test": 55,
+      "val": 55,
+      "train": 345
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Dracaena": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Asparagaceae (Snake, Spider & Dracaena)"
+  },
+  "Dumb Cane (Dieffenbachia spp.)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Araceae (Aroid & Pothos Family)"
+  },
+  "Dwarf Umbrella Tree (Heptapleurum arboricola)": {
+    "total": 500,
+    "splits": {
+      "test": 61,
+      "val": 60,
+      "train": 379
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Echeveria Elegans (Echeveria elegans)": {
+    "total": 650,
+    "splits": {
+      "test": 75,
+      "val": 75,
+      "train": 500
+    },
+    "family": "Crassulaceae (Succulent Family)"
+  },
+  "Eggplant (Solanum melongena)": {
+    "total": 439,
+    "splits": {
+      "test": 53,
+      "val": 53,
+      "train": 333
+    },
+    "family": "Solanaceae (Nightshade Family)"
+  },
+  "Elephant Ear (Alocasia spp.)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Araceae (Aroid & Pothos Family)"
+  },
+  "English Holly (Ilex aquifolium)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "English Ivy (Hedera helix)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "English Yew (Taxus baccata)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "European Privet (Ligustrum vulgare)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Fabaceae (Legume Family)"
+  },
+  "Fennel (Foeniculum vulgare)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 62,
+      "train": 378
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Ficus Audrey (Ficus benghalensis)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Moraceae (Fig Family)"
+  },
+  "Fiddle Leaf Fig (Ficus lyrata)": {
+    "total": 469,
+    "splits": {
+      "test": 56,
+      "val": 57,
+      "train": 356
+    },
+    "family": "Moraceae (Fig Family)"
+  },
+  "Field Bindweed (Convolvulus arvensis)": {
+    "total": 441,
+    "splits": {
+      "test": 55,
+      "val": 53,
+      "train": 333
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Fig Tree (Ficus carica)": {
+    "total": 464,
+    "splits": {
+      "test": 56,
+      "val": 56,
+      "train": 352
+    },
+    "family": "Moraceae (Fig Family)"
+  },
+  "Fishbone Cactus (Disocactus anguliger)": {
+    "total": 454,
+    "splits": {
+      "test": 54,
+      "val": 54,
+      "train": 346
+    },
+    "family": "Cactaceae (Cactus Family)"
+  },
+  "Fishtail Palm (Caryota mitis)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Arecaceae / Cycadales (Palms)"
+  },
+  "Flamingo Flower (Anthurium clarinervium)": {
+    "total": 161,
+    "splits": {
+      "test": 20,
+      "val": 21,
+      "train": 120
+    },
+    "family": "Araceae (Aroid & Pothos Family)"
+  },
+  "Flat-Leaf Parsley (Petroselinum crispum)": {
+    "total": 434,
+    "splits": {
+      "test": 52,
+      "val": 52,
+      "train": 330
+    },
+    "family": "Rosaceae (Rose & Fruit Family)"
+  },
+  "French Hydrangea (Hydrangea macrophylla)": {
+    "total": 452,
+    "splits": {
+      "test": 54,
+      "val": 54,
+      "train": 344
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "French Marigold (Tagetes patula)": {
+    "total": 467,
+    "splits": {
+      "test": 56,
+      "val": 56,
+      "train": 355
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "French Tarragon (Artemisia dracunculus)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Garden Cosmos (Cosmos bipinnatus)": {
+    "total": 437,
+    "splits": {
+      "test": 52,
+      "val": 52,
+      "train": 333
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Garden Dahlia (Dahlia pinnata)": {
+    "total": 434,
+    "splits": {
+      "test": 52,
+      "val": 52,
+      "train": 330
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Garden Geranium (Pelargonium)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Garden Pansy (Viola tricolor)": {
+    "total": 500,
+    "splits": {
+      "test": 63,
+      "val": 60,
+      "train": 377
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Garden Pea (Pisum sativum)": {
+    "total": 488,
+    "splits": {
+      "test": 59,
+      "val": 59,
+      "train": 370
+    },
+    "family": "Fabaceae (Legume Family)"
+  },
+  "Garden Petunia (Petunia hybrida)": {
+    "total": 446,
+    "splits": {
+      "test": 54,
+      "val": 54,
+      "train": 338
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Garden Phlox (Phlox paniculata)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Garden Rose (Rosa)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Rosaceae (Rose & Fruit Family)"
+  },
+  "Garden Sorrel (Rumex acetosa)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Garden Thyme (Thymus vulgaris)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Lamiaceae (Mint & Herb Family)"
+  },
+  "Garden Verbena (Verbena hybrida)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Garlic (Allium sativum)": {
+    "total": 450,
+    "splits": {
+      "test": 54,
+      "val": 54,
+      "train": 342
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Ghost Plant (Graptopetalum paraguayense)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 62,
+      "train": 378
+    },
+    "family": "Crassulaceae (Succulent Family)"
+  },
+  "Giant Hogweed (Heracleum mantegazzianum)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Giant White Bird of Paradise (Strelitzia nicolai)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Ginger (Zingiber officinale)": {
+    "total": 412,
+    "splits": {
+      "test": 49,
+      "val": 49,
+      "train": 314
+    },
+    "family": "Zingiberaceae (Ginger & Turmeric)"
+  },
+  "Golden Barrel Cactus (Echinocactus grusonii)": {
+    "total": 650,
+    "splits": {
+      "test": 76,
+      "val": 75,
+      "train": 499
+    },
+    "family": "Cactaceae (Cactus Family)"
+  },
+  "Goldfish Plant (Nematanthus wettsteinii)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Goosegrass (Eleusine indica)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Grapevine (Vitis vinifera)": {
+    "total": 474,
+    "splits": {
+      "test": 57,
+      "val": 57,
+      "train": 360
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Great Bougainvillea (Bougainvillea spectabilis)": {
+    "total": 495,
+    "splits": {
+      "test": 59,
+      "val": 59,
+      "train": 377
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Green Bean (Phaseolus vulgaris)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 62,
+      "train": 378
+    },
+    "family": "Fabaceae (Legume Family)"
+  },
+  "Green Foxtail (Setaria viridis)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Hairy Crabgrass (Digitaria sanguinalis)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 65,
+      "train": 375
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Heartleaf Philodendron (Philodendron hederaceum)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Araceae (Aroid & Pothos Family)"
+  },
+  "Hedgehog Cactus (Echinopsis)": {
+    "total": 650,
+    "splits": {
+      "test": 78,
+      "val": 75,
+      "train": 497
+    },
+    "family": "Cactaceae (Cactus Family)"
+  },
+  "Henbit Deadnettle (Lamium amplexicaule)": {
+    "total": 460,
+    "splits": {
+      "test": 55,
+      "val": 55,
+      "train": 350
+    },
+    "family": "Lamiaceae (Mint & Herb Family)"
+  },
+  "Hoya Kerrii (Hoya kerrii)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Hyacinth (Hyacinthus orientalis)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 65,
+      "train": 375
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Indian Shot (Canna indica)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Iron Cross begonia (Begonia masoniana)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Begoniaceae (Begonia Family)"
+  },
+  "Jade plant (Crassula ovata)": {
+    "total": 650,
+    "splits": {
+      "test": 75,
+      "val": 76,
+      "train": 499
+    },
+    "family": "Crassulaceae (Succulent Family)"
+  },
+  "Japanese Camellia (Camellia japonica)": {
+    "total": 457,
+    "splits": {
+      "test": 55,
+      "val": 55,
+      "train": 347
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Japanese Honeysuckle (Lonicera japonica)": {
+    "total": 466,
+    "splits": {
+      "test": 56,
+      "val": 56,
+      "train": 354
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Japanese Knotweed (Reynoutria japonica)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Japanese Maple (Acer palmatum)": {
+    "total": 463,
+    "splits": {
+      "test": 56,
+      "val": 56,
+      "train": 351
+    },
+    "family": "Arecaceae / Cycadales (Palms)"
+  },
+  "Japanese Spiraea (Spiraea japonica)": {
+    "total": 497,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 377
+    },
+    "family": "Rosaceae (Rose & Fruit Family)"
+  },
+  "Kaffir Lime (Citrus hystrix)": {
+    "total": 550,
+    "splits": {
+      "test": 66,
+      "val": 67,
+      "train": 417
+    },
+    "family": "Rutaceae (Citrus Family)"
+  },
+  "Kalanchoe": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Crassulaceae (Succulent Family)"
+  },
+  "Kale (Brassica oleracea var. sabellica)": {
+    "total": 500,
+    "splits": {
+      "test": 64,
+      "val": 60,
+      "train": 376
+    },
+    "family": "Brassicaceae (Mustard & Brassicas)"
+  },
+  "Kangaroo Paw Fern (Microsorum diversifolium)": {
+    "total": 166,
+    "splits": {
+      "test": 20,
+      "val": 20,
+      "train": 126
+    },
+    "family": "Polypodiopsida (Ferns)"
+  },
+  "Kentia Palm (Howea forsteriana)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Arecaceae / Cycadales (Palms)"
+  },
+  "Lantana (Lantana camara)": {
+    "total": 492,
+    "splits": {
+      "test": 59,
+      "val": 59,
+      "train": 374
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Lavender (Lavandula angustifolia)": {
+    "total": 447,
+    "splits": {
+      "test": 54,
+      "val": 54,
+      "train": 339
+    },
+    "family": "Lamiaceae (Mint & Herb Family)"
+  },
+  "Lemon Balm (Melissa officinalis)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Rutaceae (Citrus Family)"
+  },
+  "Lemon Tree (Citrus limon)": {
+    "total": 359,
+    "splits": {
+      "test": 43,
+      "val": 43,
+      "train": 273
+    },
+    "family": "Rutaceae (Citrus Family)"
+  },
+  "Lemongrass (Cymbopogon citratus)": {
+    "total": 429,
+    "splits": {
+      "test": 51,
+      "val": 51,
+      "train": 327
+    },
+    "family": "Rutaceae (Citrus Family)"
+  },
+  "Lesser Burdock (Arctium minus)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Lettuce (Lactuca sativa)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Lilium (Hemerocallis)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Lily of the valley (Convallaria majalis)": {
+    "total": 500,
+    "splits": {
+      "test": 62,
+      "val": 60,
+      "train": 378
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Lime Tree (Citrus aurantiifolia)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Rutaceae (Citrus Family)"
+  },
+  "Lipstick Plant (Aeschynanthus radicans)": {
+    "total": 336,
+    "splits": {
+      "test": 40,
+      "val": 47,
+      "train": 249
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Lovage (Levisticum officinale)": {
+    "total": 415,
+    "splits": {
+      "test": 50,
+      "val": 50,
+      "train": 315
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Maidenhair Fern (Adiantum capillus-veneris)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 62,
+      "train": 378
+    },
+    "family": "Polypodiopsida (Ferns)"
+  },
+  "Majesty Palm (Ravenea rivularis)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Arecaceae / Cycadales (Palms)"
+  },
+  "Maranta Lemon Lime (Maranta leuconeura)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Marantaceae (Prayer Plant Family)"
+  },
+  "Marjoram (Origanum majorana)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Lamiaceae (Mint & Herb Family)"
+  },
+  "Mini Monstera (Rhaphidophora tetrasperma)": {
+    "total": 353,
+    "splits": {
+      "test": 42,
+      "val": 42,
+      "train": 269
+    },
+    "family": "Araceae (Aroid & Pothos Family)"
+  },
+  "Money Tree (Pachira aquatica)": {
+    "total": 500,
+    "splits": {
+      "test": 61,
+      "val": 61,
+      "train": 378
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Monstera Deliciosa (Monstera deliciosa)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Araceae (Aroid & Pothos Family)"
+  },
+  "Moon Cactus (Gymnocalycium)": {
+    "total": 650,
+    "splits": {
+      "test": 75,
+      "val": 75,
+      "train": 500
+    },
+    "family": "Cactaceae (Cactus Family)"
+  },
+  "Moses in the Cradle (Tradescantia spathacea)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Commelinaceae (Tradescantia Family)"
+  },
+  "Narrowleaf Plantain (Plantago lanceolata)": {
+    "total": 455,
+    "splits": {
+      "test": 55,
+      "val": 55,
+      "train": 345
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Nerve Plant (Fittonia albivenis)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Old Fashioned Weigela (Weigela florida)": {
+    "total": 434,
+    "splits": {
+      "test": 52,
+      "val": 52,
+      "train": 330
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Oleander (Nerium oleander)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Olive Tree (Olea europaea)": {
+    "total": 475,
+    "splits": {
+      "test": 57,
+      "val": 57,
+      "train": 361
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Onion (Allium cepa)": {
+    "total": 435,
+    "splits": {
+      "test": 52,
+      "val": 52,
+      "train": 331
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Orange Tree (Citrus sinensis)": {
+    "total": 448,
+    "splits": {
+      "test": 54,
+      "val": 54,
+      "train": 340
+    },
+    "family": "Rutaceae (Citrus Family)"
+  },
+  "Orchid": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Orchidaceae (Orchid Family)"
+  },
+  "Oregano (Origanum vulgare)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Lamiaceae (Mint & Herb Family)"
+  },
+  "Pacific Poison Oak (Toxicodendron diversilobum)": {
+    "total": 462,
+    "splits": {
+      "test": 55,
+      "val": 55,
+      "train": 352
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Pandan (Pandanus amaryllifolius)": {
+    "total": 550,
+    "splits": {
+      "test": 66,
+      "val": 66,
+      "train": 418
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Parlor Palm (Chamaedorea elegans)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Arecaceae / Cycadales (Palms)"
+  },
+  "Peace lily": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Araceae (Aroid & Pothos Family)"
+  },
+  "Peach Tree (Prunus persica)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 61,
+      "train": 379
+    },
+    "family": "Rosaceae (Rose & Fruit Family)"
+  },
+  "Peperomia (Peperomia obtusifolia)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Piperaceae (Peperomia & Pepper Family)"
+  },
+  "Peperomia Hope (Peperomia deppeana)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Piperaceae (Peperomia & Pepper Family)"
+  },
+  "Peppermint (Mentha piperita)": {
+    "total": 445,
+    "splits": {
+      "test": 53,
+      "val": 53,
+      "train": 339
+    },
+    "family": "Solanaceae (Nightshade Family)"
+  },
+  "Peruvian Apple Cactus (Cereus repandus)": {
+    "total": 650,
+    "splits": {
+      "test": 75,
+      "val": 77,
+      "train": 498
+    },
+    "family": "Cactaceae (Cactus Family)"
+  },
+  "Philodendron Birkin (Philodendron 'Birkin')": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Araceae (Aroid & Pothos Family)"
+  },
+  "Philodendron Pink Princess (Philodendron erubescens)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Araceae (Aroid & Pothos Family)"
+  },
+  "Pincushion Cactus (Mammillaria)": {
+    "total": 650,
+    "splits": {
+      "test": 77,
+      "val": 77,
+      "train": 496
+    },
+    "family": "Cactaceae (Cactus Family)"
+  },
+  "Pitcher Plant (Nepenthes alata)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Poinsettia (Euphorbia pulcherrima)": {
+    "total": 500,
+    "splits": {
+      "test": 61,
+      "val": 60,
+      "train": 379
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Poison Ivy (Toxicodendron radicans)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Polka Dot Begonia (Begonia maculata)": {
+    "total": 461,
+    "splits": {
+      "test": 55,
+      "val": 55,
+      "train": 351
+    },
+    "family": "Begoniaceae (Begonia Family)"
+  },
+  "Polka Dot Plant (Hypoestes phyllostachya)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Ponytail Palm (Beaucarnea recurvata)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Arecaceae / Cycadales (Palms)"
+  },
+  "Potato (Solanum tuberosum)": {
+    "total": 467,
+    "splits": {
+      "test": 56,
+      "val": 56,
+      "train": 355
+    },
+    "family": "Solanaceae (Nightshade Family)"
+  },
+  "Pothos (Ivy arum)": {
+    "total": 650,
+    "splits": {
+      "test": 75,
+      "val": 75,
+      "train": 500
+    },
+    "family": "Araceae (Aroid & Pothos Family)"
+  },
+  "Prayer Plant (Maranta leuconeura)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Marantaceae (Prayer Plant Family)"
+  },
+  "Prickly Lettuce (Lactuca serriola)": {
+    "total": 498,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 378
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Prickly Pear Cactus (Opuntia ficus-indica)": {
+    "total": 650,
+    "splits": {
+      "test": 76,
+      "val": 75,
+      "train": 499
+    },
+    "family": "Cactaceae (Cactus Family)"
+  },
+  "Prostrate Knotweed (Polygonum aviculare)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Pumpkin (Cucurbita maxima)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Cucurbitaceae (Gourd & Squash)"
+  },
+  "Purple Coneflower (Echinacea purpurea)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Purple Deadnettle (Lamium purpureum)": {
+    "total": 456,
+    "splits": {
+      "test": 55,
+      "val": 55,
+      "train": 346
+    },
+    "family": "Lamiaceae (Mint & Herb Family)"
+  },
+  "Radish (Raphanus sativus)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Brassicaceae (Mustard & Brassicas)"
+  },
+  "Raspberry (Rubus idaeus)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Rosaceae (Rose & Fruit Family)"
+  },
+  "Rattlesnake Plant (Calathea lancifolia)": {
+    "total": 650,
+    "splits": {
+      "test": 75,
+      "val": 75,
+      "train": 500
+    },
+    "family": "Marantaceae (Prayer Plant Family)"
+  },
+  "Red Clover (Trifolium pratense)": {
+    "total": 475,
+    "splits": {
+      "test": 57,
+      "val": 57,
+      "train": 361
+    },
+    "family": "Fabaceae (Legume Family)"
+  },
+  "Rose of Sharon (Hibiscus syriacus)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Rosaceae (Rose & Fruit Family)"
+  },
+  "Rosemary (Salvia rosmarinus)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Lamiaceae (Mint & Herb Family)"
+  },
+  "Rubber Plant (Ficus elastica)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Moraceae (Fig Family)"
+  },
+  "Sago Palm (Cycas revoluta)": {
+    "total": 500,
+    "splits": {
+      "test": 61,
+      "val": 60,
+      "train": 379
+    },
+    "family": "Arecaceae / Cycadales (Palms)"
+  },
+  "Satin Pothos (Scindapsus pictus)": {
+    "total": 650,
+    "splits": {
+      "test": 75,
+      "val": 75,
+      "train": 500
+    },
+    "family": "Araceae (Aroid & Pothos Family)"
+  },
+  "Schefflera": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Shasta Daisy (Leucanthemum x superbum)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Shepherds Purse (Capsella bursa-pastoris)": {
+    "total": 480,
+    "splits": {
+      "test": 58,
+      "val": 58,
+      "train": 364
+    },
+    "family": "Brassicaceae (Mustard & Brassicas)"
+  },
+  "Snake plant (Sanseviera)": {
+    "total": 650,
+    "splits": {
+      "test": 76,
+      "val": 75,
+      "train": 499
+    },
+    "family": "Asparagaceae (Snake, Spider & Dracaena)"
+  },
+  "Snapdragon (Antirrhinum majus)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Spearmint (Mentha spicata)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Lamiaceae (Mint & Herb Family)"
+  },
+  "Spider Plant (Chlorophytum comosum)": {
+    "total": 650,
+    "splits": {
+      "test": 81,
+      "val": 75,
+      "train": 494
+    },
+    "family": "Asparagaceae (Snake, Spider & Dracaena)"
+  },
+  "Spiderwort (Tradescantia zebrina)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Commelinaceae (Tradescantia Family)"
+  },
+  "Spinach (Spinacia oleracea)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 62,
+      "train": 378
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Staghorn Fern (Platycerium bifurcatum)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 61,
+      "train": 379
+    },
+    "family": "Polypodiopsida (Ferns)"
+  },
+  "Star Cactus (Astrophytum)": {
+    "total": 650,
+    "splits": {
+      "test": 75,
+      "val": 75,
+      "train": 500
+    },
+    "family": "Cactaceae (Cactus Family)"
+  },
+  "Star Jasmine (Trachelospermum jasminoides)": {
+    "total": 453,
+    "splits": {
+      "test": 54,
+      "val": 54,
+      "train": 345
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Stevia (Stevia rebaudiana)": {
+    "total": 448,
+    "splits": {
+      "test": 54,
+      "val": 54,
+      "train": 340
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Stinging Nettle (Urtica dioica)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Strawberry (Fragaria ananassa)": {
+    "total": 475,
+    "splits": {
+      "test": 57,
+      "val": 58,
+      "train": 360
+    },
+    "family": "Rosaceae (Rose & Fruit Family)"
+  },
+  "Stromanthe Triostar (Stromanthe thalia)": {
+    "total": 500,
+    "splits": {
+      "test": 67,
+      "val": 60,
+      "train": 373
+    },
+    "family": "Marantaceae (Prayer Plant Family)"
+  },
+  "Sundew (Drosera capensis)": {
+    "total": 500,
+    "splits": {
+      "test": 61,
+      "val": 60,
+      "train": 379
+    },
+    "family": "Rosaceae (Rose & Fruit Family)"
+  },
+  "Sweet Alyssum (Lobularia maritima)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Sweet Basil (Ocimum basilicum)": {
+    "total": 431,
+    "splits": {
+      "test": 52,
+      "val": 52,
+      "train": 327
+    },
+    "family": "Lamiaceae (Mint & Herb Family)"
+  },
+  "Sweet Corn (Zea mays)": {
+    "total": 435,
+    "splits": {
+      "test": 52,
+      "val": 52,
+      "train": 331
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Sweet Pea (Lathyrus odoratus)": {
+    "total": 489,
+    "splits": {
+      "test": 59,
+      "val": 59,
+      "train": 371
+    },
+    "family": "Fabaceae (Legume Family)"
+  },
+  "Sweet Potato (Ipomoea batatas)": {
+    "total": 433,
+    "splits": {
+      "test": 52,
+      "val": 52,
+      "train": 329
+    },
+    "family": "Solanaceae (Nightshade Family)"
+  },
+  "Swiss Cheese Vine (Monstera adansonii)": {
+    "total": 500,
+    "splits": {
+      "test": 61,
+      "val": 60,
+      "train": 379
+    },
+    "family": "Araceae (Aroid & Pothos Family)"
+  },
+  "Ti Plant (Cordyline fruticosa)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Asparagaceae (Snake, Spider & Dracaena)"
+  },
+  "Tomato (Solanum lycopersicum)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Solanaceae (Nightshade Family)"
+  },
+  "Torch Ginger (Etlingera elatior)": {
+    "total": 417,
+    "splits": {
+      "test": 50,
+      "val": 52,
+      "train": 315
+    },
+    "family": "Zingiberaceae (Ginger & Turmeric)"
+  },
+  "Tradescantia": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Commelinaceae (Tradescantia Family)"
+  },
+  "Tulip": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Turmeric (Curcuma longa)": {
+    "total": 401,
+    "splits": {
+      "test": 48,
+      "val": 48,
+      "train": 305
+    },
+    "family": "Zingiberaceae (Ginger & Turmeric)"
+  },
+  "Venus Flytrap": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Vietnamese Coriander (Persicaria odorata)": {
+    "total": 412,
+    "splits": {
+      "test": 49,
+      "val": 49,
+      "train": 314
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Water Spinach (Ipomoea aquatica)": {
+    "total": 465,
+    "splits": {
+      "test": 56,
+      "val": 56,
+      "train": 353
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Watermelon (Citrullus lanatus)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Cucurbitaceae (Gourd & Squash)"
+  },
+  "Watermelon Peperomia (Peperomia argyreia)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Piperaceae (Peperomia & Pepper Family)"
+  },
+  "Wax Begonia (Begonia cucullata)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Begoniaceae (Begonia Family)"
+  },
+  "Wax Plant (Hoya carnosa)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Weeping Fig (Ficus benjamina)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 61,
+      "train": 379
+    },
+    "family": "Moraceae (Fig Family)"
+  },
+  "Weeping Forsythia (Forsythia suspensa)": {
+    "total": 452,
+    "splits": {
+      "test": 54,
+      "val": 54,
+      "train": 344
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "White Clover (Trifolium repens)": {
+    "total": 484,
+    "splits": {
+      "test": 58,
+      "val": 58,
+      "train": 368
+    },
+    "family": "Fabaceae (Legume Family)"
+  },
+  "Yellow Woodsorrel (Oxalis stricta)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Other Botanical Taxa"
+  },
+  "Yucca": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Asparagaceae (Snake, Spider & Dracaena)"
+  },
+  "ZZ Plant (Zamioculcas zamiifolia)": {
+    "total": 500,
+    "splits": {
+      "test": 62,
+      "val": 60,
+      "train": 378
+    },
+    "family": "Araceae (Aroid & Pothos Family)"
+  },
+  "Zebra Haworthia (Haworthiopsis fasciata)": {
+    "total": 633,
+    "splits": {
+      "test": 75,
+      "val": 75,
+      "train": 483
+    },
+    "family": "Asphodelaceae (Aloe & Haworthia)"
+  },
+  "Zucchini (Cucurbita pepo)": {
+    "total": 500,
+    "splits": {
+      "test": 60,
+      "val": 60,
+      "train": 380
+    },
+    "family": "Cucurbitaceae (Gourd & Squash)"
+  }
+}

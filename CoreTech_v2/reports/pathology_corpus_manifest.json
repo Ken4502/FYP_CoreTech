@@ -1,0 +1,97 @@
+{
+  "Healthy_Foliage": {
+    "test": 100,
+    "val": 100,
+    "train": 1800
+  },
+  "Fungal_Leaf_Spot_Anthracnose": {
+    "test": 100,
+    "val": 100,
+    "train": 1800
+  },
+  "Bacterial_Wilt_Soft_Rot": {
+    "test": 100,
+    "val": 100,
+    "train": 1800
+  },
+  "Botrytis_Gray_Mold": {
+    "test": 100,
+    "val": 100,
+    "train": 795
+  },
+  "Powdery_Mildew": {
+    "test": 100,
+    "val": 100,
+    "train": 1800
+  },
+  "Downy_Mildew": {
+    "test": 100,
+    "val": 100,
+    "train": 1027
+  },
+  "Rust_Fungi": {
+    "test": 100,
+    "val": 100,
+    "train": 1800
+  },
+  "Sooty_Mold": {
+    "test": 60,
+    "val": 60,
+    "train": 383
+  },
+  "Leaf_Miners": {
+    "test": 64,
+    "val": 64,
+    "train": 403
+  },
+  "Spider_Mites": {
+    "test": 100,
+    "val": 100,
+    "train": 1060
+  },
+  "Mealybugs_Cochineal": {
+    "test": 100,
+    "val": 100,
+    "train": 829
+  },
+  "Scale_Insects": {
+    "test": 100,
+    "val": 100,
+    "train": 805
+  },
+  "Aphids": {
+    "test": 62,
+    "val": 62,
+    "train": 392
+  },
+  "Thrips_Damage": {
+    "test": 60,
+    "val": 60,
+    "train": 380
+  },
+  "Whiteflies": {
+    "test": 61,
+    "val": 61,
+    "train": 386
+  },
+  "Abiotic_Dehydration_Underwatering": {
+    "test": 84,
+    "val": 84,
+    "train": 532
+  },
+  "Abiotic_Overwatering_Edema": {
+    "test": 60,
+    "val": 60,
+    "train": 380
+  },
+  "Abiotic_Sunburn_Scald": {
+    "test": 100,
+    "val": 100,
+    "train": 753
+  },
+  "Abiotic_Nutrient_Chlorosis": {
+    "test": 95,
+    "val": 95,
+    "train": 601
+  }
+}

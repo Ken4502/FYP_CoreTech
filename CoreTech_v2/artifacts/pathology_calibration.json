@@ -1,0 +1,12 @@
+{
+  "weights": {
+    "convnext": 0.3,
+    "dinov2": 0.7
+  },
+  "temperatures": {
+    "convnext": 1.0633,
+    "dinov2": 1.0063
+  },
+  "healthy_override_thresh": 0.62,
+  "val_ensemble_top1_pct": 92.95
+}

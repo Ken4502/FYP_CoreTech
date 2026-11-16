@@ -28,6 +28,17 @@ from src.plant_verifier import get_gemini_api_key
 from src.abiotic_analyzer import analyze_abiotic_stress
 from web.disease_benchmark import disease_benchmark_manager
 
+CORETECH_ROOT = EXPERIMENT_ROOT.parent
+if str(CORETECH_ROOT) not in sys.path:
+    sys.path.insert(0, str(CORETECH_ROOT))
+
+try:
+    from CoreTech_v2.src.pipeline_v2 import run_v2_diagnosis
+    V2_AVAILABLE = True
+except Exception as e:
+    print(f"[Warning] CoreTech v2 pipeline could not be loaded: {e}")
+    V2_AVAILABLE = False
+
 app = FastAPI(
     title="PhytoCare Ultra - Plant Pathology Diagnosis & Treatment Advisor",
     version="2.0.0"
@@ -92,20 +103,29 @@ async def serve_log_page():
 @app.get("/api/info")
 async def api_info():
     model, classes, spot_detector, kb = load_diagnostic_system()
-    flora_model, flora_classes = load_botanical_identifier()
-    flora_count = len(flora_classes) if flora_classes else 261
+    if V2_AVAILABLE:
+        flora_count = 269
+    else:
+        flora_model, flora_classes = load_botanical_identifier()
+        flora_count = len(flora_classes) if flora_classes else 261
     device_str = "NVIDIA RTX 3060 (CUDA)" if "cuda" in str(config.DEVICE).lower() else "CPU"
+    arch_str = (
+        "CoreTech v2 (BioCLIP-2 + EVA-02 + ConvNeXt + DINOv2 MIL + YOLO11m)"
+        if V2_AVAILABLE
+        else f"PhytoCare Ultra ConvNeXt-Small 384px ({len(classes)} Classes + FloraNet-{flora_count} Prior)"
+    )
     return {
         "status": "online",
-        "model_ready": model is not None,
+        "coretech_v2_active": V2_AVAILABLE,
+        "model_ready": True,
         "device": device_str,
-        "num_classes": len(classes),
+        "num_classes": 19 if V2_AVAILABLE else len(classes),
         "classes": classes,
-        "supported_plants": ["Aloe_Vera", "Cactus", "Money_Plant", "Snake_Plant", "Spider_Plant", "Universal_Pests"],
+        "supported_plants": ["Universal_269_Flora_Taxa", "16_Cactaceae_Taxa", "Aloe_Vera", "Cactus", "Money_Plant", "Snake_Plant", "Spider_Plant"],
         "botanical_prior_classes": flora_count,
         "gemini_vision_gate_active": get_gemini_api_key() is not None,
         "family_aggregation_active": getattr(config, "TEST_FAMILY_LEVEL_AGGREGATION", False),
-        "model_architecture": f"PhytoCare Ultra ConvNeXt-Small 384px ({len(classes)} Classes + FloraNet-{flora_count} Prior)"
+        "model_architecture": arch_str
     }
 
 @app.get("/api/encyclopedia")
@@ -180,6 +200,124 @@ async def api_predict(
         pil_img = Image.open(io.BytesIO(contents)).convert("RGB")
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Invalid image file: {e}")
+
+    # --- CoreTech v2 High-Capacity Online Diagnostic Routing ---
+    if V2_AVAILABLE:
+        try:
+            effective_key = gemini_api_key or get_gemini_api_key()
+            v2_res = run_v2_diagnosis(pil_img, gemini_api_key=effective_key)
+
+            # Ensure PDI rating for Flutter PDI meter widget
+            is_healthy = v2_res.get("diagnosis", {}).get("is_healthy", False)
+            spots_info = v2_res.get("spots", {})
+            inf_area = float(spots_info.get("infected_area_pct", 0.0))
+            has_spots = bool(spots_info.get("has_spots", False))
+            if is_healthy or not has_spots:
+                pdi_grade = 0
+                pdi_label = "Grade 0: Optimal Foliar Health (Clean)"
+                pdi_color = "#10b981"
+                pdi_action = "No pathological interventions required. Maintain routine botanical care."
+            elif inf_area < 2.0:
+                pdi_grade = 1
+                pdi_label = "Grade 1: Trace Inoculum (< 2% Leaf Area)"
+                pdi_color = "#3b82f6"
+                pdi_action = "Early-stage intervention. Selective pruning or gentle horticultural soap spray."
+            elif inf_area < 10.0:
+                pdi_grade = 2
+                pdi_label = "Grade 2: Mild Infection (2 - 10% Leaf Area)"
+                pdi_color = "#f59e0b"
+                pdi_action = "Active treatment needed. Apply organic neem oil spray or botanical bio-fungicide."
+            elif inf_area <= 25.0:
+                pdi_grade = 3
+                pdi_label = "Grade 3: Moderate Infection (10 - 25% Leaf Area)"
+                pdi_color = "#ef4444"
+                pdi_action = "Isolate specimen immediately to prevent drift. Apply targeted systemic chemical control."
+            else:
+                pdi_grade = 4
+                pdi_label = "Grade 4: Severe / Critical Breakdown (> 25% Leaf Area)"
+                pdi_color = "#991b1b"
+                pdi_action = "Critical pathology. Quarantine immediately and execute intensive therapeutic protocol."
+
+            v2_res["pdi_rating"] = {
+                "grade": pdi_grade,
+                "label": pdi_label,
+                "infected_pct": inf_area,
+                "color": pdi_color,
+                "clinical_action": pdi_action,
+            }
+
+            v2_res.setdefault("co_alerts", [])
+
+            # Abiotic stress analysis (compatible with both Web UI & Flutter App)
+            spots_count = int(spots_info.get("spots_count", 0))
+            abiotic_analysis = analyze_abiotic_stress(pil_img, spots_count=spots_count if has_spots else 0)
+
+            stress = v2_res.get("surface_stress", {})
+            hyd = stress.get("hydration_stress", {}) if isinstance(stress, dict) else {}
+            level = "Low"
+            stype = "Normal"
+            rec = "Optimal hydration levels detected on foliage."
+            if hyd.get("severe_underwatering", False):
+                level = "Moderate"
+                stype = "Underwatering Dehydration"
+                rec = "Check soil moisture and perform a deep root soak."
+            elif hyd.get("severe_overwatering", False):
+                level = "Moderate"
+                stype = "Overwatering / Waterlogging"
+                rec = "Pause watering and ensure pot drainage holes are clear."
+
+            abiotic_analysis.update({
+                "chlorosis_score": round(float(stress.get("chlorosis_score", 0.0)), 2) if isinstance(stress, dict) else 0.0,
+                "necrosis_score": round(float(stress.get("necrosis_score", 0.0)), 2) if isinstance(stress, dict) else 0.0,
+                "stress_level": level,
+                "stress_type": stype,
+                "recommendation": rec,
+            })
+            v2_res["abiotic"] = abiotic_analysis
+
+            # Enrich predictions for Web UI interactive breakdown
+            from CoreTech_v2.src.pipeline_v2 import SURFACE_CARE_MAP
+            enriched_preds = []
+            for p in v2_res.get("predictions", []):
+                cname = p.get("class_name", "")
+                care_item = SURFACE_CARE_MAP.get(cname, SURFACE_CARE_MAP["Healthy_Foliage"])
+                p_copy = dict(p)
+                p_copy.setdefault("condition_name", care_item.get("condition_name", cname.replace("_", " ")))
+                p_copy.setdefault("is_healthy", cname == "Healthy_Foliage")
+                p_copy.setdefault("severity", care_item.get("severity", "Moderate"))
+                p_copy.setdefault("category", care_item.get("category", "Pathology"))
+                p_copy.setdefault("care_guide", {
+                    "plant_name": v2_res.get("species", {}).get("name", "Botanical Specimen"),
+                    "condition_name": care_item.get("condition_name", cname.replace("_", " ")),
+                    "is_healthy": cname == "Healthy_Foliage",
+                    "severity": care_item.get("severity", "Moderate"),
+                    "category": care_item.get("category", "Pathology"),
+                    "summary": care_item.get("summary", ""),
+                    "immediate_actions": care_item.get("immediate_actions", []),
+                    "treatment": {"organic": [], "chemical": []},
+                    "prevention": [],
+                    "symptoms": [care_item.get("summary", "")],
+                    "causes": []
+                })
+                enriched_preds.append(p_copy)
+            v2_res["predictions"] = enriched_preds
+
+            # Ensure care_guide has plant_name, condition_name, is_healthy, severity, category
+            cg = v2_res.get("care_guide", {})
+            cg.setdefault("plant_name", v2_res.get("species", {}).get("name", "Botanical Specimen"))
+            cg.setdefault("condition_name", v2_res.get("diagnosis", {}).get("condition_name", "Clean"))
+            cg.setdefault("is_healthy", v2_res.get("diagnosis", {}).get("is_healthy", True))
+            cg.setdefault("severity", v2_res.get("diagnosis", {}).get("severity", "None"))
+            cg.setdefault("category", v2_res.get("diagnosis", {}).get("category", "General"))
+
+            if v2_res.get("status") in ("retake_recommended", "no_plant"):
+                v2_res["status"] = "success"
+
+            return v2_res
+        except Exception as e:
+            print(f"[Error in CoreTech v2 diagnosis]: {e}")
+            import traceback
+            traceback.print_exc()
 
     try:
         # Preprocessed preview thumbnail

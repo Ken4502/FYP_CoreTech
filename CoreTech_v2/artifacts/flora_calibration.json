@@ -1,0 +1,16 @@
+{
+  "weights": {
+    "bioclip2": 0.4,
+    "eva02": 0.4,
+    "convnext": 0.2
+  },
+  "temperatures": {
+    "bioclip2": 0.9477,
+    "eva02": 0.9376,
+    "convnext": 0.9321
+  },
+  "species_conf_threshold": 0.5,
+  "species_margin_threshold": 0.12,
+  "min_ood_cosine": 0.35,
+  "val_ensemble_top1_pct": 94.03
+}

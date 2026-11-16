@@ -33,6 +33,7 @@ data/
 **/data/train/
 **/data/val/
 **/data/test/
+CoreTech_v2/data/
 *.jfif
 
 # ==============================================================================
@@ -44,6 +45,11 @@ data/
 **/artifacts/best_model_swin_384.pth
 **/artifacts/best_model_22class.pth
 **/artifacts/best_model_31class.pth
+CoreTech_v2/**/weights/
+CoreTech_v2/**/*.pth
+CoreTech_v2/**/*.pt
+CoreTech_v2/**/*.ts
+weights/
 
 # ==============================================================================
 # API Keys & Secrets

@@ -1,0 +1,1616 @@
+{
+  "African Violet (Saintpaulia ionantha)": {
+    "scientific_name": "Saintpaulia ionantha",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Aloe Vera": {
+    "scientific_name": "Aloe vera",
+    "source_group": "floranet_250",
+    "target_images": 650,
+    "family": "Asphodelaceae (Aloe & Haworthia)"
+  },
+  "Anthurium (Anthurium andraeanum)": {
+    "scientific_name": "Anthurium andraeanum",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Araceae (Aroid & Pothos Family)"
+  },
+  "Areca Palm (Dypsis lutescens)": {
+    "scientific_name": "Dypsis lutescens",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Arecaceae / Cycadales (Palms)"
+  },
+  "Asparagus Fern (Asparagus setaceus)": {
+    "scientific_name": "Asparagus setaceus",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Asparagaceae (Snake, Spider & Dracaena)"
+  },
+  "Begonia (Begonia spp.)": {
+    "scientific_name": "Begonia",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Begoniaceae (Begonia Family)"
+  },
+  "Bird of Paradise (Strelitzia reginae)": {
+    "scientific_name": "Strelitzia reginae",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Birds Nest Fern (Asplenium nidus)": {
+    "scientific_name": "Asplenium nidus",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Polypodiopsida (Ferns)"
+  },
+  "Boston Fern (Nephrolepis exaltata)": {
+    "scientific_name": "Nephrolepis exaltata",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Polypodiopsida (Ferns)"
+  },
+  "Calathea": {
+    "scientific_name": "Goeppertia",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Marantaceae (Prayer Plant Family)"
+  },
+  "Cast Iron Plant (Aspidistra elatior)": {
+    "scientific_name": "Aspidistra elatior",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Asparagaceae (Snake, Spider & Dracaena)"
+  },
+  "Chinese Money Plant (Pilea peperomioides)": {
+    "scientific_name": "Pilea peperomioides",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Chinese evergreen (Aglaonema)": {
+    "scientific_name": "Aglaonema",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Araceae (Aroid & Pothos Family)"
+  },
+  "Christmas Cactus (Schlumbergera bridgesii)": {
+    "scientific_name": "Schlumbergera",
+    "source_group": "floranet_250",
+    "target_images": 650,
+    "family": "Cactaceae (Cactus Family)"
+  },
+  "Chrysanthemum": {
+    "scientific_name": "Chrysanthemum",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Ctenanthe": {
+    "scientific_name": "Ctenanthe",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Marantaceae (Prayer Plant Family)"
+  },
+  "Daffodils (Narcissus spp.)": {
+    "scientific_name": "Narcissus",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Dracaena": {
+    "scientific_name": "Dracaena",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Asparagaceae (Snake, Spider & Dracaena)"
+  },
+  "Dumb Cane (Dieffenbachia spp.)": {
+    "scientific_name": "Dieffenbachia",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Araceae (Aroid & Pothos Family)"
+  },
+  "Elephant Ear (Alocasia spp.)": {
+    "scientific_name": "Alocasia",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Araceae (Aroid & Pothos Family)"
+  },
+  "English Ivy (Hedera helix)": {
+    "scientific_name": "Hedera helix",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Hyacinth (Hyacinthus orientalis)": {
+    "scientific_name": "Hyacinthus orientalis",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Iron Cross begonia (Begonia masoniana)": {
+    "scientific_name": "Begonia masoniana",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Begoniaceae (Begonia Family)"
+  },
+  "Jade plant (Crassula ovata)": {
+    "scientific_name": "Crassula ovata",
+    "source_group": "floranet_250",
+    "target_images": 650,
+    "family": "Crassulaceae (Succulent Family)"
+  },
+  "Kalanchoe": {
+    "scientific_name": "Kalanchoe",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Crassulaceae (Succulent Family)"
+  },
+  "Lilium (Hemerocallis)": {
+    "scientific_name": "Hemerocallis",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Lily of the valley (Convallaria majalis)": {
+    "scientific_name": "Convallaria majalis",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Money Tree (Pachira aquatica)": {
+    "scientific_name": "Pachira aquatica",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Monstera Deliciosa (Monstera deliciosa)": {
+    "scientific_name": "Monstera deliciosa",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Araceae (Aroid & Pothos Family)"
+  },
+  "Orchid": {
+    "scientific_name": "Orchidaceae",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Orchidaceae (Orchid Family)"
+  },
+  "Parlor Palm (Chamaedorea elegans)": {
+    "scientific_name": "Chamaedorea elegans",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Arecaceae / Cycadales (Palms)"
+  },
+  "Peace lily": {
+    "scientific_name": "Spathiphyllum",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Araceae (Aroid & Pothos Family)"
+  },
+  "Poinsettia (Euphorbia pulcherrima)": {
+    "scientific_name": "Euphorbia pulcherrima",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Polka Dot Plant (Hypoestes phyllostachya)": {
+    "scientific_name": "Hypoestes phyllostachya",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Ponytail Palm (Beaucarnea recurvata)": {
+    "scientific_name": "Beaucarnea recurvata",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Arecaceae / Cycadales (Palms)"
+  },
+  "Pothos (Ivy arum)": {
+    "scientific_name": "Epipremnum aureum",
+    "source_group": "floranet_250",
+    "target_images": 650,
+    "family": "Araceae (Aroid & Pothos Family)"
+  },
+  "Prayer Plant (Maranta leuconeura)": {
+    "scientific_name": "Maranta leuconeura",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Marantaceae (Prayer Plant Family)"
+  },
+  "Rattlesnake Plant (Calathea lancifolia)": {
+    "scientific_name": "Goeppertia insignis",
+    "source_group": "floranet_250",
+    "target_images": 650,
+    "family": "Marantaceae (Prayer Plant Family)"
+  },
+  "Rubber Plant (Ficus elastica)": {
+    "scientific_name": "Ficus elastica",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Moraceae (Fig Family)"
+  },
+  "Sago Palm (Cycas revoluta)": {
+    "scientific_name": "Cycas revoluta",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Arecaceae / Cycadales (Palms)"
+  },
+  "Schefflera": {
+    "scientific_name": "Heptapleurum",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Snake plant (Sanseviera)": {
+    "scientific_name": "Dracaena trifasciata",
+    "source_group": "floranet_250",
+    "target_images": 650,
+    "family": "Asparagaceae (Snake, Spider & Dracaena)"
+  },
+  "Tradescantia": {
+    "scientific_name": "Tradescantia",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Commelinaceae (Tradescantia Family)"
+  },
+  "Tulip": {
+    "scientific_name": "Tulipa",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Venus Flytrap": {
+    "scientific_name": "Dionaea muscipula",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Yucca": {
+    "scientific_name": "Yucca elephantipes",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Asparagaceae (Snake, Spider & Dracaena)"
+  },
+  "ZZ Plant (Zamioculcas zamiifolia)": {
+    "scientific_name": "Zamioculcas zamiifolia",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Araceae (Aroid & Pothos Family)"
+  },
+  "Air Plant (Tillandsia ionantha)": {
+    "scientific_name": "Tillandsia ionantha",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Alocasia Amazonica (Alocasia amazonica)": {
+    "scientific_name": "Alocasia",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Araceae (Aroid & Pothos Family)"
+  },
+  "Alocasia Zebrina (Alocasia zebrina)": {
+    "scientific_name": "Alocasia zebrina",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Araceae (Aroid & Pothos Family)"
+  },
+  "Aluminum Plant (Pilea cadierei)": {
+    "scientific_name": "Pilea cadierei",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Arrowhead Plant (Syngonium podophyllum)": {
+    "scientific_name": "Syngonium podophyllum",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Araceae (Aroid & Pothos Family)"
+  },
+  "Bromeliad (Guzmania lingulata)": {
+    "scientific_name": "Guzmania lingulata",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Bunny Ears Cactus (Opuntia microdasys)": {
+    "scientific_name": "Opuntia microdasys",
+    "source_group": "floranet_250",
+    "target_images": 650,
+    "family": "Cactaceae (Cactus Family)"
+  },
+  "Calathea Medallion (Goeppertia roseopicta)": {
+    "scientific_name": "Goeppertia roseopicta",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Marantaceae (Prayer Plant Family)"
+  },
+  "Calathea Warscewiczii (Goeppertia warszewiczii)": {
+    "scientific_name": "Goeppertia warszewiczii",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Marantaceae (Prayer Plant Family)"
+  },
+  "Calathea Zebrina (Goeppertia zebrina)": {
+    "scientific_name": "Goeppertia zebrina",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Marantaceae (Prayer Plant Family)"
+  },
+  "Corn Plant (Dracaena fragrans)": {
+    "scientific_name": "Dracaena fragrans",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Asparagaceae (Snake, Spider & Dracaena)"
+  },
+  "Croton (Codiaeum variegatum)": {
+    "scientific_name": "Codiaeum variegatum",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Cylindrical Snake Plant (Dracaena angolensis)": {
+    "scientific_name": "Dracaena angolensis",
+    "source_group": "floranet_250",
+    "target_images": 650,
+    "family": "Asparagaceae (Snake, Spider & Dracaena)"
+  },
+  "Dwarf Umbrella Tree (Heptapleurum arboricola)": {
+    "scientific_name": "Heptapleurum arboricola",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Echeveria Elegans (Echeveria elegans)": {
+    "scientific_name": "Echeveria elegans",
+    "source_group": "floranet_250",
+    "target_images": 650,
+    "family": "Crassulaceae (Succulent Family)"
+  },
+  "Ficus Audrey (Ficus benghalensis)": {
+    "scientific_name": "Ficus benghalensis",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Moraceae (Fig Family)"
+  },
+  "Fiddle Leaf Fig (Ficus lyrata)": {
+    "scientific_name": "Ficus lyrata",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Moraceae (Fig Family)"
+  },
+  "Fishbone Cactus (Disocactus anguliger)": {
+    "scientific_name": "Disocactus anguliger",
+    "source_group": "floranet_250",
+    "target_images": 650,
+    "family": "Cactaceae (Cactus Family)"
+  },
+  "Fishtail Palm (Caryota mitis)": {
+    "scientific_name": "Caryota mitis",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Arecaceae / Cycadales (Palms)"
+  },
+  "Ghost Plant (Graptopetalum paraguayense)": {
+    "scientific_name": "Graptopetalum paraguayense",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Crassulaceae (Succulent Family)"
+  },
+  "Giant White Bird of Paradise (Strelitzia nicolai)": {
+    "scientific_name": "Strelitzia nicolai",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Goldfish Plant (Nematanthus wettsteinii)": {
+    "scientific_name": "Nematanthus",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Heartleaf Philodendron (Philodendron hederaceum)": {
+    "scientific_name": "Philodendron hederaceum",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Araceae (Aroid & Pothos Family)"
+  },
+  "Hoya Kerrii (Hoya kerrii)": {
+    "scientific_name": "Hoya kerrii",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Wax Plant (Hoya carnosa)": {
+    "scientific_name": "Hoya carnosa",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Kentia Palm (Howea forsteriana)": {
+    "scientific_name": "Howea forsteriana",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Arecaceae / Cycadales (Palms)"
+  },
+  "Lipstick Plant (Aeschynanthus radicans)": {
+    "scientific_name": "Aeschynanthus radicans",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Maidenhair Fern (Adiantum capillus-veneris)": {
+    "scientific_name": "Adiantum capillus-veneris",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Polypodiopsida (Ferns)"
+  },
+  "Moses in the Cradle (Tradescantia spathacea)": {
+    "scientific_name": "Tradescantia spathacea",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Commelinaceae (Tradescantia Family)"
+  },
+  "Nerve Plant (Fittonia albivenis)": {
+    "scientific_name": "Fittonia albivenis",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Peperomia Hope (Peperomia deppeana)": {
+    "scientific_name": "Peperomia",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Piperaceae (Peperomia & Pepper Family)"
+  },
+  "Peperomia (Peperomia obtusifolia)": {
+    "scientific_name": "Peperomia obtusifolia",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Piperaceae (Peperomia & Pepper Family)"
+  },
+  "Philodendron Birkin (Philodendron 'Birkin')": {
+    "scientific_name": "Philodendron",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Araceae (Aroid & Pothos Family)"
+  },
+  "Philodendron Pink Princess (Philodendron erubescens)": {
+    "scientific_name": "Philodendron erubescens",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Araceae (Aroid & Pothos Family)"
+  },
+  "Pitcher Plant (Nepenthes alata)": {
+    "scientific_name": "Nepenthes",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Polka Dot Begonia (Begonia maculata)": {
+    "scientific_name": "Begonia maculata",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Begoniaceae (Begonia Family)"
+  },
+  "Satin Pothos (Scindapsus pictus)": {
+    "scientific_name": "Scindapsus pictus",
+    "source_group": "floranet_250",
+    "target_images": 650,
+    "family": "Araceae (Aroid & Pothos Family)"
+  },
+  "Spiderwort (Tradescantia zebrina)": {
+    "scientific_name": "Tradescantia zebrina",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Commelinaceae (Tradescantia Family)"
+  },
+  "Staghorn Fern (Platycerium bifurcatum)": {
+    "scientific_name": "Platycerium bifurcatum",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Polypodiopsida (Ferns)"
+  },
+  "Stromanthe Triostar (Stromanthe thalia)": {
+    "scientific_name": "Stromanthe thalia",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Marantaceae (Prayer Plant Family)"
+  },
+  "Sundew (Drosera capensis)": {
+    "scientific_name": "Drosera capensis",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Rosaceae (Rose & Fruit Family)"
+  },
+  "Swiss Cheese Vine (Monstera adansonii)": {
+    "scientific_name": "Monstera adansonii",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Araceae (Aroid & Pothos Family)"
+  },
+  "Ti Plant (Cordyline fruticosa)": {
+    "scientific_name": "Cordyline fruticosa",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Asparagaceae (Snake, Spider & Dracaena)"
+  },
+  "Watermelon Peperomia (Peperomia argyreia)": {
+    "scientific_name": "Peperomia argyreia",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Piperaceae (Peperomia & Pepper Family)"
+  },
+  "Wax Begonia (Begonia cucullata)": {
+    "scientific_name": "Begonia cucullata",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Begoniaceae (Begonia Family)"
+  },
+  "Weeping Fig (Ficus benjamina)": {
+    "scientific_name": "Ficus benjamina",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Moraceae (Fig Family)"
+  },
+  "Zebra Haworthia (Haworthiopsis fasciata)": {
+    "scientific_name": "Haworthiopsis fasciata",
+    "source_group": "floranet_250",
+    "target_images": 650,
+    "family": "Asphodelaceae (Aloe & Haworthia)"
+  },
+  "Maranta Lemon Lime (Maranta leuconeura)": {
+    "scientific_name": "Maranta leuconeura",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Marantaceae (Prayer Plant Family)"
+  },
+  "Calathea Rufibarba (Goeppertia rufibarba)": {
+    "scientific_name": "Goeppertia rufibarba",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Marantaceae (Prayer Plant Family)"
+  },
+  "Kangaroo Paw Fern (Microsorum diversifolium)": {
+    "scientific_name": "Zealandia pustulata",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Polypodiopsida (Ferns)"
+  },
+  "Majesty Palm (Ravenea rivularis)": {
+    "scientific_name": "Ravenea rivularis",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Arecaceae / Cycadales (Palms)"
+  },
+  "Flamingo Flower (Anthurium clarinervium)": {
+    "scientific_name": "Anthurium clarinervium",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Araceae (Aroid & Pothos Family)"
+  },
+  "Mini Monstera (Rhaphidophora tetrasperma)": {
+    "scientific_name": "Rhaphidophora tetrasperma",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Araceae (Aroid & Pothos Family)"
+  },
+  "Golden Barrel Cactus (Echinocactus grusonii)": {
+    "scientific_name": "Echinocactus grusonii",
+    "source_group": "floranet_250",
+    "target_images": 650,
+    "family": "Cactaceae (Cactus Family)"
+  },
+  "Columnar Cactus (Pachycereus pringlei)": {
+    "scientific_name": "Pachycereus pringlei",
+    "source_group": "floranet_250",
+    "target_images": 650,
+    "family": "Cactaceae (Cactus Family)"
+  },
+  "Tomato (Solanum lycopersicum)": {
+    "scientific_name": "Solanum lycopersicum",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Solanaceae (Nightshade Family)"
+  },
+  "Bell Pepper (Capsicum annuum)": {
+    "scientific_name": "Capsicum annuum",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Solanaceae (Nightshade Family)"
+  },
+  "Chili Pepper (Capsicum frutescens)": {
+    "scientific_name": "Capsicum frutescens",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Solanaceae (Nightshade Family)"
+  },
+  "Eggplant (Solanum melongena)": {
+    "scientific_name": "Solanum melongena",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Solanaceae (Nightshade Family)"
+  },
+  "Cucumber (Cucumis sativus)": {
+    "scientific_name": "Cucumis sativus",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Cucurbitaceae (Gourd & Squash)"
+  },
+  "Zucchini (Cucurbita pepo)": {
+    "scientific_name": "Cucurbita pepo",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Cucurbitaceae (Gourd & Squash)"
+  },
+  "Pumpkin (Cucurbita maxima)": {
+    "scientific_name": "Cucurbita maxima",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Cucurbitaceae (Gourd & Squash)"
+  },
+  "Strawberry (Fragaria ananassa)": {
+    "scientific_name": "Fragaria ananassa",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Rosaceae (Rose & Fruit Family)"
+  },
+  "Apple Tree (Malus domestica)": {
+    "scientific_name": "Malus domestica",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Rosaceae (Rose & Fruit Family)"
+  },
+  "Lemon Tree (Citrus limon)": {
+    "scientific_name": "Citrus limon",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Rutaceae (Citrus Family)"
+  },
+  "Orange Tree (Citrus sinensis)": {
+    "scientific_name": "Citrus sinensis",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Rutaceae (Citrus Family)"
+  },
+  "Lime Tree (Citrus aurantiifolia)": {
+    "scientific_name": "Citrus aurantiifolia",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Rutaceae (Citrus Family)"
+  },
+  "Grapevine (Vitis vinifera)": {
+    "scientific_name": "Vitis vinifera",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Blueberry (Vaccinium corymbosum)": {
+    "scientific_name": "Vaccinium corymbosum",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Raspberry (Rubus idaeus)": {
+    "scientific_name": "Rubus idaeus",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Rosaceae (Rose & Fruit Family)"
+  },
+  "Blackberry (Rubus fruticosus)": {
+    "scientific_name": "Rubus fruticosus",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Rosaceae (Rose & Fruit Family)"
+  },
+  "Fig Tree (Ficus carica)": {
+    "scientific_name": "Ficus carica",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Moraceae (Fig Family)"
+  },
+  "Olive Tree (Olea europaea)": {
+    "scientific_name": "Olea europaea",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Avocado Tree (Persea americana)": {
+    "scientific_name": "Persea americana",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Peach Tree (Prunus persica)": {
+    "scientific_name": "Prunus persica",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Rosaceae (Rose & Fruit Family)"
+  },
+  "Carrot (Daucus carota)": {
+    "scientific_name": "Daucus carota",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Potato (Solanum tuberosum)": {
+    "scientific_name": "Solanum tuberosum",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Solanaceae (Nightshade Family)"
+  },
+  "Sweet Potato (Ipomoea batatas)": {
+    "scientific_name": "Ipomoea batatas",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Solanaceae (Nightshade Family)"
+  },
+  "Onion (Allium cepa)": {
+    "scientific_name": "Allium cepa",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Garlic (Allium sativum)": {
+    "scientific_name": "Allium sativum",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Lettuce (Lactuca sativa)": {
+    "scientific_name": "Lactuca sativa",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Spinach (Spinacia oleracea)": {
+    "scientific_name": "Spinacia oleracea",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Kale (Brassica oleracea var. sabellica)": {
+    "scientific_name": "Brassica oleracea sabellica",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Brassicaceae (Mustard & Brassicas)"
+  },
+  "Broccoli (Brassica oleracea var. italica)": {
+    "scientific_name": "Brassica oleracea italica",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Brassicaceae (Mustard & Brassicas)"
+  },
+  "Cabbage (Brassica oleracea var. capitata)": {
+    "scientific_name": "Brassica oleracea capitata",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Brassicaceae (Mustard & Brassicas)"
+  },
+  "Garden Pea (Pisum sativum)": {
+    "scientific_name": "Pisum sativum",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Fabaceae (Legume Family)"
+  },
+  "Green Bean (Phaseolus vulgaris)": {
+    "scientific_name": "Phaseolus vulgaris",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Fabaceae (Legume Family)"
+  },
+  "Sweet Corn (Zea mays)": {
+    "scientific_name": "Zea mays",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Watermelon (Citrullus lanatus)": {
+    "scientific_name": "Citrullus lanatus",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Cucurbitaceae (Gourd & Squash)"
+  },
+  "Cantaloupe (Cucumis melo)": {
+    "scientific_name": "Cucumis melo",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Cucurbitaceae (Gourd & Squash)"
+  },
+  "Radish (Raphanus sativus)": {
+    "scientific_name": "Raphanus sativus",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Brassicaceae (Mustard & Brassicas)"
+  },
+  "Beetroot (Beta vulgaris)": {
+    "scientific_name": "Beta vulgaris",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Celery (Apium graveolens)": {
+    "scientific_name": "Apium graveolens",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Asparagus (Asparagus officinalis)": {
+    "scientific_name": "Asparagus officinalis",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Asparagaceae (Snake, Spider & Dracaena)"
+  },
+  "Ginger (Zingiber officinale)": {
+    "scientific_name": "Zingiber officinale",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Zingiberaceae (Ginger & Turmeric)"
+  },
+  "Sweet Basil (Ocimum basilicum)": {
+    "scientific_name": "Ocimum basilicum",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Lamiaceae (Mint & Herb Family)"
+  },
+  "Rosemary (Salvia rosmarinus)": {
+    "scientific_name": "Salvia rosmarinus",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Lamiaceae (Mint & Herb Family)"
+  },
+  "Garden Thyme (Thymus vulgaris)": {
+    "scientific_name": "Thymus vulgaris",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Lamiaceae (Mint & Herb Family)"
+  },
+  "Peppermint (Mentha piperita)": {
+    "scientific_name": "Mentha piperita",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Solanaceae (Nightshade Family)"
+  },
+  "Spearmint (Mentha spicata)": {
+    "scientific_name": "Mentha spicata",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Lamiaceae (Mint & Herb Family)"
+  },
+  "Oregano (Origanum vulgare)": {
+    "scientific_name": "Origanum vulgare",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Lamiaceae (Mint & Herb Family)"
+  },
+  "Common Sage (Salvia officinalis)": {
+    "scientific_name": "Salvia officinalis",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Lamiaceae (Mint & Herb Family)"
+  },
+  "Flat-Leaf Parsley (Petroselinum crispum)": {
+    "scientific_name": "Petroselinum crispum",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Rosaceae (Rose & Fruit Family)"
+  },
+  "Cilantro (Coriandrum sativum)": {
+    "scientific_name": "Coriandrum sativum",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Dill (Anethum graveolens)": {
+    "scientific_name": "Anethum graveolens",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Chives (Allium schoenoprasum)": {
+    "scientific_name": "Allium schoenoprasum",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "French Tarragon (Artemisia dracunculus)": {
+    "scientific_name": "Artemisia dracunculus",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Lemongrass (Cymbopogon citratus)": {
+    "scientific_name": "Cymbopogon citratus",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Rutaceae (Citrus Family)"
+  },
+  "Lavender (Lavandula angustifolia)": {
+    "scientific_name": "Lavandula angustifolia",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Lamiaceae (Mint & Herb Family)"
+  },
+  "Chamomile (Matricaria chamomilla)": {
+    "scientific_name": "Matricaria chamomilla",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Lemon Balm (Melissa officinalis)": {
+    "scientific_name": "Melissa officinalis",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Rutaceae (Citrus Family)"
+  },
+  "Bay Laurel (Laurus nobilis)": {
+    "scientific_name": "Laurus nobilis",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Marjoram (Origanum majorana)": {
+    "scientific_name": "Origanum majorana",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Lamiaceae (Mint & Herb Family)"
+  },
+  "Catnip (Nepeta cataria)": {
+    "scientific_name": "Nepeta cataria",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Lamiaceae (Mint & Herb Family)"
+  },
+  "Fennel (Foeniculum vulgare)": {
+    "scientific_name": "Foeniculum vulgare",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Stevia (Stevia rebaudiana)": {
+    "scientific_name": "Stevia rebaudiana",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Borage (Borago officinalis)": {
+    "scientific_name": "Borago officinalis",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Lovage (Levisticum officinale)": {
+    "scientific_name": "Levisticum officinale",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Garden Sorrel (Rumex acetosa)": {
+    "scientific_name": "Rumex acetosa",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Purple Coneflower (Echinacea purpurea)": {
+    "scientific_name": "Echinacea purpurea",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Garden Rose (Rosa)": {
+    "scientific_name": "Rosa",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Rosaceae (Rose & Fruit Family)"
+  },
+  "French Hydrangea (Hydrangea macrophylla)": {
+    "scientific_name": "Hydrangea macrophylla",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Common Sunflower (Helianthus annuus)": {
+    "scientific_name": "Helianthus annuus",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Garden Geranium (Pelargonium)": {
+    "scientific_name": "Pelargonium",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Common Boxwood (Buxus sempervirens)": {
+    "scientific_name": "Buxus sempervirens",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Rose of Sharon (Hibiscus syriacus)": {
+    "scientific_name": "Hibiscus syriacus",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Rosaceae (Rose & Fruit Family)"
+  },
+  "Chinese Hibiscus (Hibiscus rosa-sinensis)": {
+    "scientific_name": "Hibiscus rosa-sinensis",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Rosaceae (Rose & Fruit Family)"
+  },
+  "Japanese Camellia (Camellia japonica)": {
+    "scientific_name": "Camellia japonica",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Chinese Peony (Paeonia lactiflora)": {
+    "scientific_name": "Paeonia lactiflora",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Garden Dahlia (Dahlia pinnata)": {
+    "scientific_name": "Dahlia pinnata",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Common Zinnia (Zinnia elegans)": {
+    "scientific_name": "Zinnia elegans",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Snapdragon (Antirrhinum majus)": {
+    "scientific_name": "Antirrhinum majus",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Garden Pansy (Viola tricolor)": {
+    "scientific_name": "Viola tricolor",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "French Marigold (Tagetes patula)": {
+    "scientific_name": "Tagetes patula",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Garden Petunia (Petunia hybrida)": {
+    "scientific_name": "Petunia hybrida",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Sweet Alyssum (Lobularia maritima)": {
+    "scientific_name": "Lobularia maritima",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Garden Cosmos (Cosmos bipinnatus)": {
+    "scientific_name": "Cosmos bipinnatus",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Common Morning Glory (Ipomoea purpurea)": {
+    "scientific_name": "Ipomoea purpurea",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Clematis (Clematis)": {
+    "scientific_name": "Clematis",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Chinese Wisteria (Wisteria sinensis)": {
+    "scientific_name": "Wisteria sinensis",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Fabaceae (Legume Family)"
+  },
+  "Common Lilac (Syringa vulgaris)": {
+    "scientific_name": "Syringa vulgaris",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Weeping Forsythia (Forsythia suspensa)": {
+    "scientific_name": "Forsythia suspensa",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Japanese Spiraea (Spiraea japonica)": {
+    "scientific_name": "Spiraea japonica",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Rosaceae (Rose & Fruit Family)"
+  },
+  "Old Fashioned Weigela (Weigela florida)": {
+    "scientific_name": "Weigela florida",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Butterfly Bush (Buddleja davidii)": {
+    "scientific_name": "Buddleja davidii",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Garden Phlox (Phlox paniculata)": {
+    "scientific_name": "Phlox paniculata",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Black-Eyed Susan (Rudbeckia hirta)": {
+    "scientific_name": "Rudbeckia hirta",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Shasta Daisy (Leucanthemum x superbum)": {
+    "scientific_name": "Leucanthemum superbum",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Common Hollyhock (Alcea rosea)": {
+    "scientific_name": "Alcea rosea",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Rosaceae (Rose & Fruit Family)"
+  },
+  "Sweet Pea (Lathyrus odoratus)": {
+    "scientific_name": "Lathyrus odoratus",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Fabaceae (Legume Family)"
+  },
+  "Common Foxglove (Digitalis purpurea)": {
+    "scientific_name": "Digitalis purpurea",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Common Columbine (Aquilegia vulgaris)": {
+    "scientific_name": "Aquilegia vulgaris",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Bleeding Heart (Lamprocapnos spectabilis)": {
+    "scientific_name": "Lamprocapnos spectabilis",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Indian Shot (Canna indica)": {
+    "scientific_name": "Canna indica",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Calla Lily (Zantedeschia aethiopica)": {
+    "scientific_name": "Zantedeschia aethiopica",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Araceae (Aroid & Pothos Family)"
+  },
+  "Japanese Maple (Acer palmatum)": {
+    "scientific_name": "Acer palmatum",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Arecaceae / Cycadales (Palms)"
+  },
+  "Star Jasmine (Trachelospermum jasminoides)": {
+    "scientific_name": "Trachelospermum jasminoides",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Great Bougainvillea (Bougainvillea spectabilis)": {
+    "scientific_name": "Bougainvillea spectabilis",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Common Gardenia (Gardenia jasminoides)": {
+    "scientific_name": "Gardenia jasminoides",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Oleander (Nerium oleander)": {
+    "scientific_name": "Nerium oleander",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "European Privet (Ligustrum vulgare)": {
+    "scientific_name": "Ligustrum vulgare",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Fabaceae (Legume Family)"
+  },
+  "English Holly (Ilex aquifolium)": {
+    "scientific_name": "Ilex aquifolium",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "English Yew (Taxus baccata)": {
+    "scientific_name": "Taxus baccata",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Japanese Honeysuckle (Lonicera japonica)": {
+    "scientific_name": "Lonicera japonica",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Cape Leadwort (Plumbago auriculata)": {
+    "scientific_name": "Plumbago auriculata",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Garden Verbena (Verbena hybrida)": {
+    "scientific_name": "Verbena hybrida",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Coleus (Coleus scutellarioides)": {
+    "scientific_name": "Coleus scutellarioides",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Lamiaceae (Mint & Herb Family)"
+  },
+  "Lantana (Lantana camara)": {
+    "scientific_name": "Lantana camara",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Common Dandelion (Taraxacum officinale)": {
+    "scientific_name": "Taraxacum officinale",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "White Clover (Trifolium repens)": {
+    "scientific_name": "Trifolium repens",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Fabaceae (Legume Family)"
+  },
+  "Red Clover (Trifolium pratense)": {
+    "scientific_name": "Trifolium pratense",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Fabaceae (Legume Family)"
+  },
+  "Broadleaf Plantain (Plantago major)": {
+    "scientific_name": "Plantago major",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Narrowleaf Plantain (Plantago lanceolata)": {
+    "scientific_name": "Plantago lanceolata",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Common Chickweed (Stellaria media)": {
+    "scientific_name": "Stellaria media",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Stinging Nettle (Urtica dioica)": {
+    "scientific_name": "Urtica dioica",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Creeping Charlie (Glechoma hederacea)": {
+    "scientific_name": "Glechoma hederacea",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Lamiaceae (Mint & Herb Family)"
+  },
+  "Hairy Crabgrass (Digitaria sanguinalis)": {
+    "scientific_name": "Digitaria sanguinalis",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Annual Bluegrass (Poa annua)": {
+    "scientific_name": "Poa annua",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Bermuda Grass (Cynodon dactylon)": {
+    "scientific_name": "Cynodon dactylon",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Yellow Woodsorrel (Oxalis stricta)": {
+    "scientific_name": "Oxalis stricta",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Henbit Deadnettle (Lamium amplexicaule)": {
+    "scientific_name": "Lamium amplexicaule",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Lamiaceae (Mint & Herb Family)"
+  },
+  "Purple Deadnettle (Lamium purpureum)": {
+    "scientific_name": "Lamium purpureum",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Lamiaceae (Mint & Herb Family)"
+  },
+  "Common Purslane (Portulaca oleracea)": {
+    "scientific_name": "Portulaca oleracea",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Shepherds Purse (Capsella bursa-pastoris)": {
+    "scientific_name": "Capsella bursa-pastoris",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Brassicaceae (Mustard & Brassicas)"
+  },
+  "Canada Thistle (Cirsium arvense)": {
+    "scientific_name": "Cirsium arvense",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Bull Thistle (Cirsium vulgare)": {
+    "scientific_name": "Cirsium vulgare",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Prickly Lettuce (Lactuca serriola)": {
+    "scientific_name": "Lactuca serriola",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Common Ragweed (Ambrosia artemisiifolia)": {
+    "scientific_name": "Ambrosia artemisiifolia",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Field Bindweed (Convolvulus arvensis)": {
+    "scientific_name": "Convolvulus arvensis",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Common Mallow (Malva neglecta)": {
+    "scientific_name": "Malva neglecta",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Goosegrass (Eleusine indica)": {
+    "scientific_name": "Eleusine indica",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Green Foxtail (Setaria viridis)": {
+    "scientific_name": "Setaria viridis",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Barnyard Grass (Echinochloa crus-galli)": {
+    "scientific_name": "Echinochloa crus-galli",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Black Medick (Medicago lupulina)": {
+    "scientific_name": "Medicago lupulina",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Fabaceae (Legume Family)"
+  },
+  "Prostrate Knotweed (Polygonum aviculare)": {
+    "scientific_name": "Polygonum aviculare",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Common Lambsquarters (Chenopodium album)": {
+    "scientific_name": "Chenopodium album",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Lesser Burdock (Arctium minus)": {
+    "scientific_name": "Arctium minus",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Poison Ivy (Toxicodendron radicans)": {
+    "scientific_name": "Toxicodendron radicans",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Pacific Poison Oak (Toxicodendron diversilobum)": {
+    "scientific_name": "Toxicodendron diversilobum",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Bittersweet Nightshade (Solanum dulcamara)": {
+    "scientific_name": "Solanum dulcamara",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Solanaceae (Nightshade Family)"
+  },
+  "Black Nightshade (Solanum nigrum)": {
+    "scientific_name": "Solanum nigrum",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Solanaceae (Nightshade Family)"
+  },
+  "Japanese Knotweed (Reynoutria japonica)": {
+    "scientific_name": "Reynoutria japonica",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Giant Hogweed (Heracleum mantegazzianum)": {
+    "scientific_name": "Heracleum mantegazzianum",
+    "source_group": "floranet_250",
+    "target_images": 500,
+    "family": "Other Botanical Taxa"
+  },
+  "Pandan (Pandanus amaryllifolius)": {
+    "scientific_name": "Pandanus amaryllifolius",
+    "source_group": "sea_herb",
+    "target_images": 550,
+    "family": "Other Botanical Taxa"
+  },
+  "Curry Leaf Tree (Murraya koenigii)": {
+    "scientific_name": "Murraya koenigii",
+    "source_group": "sea_10",
+    "target_images": 550,
+    "family": "Rutaceae (Citrus Family)"
+  },
+  "Kaffir Lime (Citrus hystrix)": {
+    "scientific_name": "Citrus hystrix",
+    "source_group": "sea_10",
+    "target_images": 550,
+    "family": "Rutaceae (Citrus Family)"
+  },
+  "Calamansi (Citrus microcarpa)": {
+    "scientific_name": "Citrus microcarpa",
+    "source_group": "sea_10",
+    "target_images": 550,
+    "family": "Rutaceae (Citrus Family)"
+  },
+  "Butterfly Pea (Clitoria ternatea)": {
+    "scientific_name": "Clitoria ternatea",
+    "source_group": "sea_10",
+    "target_images": 550,
+    "family": "Fabaceae (Legume Family)"
+  },
+  "Vietnamese Coriander (Persicaria odorata)": {
+    "scientific_name": "Persicaria odorata",
+    "source_group": "sea_10",
+    "target_images": 550,
+    "family": "Other Botanical Taxa"
+  },
+  "Turmeric (Curcuma longa)": {
+    "scientific_name": "Curcuma longa",
+    "source_group": "sea_10",
+    "target_images": 550,
+    "family": "Zingiberaceae (Ginger & Turmeric)"
+  },
+  "Torch Ginger (Etlingera elatior)": {
+    "scientific_name": "Etlingera elatior",
+    "source_group": "sea_10",
+    "target_images": 550,
+    "family": "Zingiberaceae (Ginger & Turmeric)"
+  },
+  "Betel Leaf (Piper betle)": {
+    "scientific_name": "Piper betle",
+    "source_group": "sea_10",
+    "target_images": 550,
+    "family": "Piperaceae (Peperomia & Pepper Family)"
+  },
+  "Water Spinach (Ipomoea aquatica)": {
+    "scientific_name": "Ipomoea aquatica",
+    "source_group": "sea_10",
+    "target_images": 550,
+    "family": "Other Botanical Taxa"
+  },
+  "Bitter Gourd (Momordica charantia)": {
+    "scientific_name": "Momordica charantia",
+    "source_group": "sea_10",
+    "target_images": 550,
+    "family": "Cucurbitaceae (Gourd & Squash)"
+  },
+  "Spider Plant (Chlorophytum comosum)": {
+    "scientific_name": "Chlorophytum comosum",
+    "source_group": "core_houseplant_gap",
+    "target_images": 650,
+    "family": "Asparagaceae (Snake, Spider & Dracaena)"
+  },
+  "Pincushion Cactus (Mammillaria)": {
+    "scientific_name": "Mammillaria",
+    "source_group": "expanded_cactaceae",
+    "target_images": 650,
+    "family": "Cactaceae (Cactus Family)"
+  },
+  "Moon Cactus (Gymnocalycium)": {
+    "scientific_name": "Gymnocalycium",
+    "source_group": "expanded_cactaceae",
+    "target_images": 650,
+    "family": "Cactaceae (Cactus Family)"
+  },
+  "Prickly Pear Cactus (Opuntia ficus-indica)": {
+    "scientific_name": "Opuntia ficus-indica",
+    "source_group": "expanded_cactaceae",
+    "target_images": 650,
+    "family": "Cactaceae (Cactus Family)"
+  },
+  "Hedgehog Cactus (Echinopsis)": {
+    "scientific_name": "Echinopsis",
+    "source_group": "expanded_cactaceae",
+    "target_images": 650,
+    "family": "Cactaceae (Cactus Family)"
+  },
+  "Peruvian Apple Cactus (Cereus repandus)": {
+    "scientific_name": "Cereus repandus",
+    "source_group": "expanded_cactaceae",
+    "target_images": 650,
+    "family": "Cactaceae (Cactus Family)"
+  },
+  "Barrel Cactus (Ferocactus)": {
+    "scientific_name": "Ferocactus",
+    "source_group": "expanded_cactaceae",
+    "target_images": 650,
+    "family": "Cactaceae (Cactus Family)"
+  },
+  "Star Cactus (Astrophytum)": {
+    "scientific_name": "Astrophytum",
+    "source_group": "expanded_cactaceae",
+    "target_images": 650,
+    "family": "Cactaceae (Cactus Family)"
+  }
+}

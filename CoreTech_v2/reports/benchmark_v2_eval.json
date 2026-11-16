@@ -1,0 +1,51 @@
+{
+  "evaluated_at": "2026-11-16 04:57:03",
+  "flora_id": {
+    "calibration": {
+      "weights": {
+        "bioclip2": 0.4,
+        "eva02": 0.4,
+        "convnext": 0.2
+      },
+      "temperatures": {
+        "bioclip2": 0.9477,
+        "eva02": 0.9376,
+        "convnext": 0.9321
+      },
+      "species_conf_threshold": 0.5,
+      "species_margin_threshold": 0.12,
+      "min_ood_cosine": 0.35,
+      "val_ensemble_top1_pct": 94.03
+    },
+    "test_samples": 15936,
+    "individual_test_top1_pct": {
+      "bioclip2": 92.67,
+      "eva02": 92.8,
+      "convnext": 89.09
+    },
+    "ensemble_test_top1_pct": 93.68,
+    "ensemble_test_top5_pct": 98.58,
+    "ensemble_macro_f1_pct": 93.6,
+    "cactaceae_species_top1_pct": 96.74,
+    "cactaceae_family_top1_pct": 99.44
+  },
+  "surface_pathology": {
+    "calibration": {
+      "weights": {
+        "convnext": 0.3,
+        "dinov2": 0.7
+      },
+      "temperatures": {
+        "convnext": 1.0633,
+        "dinov2": 1.0063
+      },
+      "healthy_override_thresh": 0.62,
+      "val_ensemble_top1_pct": 92.95
+    },
+    "test_samples": 1646,
+    "test_fine_top1_pct": 93.07,
+    "test_fine_top3_pct": 97.93,
+    "test_macro_f1_pct": 93.3,
+    "test_super_healthy_biotic_abiotic_pct": 97.51
+  }
+}
