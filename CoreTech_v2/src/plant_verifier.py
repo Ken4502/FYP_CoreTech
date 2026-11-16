@@ -79,17 +79,21 @@ def verify_plant_online(
             "   it MUST be marked is_plant=true.\n"
             "2. Non-plant subjects (such as artificial plastic/silk plants, green furniture/walls, screens, "
             "   clothing, electronics, animals, food dishes, or humans WITHOUT any plant matter) must be marked is_plant=false.\n"
-            "3. Assess if the plant specimen is dried, desiccated, or severely withered.\n"
+            "3. Assess viability and desiccation state:\n"
+            "   - 'fresh_living': Healthy or living tissue with active chlorophyll.\n"
+            "   - 'severely_dried_withered': Severely dehydrated/shriveled, but potentially recoverable with care/soak.\n"
+            "   - 'dead_beyond_saving': Completely dead, brittle brown/black collapsed tissue, fully dead leaf/stem that is beyond saving and cannot be revived.\n"
             "4. Also note if multiple separate plants are visible.\n\n"
             "Respond ONLY with valid JSON:\n"
             "{\n"
             '  "is_plant": true or false,\n'
             '  "is_dried": true or false,\n'
-            '  "desiccation_status": "fresh_living" or "mild_wilting" or "severely_dried_withered",\n'
+            '  "is_dead_beyond_saving": true or false,\n'
+            '  "desiccation_status": "fresh_living" or "severely_dried_withered" or "dead_beyond_saving",\n'
             '  "confidence": 0.0 to 1.0,\n'
-            '  "detected_subject": "concise description of main subject (e.g. dried plant stem with brown crispy leaves)",\n'
+            '  "detected_subject": "concise description of main subject (e.g. completely dead brown leaf or living plant)",\n'
             '  "multiple_plants": true or false,\n'
-            '  "reason": "1 concise sentence explaining why"\n'
+            '  "reason": "1 concise sentence explaining whether specimen is living, recoverable, or completely dead"\n'
             "}"
         )
 
@@ -119,7 +123,8 @@ def verify_plant_online(
         is_plant = bool(data.get("is_plant", False))
         is_dried = bool(data.get("is_dried", False))
         desiccation_status = str(data.get("desiccation_status", "fresh_living"))
-        if "dried" in desiccation_status or "withered" in desiccation_status:
+        is_dead = bool(data.get("is_dead_beyond_saving", False) or desiccation_status == "dead_beyond_saving")
+        if is_dead or "dried" in desiccation_status or "withered" in desiccation_status:
             is_dried = True
         subject = str(data.get("detected_subject", "Unknown subject"))
         reason = str(data.get("reason", ""))
@@ -127,6 +132,8 @@ def verify_plant_online(
 
         if not is_plant:
             msg = f"Non-plant detected: {subject}. {reason}".strip()
+        elif is_dead:
+            msg = f"Non-viable dead botanical matter verified (Beyond Saving): {subject}."
         elif is_dried:
             msg = f"Botanical specimen verified (Dried/Desiccated State): {subject}."
         else:
@@ -138,6 +145,7 @@ def verify_plant_online(
             "detected_subject": subject,
             "multiple_plants": bool(data.get("multiple_plants", False)),
             "is_dried": is_dried,
+            "is_dead_beyond_saving": is_dead,
             "desiccation_status": desiccation_status,
             "reason": reason,
         }

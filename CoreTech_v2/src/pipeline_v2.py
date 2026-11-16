@@ -246,6 +246,19 @@ SURFACE_CARE_MAP = {
             "Withhold all fertilizer: never fertilize a dehydrated or stressed root ball; wait until healthy new green shoots emerge.",
         ],
     },
+    "Abiotic_Terminal_Dead_Plant": {
+        "condition_name": "Irreversible Tissue Mortality / Non-Viable Dead Specimen",
+        "category": "Terminal Tissue Necrosis",
+        "severity": "Terminal (Beyond Saving)",
+        "summary": "Specimen foliage and vascular tissue exhibit complete cellular collapse and irreversible necrosis. The sample is beyond recovery.",
+        "immediate_actions": [
+            "Perform a stem snap test: gently bend the lower stem. If it snaps cleanly like a brittle dry twig with no green interior cambium layer, the plant's vascular core is dead and cannot be revived.",
+            "Single Leaf Assessment: If this photograph is of an individual fallen or trimmed leaf from an otherwise living plant, simply prune and discard the dead leaf to prevent saprophytic mold, and inspect the parent plant's main stem and root ball.",
+            "Whole Plant Assessment: If the entire plant is brittle, dry, and lacks any green tissue or firm roots, safely discard the plant matter into compost or waste.",
+            "Sanitize pot and soil: Do not reuse unsterilized soil from a dead plant. Wash containers thoroughly with a 10% bleach solution before potting new plants.",
+            "Check neighboring plants: If plant death occurred suddenly, inspect surrounding plants for hidden root rot, soil pests, or systemic pathogen spread.",
+        ],
+    },
 }
 
 
@@ -309,10 +322,11 @@ def run_v2_diagnosis(
     # 3. Stage 1B: Dominant Multi-Plant Instance Segmentation (Highest Coverage Focus)
     iso = isolate_dominant_plant(pil_img, min_coverage_pct=QUALITY_THRESHOLDS["min_plant_coverage_pct"], allow_fallback=True)
     is_dried_specimen = bool(ver_meta.get("is_dried", False))
+    is_dead_specimen = bool(ver_meta.get("is_dead_beyond_saving", False))
 
     if not iso["detected"] or iso["dominant_coverage_pct"] < QUALITY_THRESHOLDS["min_plant_coverage_pct"]:
-        if is_plant or is_dried_specimen:
-            # Fall back to using the full photo for dried or irregular botanical subjects
+        if is_plant or is_dried_specimen or is_dead_specimen:
+            # Fall back to using the full photo for dried, dead, or irregular botanical subjects
             iso["crop_img"] = pil_img
             iso["masked_crop_img"] = pil_img
             iso["mask_crop"] = np.ones((pil_img.height, pil_img.width), dtype=bool)
@@ -348,7 +362,7 @@ def run_v2_diagnosis(
 
     # Re-run sharp focus verification strictly on the isolated dominant plant pixels
     fg_ok, fg_code, fg_q = evaluate_image_quality(iso["crop_img"], foreground_mask=iso["mask_crop"], min_short_side=120)
-    if not fg_ok and not is_dried_specimen:
+    if not fg_ok and not is_dried_specimen and not is_dead_specimen:
         return {
             "status": "retake_recommended",
             "grace_code": f"SUBJECT_{fg_code}",
@@ -374,14 +388,18 @@ def run_v2_diagnosis(
         iso["mask_crop"],
         plant_family=id_res.get("family", "Unknown"),
         is_externally_dried=is_dried_specimen,
+        is_externally_dead=is_dead_specimen,
     )
     primary_cond = path_res["primary_class"]
     care = SURFACE_CARE_MAP.get(primary_cond, SURFACE_CARE_MAP["Healthy_Foliage"])
     lesion_info = path_res["lesion_info"]
 
-    is_dried = is_dried_specimen or (primary_cond == "Abiotic_Severe_Desiccation_Dried_Plant")
+    is_dead = bool(is_dead_specimen or path_res.get("is_dead", False) or primary_cond == "Abiotic_Terminal_Dead_Plant")
+    is_dried = is_dead or is_dried_specimen or (primary_cond == "Abiotic_Severe_Desiccation_Dried_Plant")
     raw_species = id_res.get("raw_top_species") or id_res.get("species", "Botanical Specimen")
-    if is_dried:
+    if is_dead:
+        species_name = f"{raw_species} (Dead / Non-Viable Specimen)"
+    elif is_dried:
         species_name = f"{raw_species} (Dried / Withered Specimen)"
     else:
         species_name = raw_species
@@ -391,7 +409,9 @@ def run_v2_diagnosis(
         if iso["instances_count"] > 1
         else f"Primary plant isolated cleanly ({iso['dominant_coverage_pct']}% frame coverage)."
     )
-    if is_dried:
+    if is_dead:
+        multi_note = f"{multi_note} Specimen exhibits irreversible cellular mortality (beyond saving)."
+    elif is_dried:
         multi_note = f"{multi_note} Specimen exhibits severe desiccation / dried foliage."
 
     all_recs = list(care["immediate_actions"]) + [r for r in id_res.get("recommendations", []) if r not in care["immediate_actions"]]
@@ -433,12 +453,18 @@ def run_v2_diagnosis(
             "spots_count": lesion_info["spots_count"],
             "infected_area_pct": lesion_info["infected_area_pct"],
             "status_message": (
-                f"Specimen exhibits severe desiccation ({path_res['surface_stress'].get('desiccation_grade', 'Dried')}). "
-                if (primary_cond == "Abiotic_Severe_Desiccation_Dried_Plant")
-                else ""
+                f"Specimen exhibits irreversible cellular mortality ({path_res['surface_stress'].get('desiccation_grade', 'Dead')}). "
+                if (primary_cond == "Abiotic_Terminal_Dead_Plant")
+                else (
+                    f"Specimen exhibits severe desiccation ({path_res['surface_stress'].get('desiccation_grade', 'Dried')}). "
+                    if (primary_cond == "Abiotic_Severe_Desiccation_Dried_Plant")
+                    else ""
+                )
             ) + (
                 f"{lesion_info['spots_count']} surface lesion/symptom zone(s) detected ({lesion_info['infected_area_pct']}% of plant mask)."
                 if lesion_info["spots_count"] > 0
+                else "No active fungal/pest lesions detected; tissue exhibits total cellular death."
+                if (primary_cond == "Abiotic_Terminal_Dead_Plant")
                 else "No localized fungal/pest spots detected; pathology dominated by abiotic surface desiccation."
                 if (primary_cond == "Abiotic_Severe_Desiccation_Dried_Plant")
                 else "No distinct localized lesion boxes detected."
@@ -456,7 +482,15 @@ def run_v2_diagnosis(
             "treatment": {"organic": [], "chemical": []},
             "prevention": [],
             "symptoms": [care["summary"]],
-            "causes": ["Severe moisture depletion", "Prolonged underwatering", "Root-ball dehydration", "Excess heat desiccation"] if (primary_cond == "Abiotic_Severe_Desiccation_Dried_Plant") else [],
+            "causes": (
+                ["Complete vascular collapse", "Severe irreversible dehydration", "Total chlorophyll loss", "Terminal root desiccation or rot"]
+                if (primary_cond == "Abiotic_Terminal_Dead_Plant")
+                else (
+                    ["Severe moisture depletion", "Prolonged underwatering", "Root-ball dehydration", "Excess heat desiccation"]
+                    if (primary_cond == "Abiotic_Severe_Desiccation_Dried_Plant")
+                    else []
+                )
+            ),
         },
         "predictions": path_res["predictions"],
         "preprocessed_image_base64": _img_to_b64(iso["crop_img"]),

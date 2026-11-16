@@ -501,7 +501,7 @@ document.addEventListener("DOMContentLoaded", () => {
       verdictBanner.classList.add("healthy");
       statusBadge.classList.add("healthy");
       statusBadge.textContent = "CLEAN & HEALTHY BASELINE";
-    } else if (diag.severity === "Severe") {
+    } else if (diag.severity === "Severe" || (diag.severity && (diag.severity.includes("Terminal") || diag.severity.includes("Critical")))) {
       verdictBanner.classList.add("diseased");
       statusBadge.classList.add("diseased");
       statusBadge.textContent = `CRITICAL: ${(diag.category || "PATHOLOGY").toUpperCase()}`;

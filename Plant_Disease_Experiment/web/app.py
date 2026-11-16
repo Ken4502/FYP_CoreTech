@@ -209,10 +209,25 @@ async def api_predict(
 
             # Ensure PDI rating for Flutter PDI meter widget
             is_healthy = v2_res.get("diagnosis", {}).get("is_healthy", False)
+            class_id = v2_res.get("diagnosis", {}).get("class_id", "")
+            stress = v2_res.get("surface_stress", {})
+            is_dead_cond = bool(class_id == "Abiotic_Terminal_Dead_Plant" or stress.get("is_dead", False))
+            is_desiccated_cond = bool(class_id == "Abiotic_Severe_Desiccation_Dried_Plant" or stress.get("is_dried", False) or is_dead_cond)
             spots_info = v2_res.get("spots", {})
             inf_area = float(spots_info.get("infected_area_pct", 0.0))
             has_spots = bool(spots_info.get("has_spots", False))
-            if is_healthy or not has_spots:
+
+            if is_dead_cond:
+                pdi_grade = 4
+                pdi_label = "Grade 4: Total Cellular Death / Terminal (Non-Viable)"
+                pdi_color = "#450a0a"
+                pdi_action = "Irreversible tissue mortality. Perform stem snap test; safely prune or discard non-viable plant matter."
+            elif is_desiccated_cond:
+                pdi_grade = 3
+                pdi_label = "Grade 3: Severe Foliar Desiccation & Dehydration"
+                pdi_color = "#d97706"
+                pdi_action = "Conduct stem scratch viability test, execute 30-45 min bottom-watering soak, prune crispy leaves."
+            elif is_healthy or (not has_spots and class_id == "Healthy_Foliage"):
                 pdi_grade = 0
                 pdi_label = "Grade 0: Optimal Foliar Health (Clean)"
                 pdi_color = "#10b981"
@@ -252,13 +267,15 @@ async def api_predict(
             spots_count = int(spots_info.get("spots_count", 0))
             abiotic_analysis = analyze_abiotic_stress(pil_img, spots_count=spots_count if has_spots else 0)
 
-            stress = v2_res.get("surface_stress", {})
             hyd = stress.get("hydration_stress", {}) if isinstance(stress, dict) else {}
             level = "Low"
             stype = "Normal"
             rec = "Optimal hydration levels detected on foliage."
-            is_desiccated = bool(stress.get("is_dried", False) or v2_res.get("diagnosis", {}).get("class_id") == "Abiotic_Severe_Desiccation_Dried_Plant")
-            if is_desiccated:
+            if is_dead_cond:
+                level = "Terminal"
+                stype = "Total Cellular Death / Dead Specimen"
+                rec = "Specimen is non-viable and beyond saving. Conduct stem snap test, prune non-viable tissue, or discard dead plant matter and sanitize container."
+            elif is_desiccated_cond:
                 level = "Critical"
                 stype = "Severe Desiccation / Dried Foliage"
                 rec = "Perform stem scratch viability test, execute 30-45 min bottom-watering soak, prune non-viable crispy foliage, and withhold fertilizer."
@@ -277,9 +294,38 @@ async def api_predict(
                 "stress_level": level,
                 "stress_type": stype,
                 "recommendation": rec,
-                "is_dried": is_desiccated,
-                "desiccation_grade": stress.get("desiccation_grade", "Severe Desiccation") if is_desiccated else "Normal",
+                "is_dried": is_desiccated_cond,
+                "is_dead": is_dead_cond,
+                "desiccation_grade": stress.get("desiccation_grade", "Non-Viable / Dead") if is_dead_cond else (stress.get("desiccation_grade", "Severe Desiccation") if is_desiccated_cond else "Normal"),
             })
+
+            if is_dead_cond:
+                abiotic_analysis["water_status"] = "Terminal Moisture Depletion (Collapsed)"
+                abiotic_analysis["water_severity"] = "Severe"
+                abiotic_analysis["aging_status"] = "Irreversible Cellular Death (Non-Viable)"
+                abiotic_analysis["status_summary"] = "Specimen foliar tissue is completely dead and non-viable. Chlorophyll vigor is depleted. Conduct stem snap test to confirm vascular core mortality."
+                abiotic_analysis["vigor_pct"] = float(stress.get("chlorophyll_vigor_pct", 1.0))
+                abiotic_analysis["chlorosis_pct"] = float(stress.get("chlorosis_yellowing_pct", 0.0))
+                abiotic_analysis["crispness_pct"] = float(stress.get("dry_necrotic_margin_pct", 85.0))
+                abiotic_analysis["abiotic_actions"] = [
+                    "Perform stem snap test: bend lower stem; if it snaps brittle like dry wood with no green cambium inside, vascular core is dead.",
+                    "Single leaf: If only a detached or fallen leaf, prune it cleanly to prevent mold and monitor the parent plant.",
+                    "Whole plant: Safely discard dead plant matter; do not reuse soil without sanitizing pot in 10% bleach.",
+                ]
+            elif is_desiccated_cond:
+                abiotic_analysis["water_status"] = "Severe Desiccation / Moisture Deficit"
+                abiotic_analysis["water_severity"] = "Severe"
+                abiotic_analysis["aging_status"] = "Severe Dehydration & Shriveling"
+                abiotic_analysis["status_summary"] = "Specimen shows extreme desiccation with crispy brittle foliage. Root ball likely hydrophobic."
+                abiotic_analysis["vigor_pct"] = float(stress.get("chlorophyll_vigor_pct", 12.0))
+                abiotic_analysis["chlorosis_pct"] = float(stress.get("chlorosis_yellowing_pct", 25.0))
+                abiotic_analysis["crispness_pct"] = float(stress.get("dry_necrotic_margin_pct", 55.0))
+                abiotic_analysis["abiotic_actions"] = [
+                    "Perform stem scratch viability test: look for green moist cambium tissue beneath bark.",
+                    "Bottom-soak root ball in lukewarm water for 30-45 minutes.",
+                    "Prune completely dead brittle leaves to conserve residual moisture.",
+                    "Withhold fertilizer until fresh green shoots emerge.",
+                ]
             v2_res["abiotic"] = abiotic_analysis
 
             # Enrich predictions for Web UI interactive breakdown
