@@ -197,22 +197,21 @@ def identify_dominant_plant(pil_crop: Image.Image, top_k: int = 5) -> Dict[str, 
         display_name = top_species
         display_conf = round(top1_prob * 100.0, 2)
         recommendations = []
-    elif not is_ood and top_fam_p >= 0.65 and not top_fam.startswith("Other"):
+    elif not is_ood and top_fam_p >= 0.50 and not top_fam.startswith("Other"):
         status = "GENUS_FAMILY_FALLBACK"
-        fam_short = top_fam.split(" (")[0]
-        display_name = f"{fam_short} (Likely {top_species})"
-        display_conf = round(top_fam_p * 100.0, 2)
-        recommendations = [
-            f"Confirmed plant family ({top_fam}, {display_conf:.0f}%), though exact cultivar is closely split among {candidates[0]['species']} and {candidates[1]['species']}.",
-            "To pinpoint exact species, take a clearer side-profile showing leaf stem attachment and overall plant structure."
-        ]
-    else:
-        status = "LOW_CONFIDENCE_SPECIES"
-        display_name = f"Unlisted or Ambiguous Plant (Closest: {top_species})"
+        display_name = top_species
         display_conf = round(top1_prob * 100.0, 2)
         recommendations = [
-            "Could not confidently match this exact species against our curated botanical library.",
-            "Try capturing both a full-plant silhouette and a crisp close-up of a single mature leaf/stem in bright diffuse daylight."
+            f"Identified as {top_species} within the {top_fam} family.",
+            "To maximize confidence, capture an additional photo showing clear leaf venation and stem attachment."
+        ]
+    else:
+        status = "PROBABLE_SPECIES"
+        display_name = top_species
+        display_conf = round(top1_prob * 100.0, 2)
+        recommendations = [
+            f"Closest botanical match: {top_species} ({top_species_fam}).",
+            "Try capturing both a full-plant silhouette and a crisp close-up in bright diffuse daylight to boost certainty."
         ]
 
     return {

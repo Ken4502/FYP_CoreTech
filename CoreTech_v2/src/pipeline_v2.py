@@ -380,9 +380,11 @@ def run_v2_diagnosis(
     lesion_info = path_res["lesion_info"]
 
     is_dried = is_dried_specimen or (primary_cond == "Abiotic_Severe_Desiccation_Dried_Plant")
-    species_name = id_res.get("species", "Unknown Plant")
-    if is_dried and "Dried" not in species_name and "Unknown" not in species_name:
-        species_name = f"{species_name} (Dried / Withered Specimen)"
+    raw_species = id_res.get("raw_top_species") or id_res.get("species", "Botanical Specimen")
+    if is_dried:
+        species_name = f"{raw_species} (Dried / Withered Specimen)"
+    else:
+        species_name = raw_species
 
     multi_note = (
         f"Detected {iso['instances_count']} plants; focused exclusively on largest foreground plant ({iso['dominant_coverage_pct']}% frame coverage)."
