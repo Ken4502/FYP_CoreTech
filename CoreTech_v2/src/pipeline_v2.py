@@ -444,6 +444,10 @@ def run_v2_diagnosis(
             "annotated_image_base64": _img_to_b64(lesion_info["annotated_img"]),
         },
         "surface_stress": path_res["surface_stress"],
+        "xai_heatmap_base64": path_res.get("xai_heatmap_base64", ""),
+        "tile_attention_pct": path_res.get("tile_attention_pct", []),
+        "host_compatibility": path_res.get("host_compatibility", {}),
+        "tta_meta": path_res.get("tta_meta", {}),
         "care_guide": {
             "summary": care["summary"],
             "immediate_actions": all_recs,

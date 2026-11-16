@@ -126,6 +126,8 @@
               <div class="layer1-title-row">
                 <h4 id="layer1-species-name">Aloe Vera</h4>
                 <span class="layer1-confidence" id="layer1-confidence">96.0% Match</span>
+                <span class="layer1-status-pill" id="host-prior-pill" style="display: none; background: #e0f2fe; color: #0369a1; border-color: #bae6fd;">🌱 Host Matrix Active</span>
+                <span class="layer1-status-pill" id="tta-pill" style="display: none; background: #fef3c7; color: #b45309; border-color: #fde68a;">⚡ TTA 3× Consensus</span>
               </div>
             </div>
             <span class="layer1-status-pill" id="layer1-status-pill">Supported in Disease Model</span>
@@ -137,7 +139,8 @@
               <span class="spot-badge" id="spot-badge">0 SPOTS DETECTED</span>
               <div class="view-toggle-btns">
                 <button type="button" class="toggle-btn active" id="view-highlighted-btn">🔍 Highlighted Spots</button>
-                <button type="button" class="toggle-btn" id="view-preprocessed-btn">🌿 After Preprocessing</button>
+                <button type="button" class="toggle-btn" id="view-xai-btn" style="display: none;">👁️ AI Attention Heatmap (XAI)</button>
+                <button type="button" class="toggle-btn" id="view-preprocessed-btn">🌿 Isolated Specimen</button>
                 <button type="button" class="toggle-btn" id="view-original-btn">📸 Original</button>
               </div>
             </div>

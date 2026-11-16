@@ -22,8 +22,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const spotBadge = document.getElementById("spot-badge");
   const spotStatusText = document.getElementById("spot-status-text");
   const viewHighlightedBtn = document.getElementById("view-highlighted-btn");
+  const viewXaiBtn = document.getElementById("view-xai-btn");
   const viewPreprocessedBtn = document.getElementById("view-preprocessed-btn");
   const viewOriginalBtn = document.getElementById("view-original-btn");
+
+  const hostPriorPill = document.getElementById("host-prior-pill");
+  const ttaPill = document.getElementById("tta-pill");
 
   // EPPO / USDA PDI & Co-Infection Elements
   const pdiMeterCard = document.getElementById("pdi-meter-card");
@@ -71,6 +75,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let originalImageSrc = "";
   let annotatedImageSrc = "";
   let preprocessedImageSrc = "";
+  let xaiHeatmapSrc = "";
 
   // 1. Fetch system info
   async function fetchSystemInfo() {
@@ -190,15 +195,28 @@ document.addEventListener("DOMContentLoaded", () => {
   viewHighlightedBtn.addEventListener("click", () => {
     viewHighlightedBtn.classList.add("active");
     viewOriginalBtn.classList.remove("active");
+    if (viewXaiBtn) viewXaiBtn.classList.remove("active");
     if (viewPreprocessedBtn) viewPreprocessedBtn.classList.remove("active");
     annotatedPreview.src = annotatedImageSrc || originalImageSrc;
   });
+
+  if (viewXaiBtn) {
+    viewXaiBtn.addEventListener("click", () => {
+      viewXaiBtn.classList.add("active");
+      viewHighlightedBtn.classList.remove("active");
+      viewOriginalBtn.classList.remove("active");
+      if (viewPreprocessedBtn) viewPreprocessedBtn.classList.remove("active");
+      annotatedPreview.src = xaiHeatmapSrc || originalImageSrc;
+      spotStatusText.textContent = "Displaying Dual-Scale Multi-Tile Attention Heatmap (Grad-CAM spatial activation across plant foliage).";
+    });
+  }
 
   if (viewPreprocessedBtn) {
     viewPreprocessedBtn.addEventListener("click", () => {
       viewPreprocessedBtn.classList.add("active");
       viewHighlightedBtn.classList.remove("active");
       viewOriginalBtn.classList.remove("active");
+      if (viewXaiBtn) viewXaiBtn.classList.remove("active");
       annotatedPreview.src = preprocessedImageSrc || originalImageSrc;
     });
   }
@@ -206,6 +224,7 @@ document.addEventListener("DOMContentLoaded", () => {
   viewOriginalBtn.addEventListener("click", () => {
     viewOriginalBtn.classList.add("active");
     viewHighlightedBtn.classList.remove("active");
+    if (viewXaiBtn) viewXaiBtn.classList.remove("active");
     if (viewPreprocessedBtn) viewPreprocessedBtn.classList.remove("active");
     annotatedPreview.src = originalImageSrc;
   });
@@ -312,6 +331,37 @@ document.addEventListener("DOMContentLoaded", () => {
     preprocessedImageSrc = data.preprocessed_image_base64 || "";
     if (viewPreprocessedBtn) {
       viewPreprocessedBtn.style.display = preprocessedImageSrc ? "inline-block" : "none";
+    }
+
+    xaiHeatmapSrc = data.xai_heatmap_base64 || "";
+    if (viewXaiBtn) {
+      viewXaiBtn.style.display = xaiHeatmapSrc ? "inline-block" : "none";
+    }
+
+    // Host Compatibility & TTA Status Badges
+    if (hostPriorPill) {
+      if (data.host_compatibility && data.host_compatibility.applied) {
+        hostPriorPill.style.display = "inline-block";
+        hostPriorPill.textContent = `🌱 Host Matrix: ${data.host_compatibility.matched_family}`;
+        const supp = data.host_compatibility.suppressed_diseases || [];
+        if (supp.length > 0) {
+          hostPriorPill.title = `Host prior suppressed: ${supp.map(s => s.disease).join(", ")}`;
+        } else {
+          hostPriorPill.title = `Host biological compatibility prior active for ${data.host_compatibility.matched_family}`;
+        }
+      } else {
+        hostPriorPill.style.display = "none";
+      }
+    }
+
+    if (ttaPill) {
+      if (data.tta_meta && data.tta_meta.applied) {
+        ttaPill.style.display = "inline-block";
+        ttaPill.textContent = `⚡ TTA ${data.tta_meta.iterations}× Consensus`;
+        ttaPill.title = `Test-Time Augmentation triggered by: ${data.tta_meta.trigger}`;
+      } else {
+        ttaPill.style.display = "none";
+      }
     }
 
     // Render Abiotic Stress & Senescence Assessment
