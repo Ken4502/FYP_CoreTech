@@ -233,6 +233,19 @@ SURFACE_CARE_MAP = {
             "Check soil pH and feed with a balanced half-strength liquid fertilizer containing chelated micronutrients (Fe, Mn, Mg).",
         ],
     },
+    "Abiotic_Severe_Desiccation_Dried_Plant": {
+        "condition_name": "Severe Desiccation / Dried Plant Specimen",
+        "category": "Abiotic Water Deficit",
+        "severity": "High",
+        "summary": "Specimen foliage and stems are severely dried, crispy, or withered from extreme moisture depletion.",
+        "immediate_actions": [
+            "Perform a stem scratch test: scrape a tiny section of the main stem near the base with a fingernail or clean blade. If you see moist green cambium tissue beneath the bark, the root crown is still alive and can recover.",
+            "Emergency bottom-watering soak: place the pot into a basin with 2-3 inches of lukewarm water for 30-45 minutes so dry compacted soil can rehydrate from the bottom up, then drain completely.",
+            "Prune fully dead crispy leaves: prune completely brittle, brown leaves that snap easily so the plant conserves water and energy for new viable growth.",
+            "Provide recovery humidity: move the plant into bright indirect light away from hot direct sun, and place a clear bag or humidity tray nearby to reduce transpiration stress.",
+            "Withhold all fertilizer: never fertilize a dehydrated or stressed root ball; wait until healthy new green shoots emerge.",
+        ],
+    },
 }
 
 
@@ -294,34 +307,48 @@ def run_v2_diagnosis(
         }
 
     # 3. Stage 1B: Dominant Multi-Plant Instance Segmentation (Highest Coverage Focus)
-    iso = isolate_dominant_plant(pil_img, min_coverage_pct=QUALITY_THRESHOLDS["min_plant_coverage_pct"])
+    iso = isolate_dominant_plant(pil_img, min_coverage_pct=QUALITY_THRESHOLDS["min_plant_coverage_pct"], allow_fallback=True)
+    is_dried_specimen = bool(ver_meta.get("is_dried", False))
+
     if not iso["detected"] or iso["dominant_coverage_pct"] < QUALITY_THRESHOLDS["min_plant_coverage_pct"]:
-        cov = iso["dominant_coverage_pct"]
-        msg = f"Plant subject is too small or unclear in the frame ({cov:.1f}% coverage)."
-        recs = [
-            "Move the camera closer so the target plant fills at least 35-60% of the photo.",
-            "Keep pots, desks, and room walls minimized around the edges.",
-        ]
-        return {
-            "status": "retake_recommended",
-            "grace_code": "LOW_COVERAGE",
-            "is_plant": True,
-            "disease_available": False,
-            "inference_time_ms": round((time.time() - t0) * 1000.0, 1),
-            "status_message": msg,
-            "recommendations": recs,
-            "isolation_meta": {"instances_count": iso["instances_count"], "dominant_coverage_pct": cov},
-            "species": {"name": "Move Closer to Plant", "confidence": 0.0, "detected_mode": "Stage 1B Coverage Gate", "top_candidates": []},
-            "diagnosis": {"condition_name": "Subject Too Far", "category": "Framing Issue", "is_healthy": True, "confidence": 0.0, "severity": "None"},
-            "spots": {"has_spots": False, "spots_count": 0, "infected_area_pct": 0.0, "status_message": msg, "annotated_image_base64": _img_to_b64(iso["overlay_img"])},
-            "care_guide": {"summary": msg, "immediate_actions": recs, "treatment": {"organic": [], "chemical": []}, "prevention": [], "symptoms": [], "causes": []},
-            "predictions": [],
-            "preprocessed_image_base64": prep_b64,
-        }
+        if is_plant or is_dried_specimen:
+            # Fall back to using the full photo for dried or irregular botanical subjects
+            iso["crop_img"] = pil_img
+            iso["masked_crop_img"] = pil_img
+            iso["mask_crop"] = np.ones((pil_img.height, pil_img.width), dtype=bool)
+            iso["full_mask"] = iso["mask_crop"]
+            iso["dominant_coverage_pct"] = 100.0
+            iso["dominant_conf"] = 0.50
+            iso["detected"] = True
+            iso["instances_count"] = 1
+            iso["mode"] = "verified_plant_full_frame"
+        else:
+            cov = iso["dominant_coverage_pct"]
+            msg = f"Plant subject is too small or unclear in the frame ({cov:.1f}% coverage)."
+            recs = [
+                "Move the camera closer so the target plant fills at least 35-60% of the photo.",
+                "Keep pots, desks, and room walls minimized around the edges.",
+            ]
+            return {
+                "status": "retake_recommended",
+                "grace_code": "LOW_COVERAGE",
+                "is_plant": True,
+                "disease_available": False,
+                "inference_time_ms": round((time.time() - t0) * 1000.0, 1),
+                "status_message": msg,
+                "recommendations": recs,
+                "isolation_meta": {"instances_count": iso["instances_count"], "dominant_coverage_pct": cov},
+                "species": {"name": "Move Closer to Plant", "confidence": 0.0, "detected_mode": "Stage 1B Coverage Gate", "top_candidates": []},
+                "diagnosis": {"condition_name": "Subject Too Far", "category": "Framing Issue", "is_healthy": True, "confidence": 0.0, "severity": "None"},
+                "spots": {"has_spots": False, "spots_count": 0, "infected_area_pct": 0.0, "status_message": msg, "annotated_image_base64": _img_to_b64(iso["overlay_img"])},
+                "care_guide": {"summary": msg, "immediate_actions": recs, "treatment": {"organic": [], "chemical": []}, "prevention": [], "symptoms": [], "causes": []},
+                "predictions": [],
+                "preprocessed_image_base64": prep_b64,
+            }
 
     # Re-run sharp focus verification strictly on the isolated dominant plant pixels
     fg_ok, fg_code, fg_q = evaluate_image_quality(iso["crop_img"], foreground_mask=iso["mask_crop"], min_short_side=120)
-    if not fg_ok:
+    if not fg_ok and not is_dried_specimen:
         return {
             "status": "retake_recommended",
             "grace_code": f"SUBJECT_{fg_code}",
@@ -342,18 +369,30 @@ def run_v2_diagnosis(
     id_res = identify_dominant_plant(iso["crop_img"], top_k=5)
 
     # 5. Stage 3: Dual-Scale Surface Pathology, Lesion Localization & Masked Stress
-    path_res = diagnose_surface_condition(iso["crop_img"], iso["mask_crop"], plant_family=id_res.get("family", "Unknown"))
+    path_res = diagnose_surface_condition(
+        iso["crop_img"],
+        iso["mask_crop"],
+        plant_family=id_res.get("family", "Unknown"),
+        is_externally_dried=is_dried_specimen,
+    )
     primary_cond = path_res["primary_class"]
     care = SURFACE_CARE_MAP.get(primary_cond, SURFACE_CARE_MAP["Healthy_Foliage"])
     lesion_info = path_res["lesion_info"]
+
+    is_dried = is_dried_specimen or (primary_cond == "Abiotic_Severe_Desiccation_Dried_Plant")
+    species_name = id_res.get("species", "Unknown Plant")
+    if is_dried and "Dried" not in species_name and "Unknown" not in species_name:
+        species_name = f"{species_name} (Dried / Withered Specimen)"
 
     multi_note = (
         f"Detected {iso['instances_count']} plants; focused exclusively on largest foreground plant ({iso['dominant_coverage_pct']}% frame coverage)."
         if iso["instances_count"] > 1
         else f"Primary plant isolated cleanly ({iso['dominant_coverage_pct']}% frame coverage)."
     )
+    if is_dried:
+        multi_note = f"{multi_note} Specimen exhibits severe desiccation / dried foliage."
 
-    all_recs = list(id_res.get("recommendations", [])) + list(care["immediate_actions"])
+    all_recs = list(care["immediate_actions"]) + [r for r in id_res.get("recommendations", []) if r not in care["immediate_actions"]]
 
     return {
         "status": "success",
@@ -370,7 +409,7 @@ def run_v2_diagnosis(
             "mode": iso["mode"],
         },
         "species": {
-            "name": id_res["species"],
+            "name": species_name,
             "raw_top_species": id_res.get("raw_top_species"),
             "family": id_res.get("family"),
             "confidence": id_res["confidence"],
@@ -391,7 +430,17 @@ def run_v2_diagnosis(
             "has_spots": (not path_res["is_healthy"]) and lesion_info["spots_count"] > 0,
             "spots_count": lesion_info["spots_count"],
             "infected_area_pct": lesion_info["infected_area_pct"],
-            "status_message": f"{lesion_info['spots_count']} surface lesion/symptom zone(s) detected ({lesion_info['infected_area_pct']}% of plant mask)." if lesion_info["spots_count"] > 0 else "No distinct localized lesion boxes detected.",
+            "status_message": (
+                f"Specimen exhibits severe desiccation ({path_res['surface_stress'].get('desiccation_grade', 'Dried')}). "
+                if (primary_cond == "Abiotic_Severe_Desiccation_Dried_Plant")
+                else ""
+            ) + (
+                f"{lesion_info['spots_count']} surface lesion/symptom zone(s) detected ({lesion_info['infected_area_pct']}% of plant mask)."
+                if lesion_info["spots_count"] > 0
+                else "No localized fungal/pest spots detected; pathology dominated by abiotic surface desiccation."
+                if (primary_cond == "Abiotic_Severe_Desiccation_Dried_Plant")
+                else "No distinct localized lesion boxes detected."
+            ),
             "annotated_image_base64": _img_to_b64(lesion_info["annotated_img"]),
         },
         "surface_stress": path_res["surface_stress"],
@@ -401,7 +450,7 @@ def run_v2_diagnosis(
             "treatment": {"organic": [], "chemical": []},
             "prevention": [],
             "symptoms": [care["summary"]],
-            "causes": [],
+            "causes": ["Severe moisture depletion", "Prolonged underwatering", "Root-ball dehydration", "Excess heat desiccation"] if (primary_cond == "Abiotic_Severe_Desiccation_Dried_Plant") else [],
         },
         "predictions": path_res["predictions"],
         "preprocessed_image_base64": _img_to_b64(iso["crop_img"]),

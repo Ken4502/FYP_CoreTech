@@ -257,7 +257,12 @@ async def api_predict(
             level = "Low"
             stype = "Normal"
             rec = "Optimal hydration levels detected on foliage."
-            if hyd.get("severe_underwatering", False):
+            is_desiccated = bool(stress.get("is_dried", False) or v2_res.get("diagnosis", {}).get("class_id") == "Abiotic_Severe_Desiccation_Dried_Plant")
+            if is_desiccated:
+                level = "Critical"
+                stype = "Severe Desiccation / Dried Foliage"
+                rec = "Perform stem scratch viability test, execute 30-45 min bottom-watering soak, prune non-viable crispy foliage, and withhold fertilizer."
+            elif hyd.get("severe_underwatering", False):
                 level = "Moderate"
                 stype = "Underwatering Dehydration"
                 rec = "Check soil moisture and perform a deep root soak."
@@ -267,11 +272,14 @@ async def api_predict(
                 rec = "Pause watering and ensure pot drainage holes are clear."
 
             abiotic_analysis.update({
-                "chlorosis_score": round(float(stress.get("chlorosis_score", 0.0)), 2) if isinstance(stress, dict) else 0.0,
-                "necrosis_score": round(float(stress.get("necrosis_score", 0.0)), 2) if isinstance(stress, dict) else 0.0,
+                "chlorosis_score": round(float(stress.get("chlorosis_yellowing_pct", 0.0)), 2) if isinstance(stress, dict) else 0.0,
+                "necrosis_score": round(float(stress.get("dry_necrotic_margin_pct", 0.0)), 2) if isinstance(stress, dict) else 0.0,
                 "stress_level": level,
                 "stress_type": stype,
                 "recommendation": rec,
+                "is_dried": is_desiccated,
+                "desiccation_grade": stress.get("desiccation_grade", "Severe Desiccation") if is_desiccated else "Normal",
+            })
             })
             v2_res["abiotic"] = abiotic_analysis
 

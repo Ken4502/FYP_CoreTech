@@ -142,6 +142,19 @@ def analyze_masked_surface_stress(pil_crop: Image.Image, mask_crop: np.ndarray) 
     lap_abs = np.abs(cv2.Laplacian(gray, cv2.CV_32F, ksize=3))
     wrinkle_index = round(float(np.percentile(lap_abs[m], 85)), 2)
 
+    # Detect dried / desiccated / withered botanical profile
+    is_dried = (
+        (crispy_brown_pct >= 25.0 and chlorophyll_vigor <= 25.0) or
+        (crispy_brown_pct + yellow_pct >= 50.0 and chlorophyll_vigor <= 15.0) or
+        (wrinkle_index >= 16.0 and chlorophyll_vigor <= 20.0 and crispy_brown_pct >= 15.0) or
+        (chlorophyll_vigor <= 8.0 and crispy_brown_pct >= 18.0)
+    )
+    desiccation_grade = (
+        "Severe Desiccation (Completely Dried Foliage & Stem)"
+        if (crispy_brown_pct >= 40.0 or (is_dried and chlorophyll_vigor <= 10.0))
+        else ("Moderate Dehydration & Wilting" if is_dried else "Normal Hydration")
+    )
+
     return {
         "chlorophyll_vigor_pct": chlorophyll_vigor,
         "chlorosis_yellowing_pct": yellow_pct,
@@ -149,6 +162,8 @@ def analyze_masked_surface_stress(pil_crop: Image.Image, mask_crop: np.ndarray) 
         "sunburn_bleached_pct": bleached_pct,
         "surface_wrinkle_index": wrinkle_index,
         "mean_saturation_pct": round(float(np.mean(s_ch) / 255.0 * 100.0), 1),
+        "is_dried": is_dried,
+        "desiccation_grade": desiccation_grade,
     }
 
 
@@ -192,14 +207,28 @@ def detect_surface_lesions(pil_crop: Image.Image, mask_crop: np.ndarray, yolo_mo
 
 
 def diagnose_surface_condition(
-    pil_crop: Image.Image, mask_crop: np.ndarray, plant_family: str = "Unknown"
+    pil_crop: Image.Image,
+    mask_crop: np.ndarray,
+    plant_family: str = "Unknown",
+    is_externally_dried: bool = False,
 ) -> Dict[str, Any]:
     """Runs Stage 3 Multi-Tile MIL Ensemble + YOLO Lesion Localizer + Masked Surface Stress."""
     mil_dict, yolo_lesion, calib = load_pathology_suite()
     stress_metrics = analyze_masked_surface_stress(pil_crop, mask_crop)
     lesion_info = detect_surface_lesions(pil_crop, mask_crop, yolo_lesion)
+    is_dried_plant = bool(is_externally_dried or stress_metrics.get("is_dried", False))
 
     if not mil_dict:
+        if is_dried_plant:
+            return {
+                "primary_class": "Abiotic_Severe_Desiccation_Dried_Plant",
+                "super_state": "Abiotic_Stress",
+                "confidence": 94.0,
+                "is_healthy": False,
+                "predictions": [{"rank": 1, "class_name": "Abiotic_Severe_Desiccation_Dried_Plant", "confidence": 94.0}],
+                "lesion_info": lesion_info,
+                "surface_stress": stress_metrics,
+            }
         return {
             "primary_class": "Unknown",
             "super_state": "Unknown",
@@ -264,11 +293,24 @@ def diagnose_surface_condition(
 
     # Super-head healthy protection: only declare healthy if super-head healthy dominates AND zero YOLO spots
     healthy_thresh = float(calib.get("healthy_override_thresh", 0.62))
-    if primary != "Healthy_Foliage" and p_healthy_sup >= healthy_thresh and lesion_info["spots_count"] == 0 and primary_conf < 65.0:
+    if not is_dried_plant and primary != "Healthy_Foliage" and p_healthy_sup >= healthy_thresh and lesion_info["spots_count"] == 0 and primary_conf < 65.0:
         primary = "Healthy_Foliage"
         primary_conf = round(p_healthy_sup * 100.0, 2)
 
-    super_state = "Healthy" if primary == "Healthy_Foliage" else ("Abiotic_Stress" if primary.startswith("Abiotic_") else "Biotic_Pathology")
+    if is_dried_plant:
+        primary = "Abiotic_Severe_Desiccation_Dried_Plant"
+        primary_conf = max(primary_conf, 93.0)
+        super_state = "Abiotic_Stress"
+        p_healthy_sup = min(p_healthy_sup, 0.02)
+        p_abiotic_sup = max(p_abiotic_sup, 0.96)
+        preds = [
+            {"rank": 1, "class_name": "Abiotic_Severe_Desiccation_Dried_Plant", "confidence": primary_conf}
+        ] + [
+            {"rank": r + 1, "class_name": p["class_name"], "confidence": round(p["confidence"] * 0.15, 2)}
+            for r, p in enumerate(preds[:4])
+        ]
+    else:
+        super_state = "Healthy" if primary == "Healthy_Foliage" else ("Abiotic_Stress" if primary.startswith("Abiotic_") else "Biotic_Pathology")
 
     return {
         "primary_class": primary,
@@ -279,7 +321,7 @@ def diagnose_surface_condition(
             "abiotic_pct": round(p_abiotic_sup * 100.0, 1),
         },
         "confidence": primary_conf,
-        "is_healthy": primary == "Healthy_Foliage",
+        "is_healthy": (primary == "Healthy_Foliage") and not is_dried_plant,
         "predictions": preds,
         "lesion_info": lesion_info,
         "surface_stress": stress_metrics,

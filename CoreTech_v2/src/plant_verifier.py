@@ -72,17 +72,22 @@ def verify_plant_online(
 
         prompt = (
             "Examine this photo carefully.\n"
-            "1. Determine whether there is at least one genuine living botanical plant "
-            "(houseplant, leaf, stem, flower, tree, crop, herb, cactus, or succulent) present.\n"
-            "2. Artificial plastic plants, painted green furniture (like green chairs/sofas), green walls, "
-            "printed plant pictures on screens/posters, clothing, electronics, animals, or people WITHOUT "
-            "an actual living plant as a clear subject must be marked is_plant=false.\n"
-            "3. Also note if multiple separate plants are visible.\n\n"
+            "1. Determine whether genuine botanical plant matter is present.\n"
+            "   This includes: living green plants, dried leaves, dry/withered stems, desiccated foliage, "
+            "   fallen brown leaves, crispy dried cuttings, flowers, crops, trees, cacti, or succulents.\n"
+            "   Even if the plant is completely dried up, brown, withered, severely underwatered, or dead, "
+            "   it MUST be marked is_plant=true.\n"
+            "2. Non-plant subjects (such as artificial plastic/silk plants, green furniture/walls, screens, "
+            "   clothing, electronics, animals, food dishes, or humans WITHOUT any plant matter) must be marked is_plant=false.\n"
+            "3. Assess if the plant specimen is dried, desiccated, or severely withered.\n"
+            "4. Also note if multiple separate plants are visible.\n\n"
             "Respond ONLY with valid JSON:\n"
             "{\n"
             '  "is_plant": true or false,\n'
+            '  "is_dried": true or false,\n'
+            '  "desiccation_status": "fresh_living" or "mild_wilting" or "severely_dried_withered",\n'
             '  "confidence": 0.0 to 1.0,\n'
-            '  "detected_subject": "concise description of main subject",\n'
+            '  "detected_subject": "concise description of main subject (e.g. dried plant stem with brown crispy leaves)",\n'
             '  "multiple_plants": true or false,\n'
             '  "reason": "1 concise sentence explaining why"\n'
             "}"
@@ -112,20 +117,28 @@ def verify_plant_online(
 
         data = json.loads(response.text.strip())
         is_plant = bool(data.get("is_plant", False))
+        is_dried = bool(data.get("is_dried", False))
+        desiccation_status = str(data.get("desiccation_status", "fresh_living"))
+        if "dried" in desiccation_status or "withered" in desiccation_status:
+            is_dried = True
         subject = str(data.get("detected_subject", "Unknown subject"))
         reason = str(data.get("reason", ""))
         conf = float(data.get("confidence", 1.0))
 
         if not is_plant:
             msg = f"Non-plant detected: {subject}. {reason}".strip()
+        elif is_dried:
+            msg = f"Botanical specimen verified (Dried/Desiccated State): {subject}."
         else:
             msg = f"Living botanical specimen verified: {subject}."
 
         return is_plant, msg, {
             "source": "Google Gemini Vision API",
-            "detected_subject": subject,
             "confidence": round(conf * 100.0, 1),
+            "detected_subject": subject,
             "multiple_plants": bool(data.get("multiple_plants", False)),
+            "is_dried": is_dried,
+            "desiccation_status": desiccation_status,
             "reason": reason,
         }
     except Exception as e:
