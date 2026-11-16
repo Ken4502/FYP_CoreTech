@@ -226,8 +226,11 @@ async def api_predict(
                     "Spider_Mites",
                     "Whiteflies",
                     "Leaf_Miners",
+                    "Chewing_Pests_Bug_Bites_Holes",
+                    "Rust_Fungi_With_Bug_Bites",
                 )
                 or ver_meta.get("is_infestation", False)
+                or ver_meta.get("has_bug_bites_holes", False)
                 or ver_meta.get("verified_pest_class") is not None
             )
             is_dead_cond = bool((class_id == "Abiotic_Terminal_Dead_Plant" or stress.get("is_dead", False) or ver_meta.get("is_dead_beyond_saving", False)) and not is_pest_cond)

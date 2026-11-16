@@ -216,6 +216,26 @@ def analyze_masked_surface_stress(pil_crop: Image.Image, mask_crop: np.ndarray) 
     )
     has_rust_pustules = bool(rust_pustule_pct >= 0.65)
 
+    # Optical bug bite holes & leaf perforation index
+    # Detect interior cavities, voids, or chewed punctures inside the dominant leaf boundary
+    mask_u8 = (mask_crop.astype(np.uint8) * 255)
+    contours, hierarchy = cv2.findContours(mask_u8, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
+    internal_holes_count = 0
+    internal_holes_area = 0
+    plant_area = max(1, int(np.count_nonzero(mask_crop)))
+
+    if hierarchy is not None and len(contours) > 0:
+        for i, c in enumerate(contours):
+            # Interior hole within leaf mask
+            if hierarchy[0][i][3] != -1:
+                area = cv2.contourArea(c)
+                if 20 <= area <= (0.28 * plant_area):
+                    internal_holes_count += 1
+                    internal_holes_area += int(area)
+
+    bite_holes_area_pct = round(float(internal_holes_area / plant_area * 100.0), 2)
+    has_optical_bite_holes = bool(internal_holes_count >= 1 and bite_holes_area_pct >= 0.20)
+
     # Surface wrinkling / shriveling texture index (high local high-freq directional ridges inside mask)
     lap_abs = np.abs(cv2.Laplacian(gray, cv2.CV_32F, ksize=3))
     wrinkle_index = round(float(np.percentile(lap_abs[m], 85)), 2)
@@ -255,6 +275,9 @@ def analyze_masked_surface_stress(pil_crop: Image.Image, mask_crop: np.ndarray) 
         "is_mealybug_cotton": is_mealybug_cotton,
         "rust_pustule_pct": rust_pustule_pct,
         "has_rust_pustules": has_rust_pustules,
+        "bite_holes_count": internal_holes_count,
+        "bite_holes_area_pct": bite_holes_area_pct,
+        "has_optical_bite_holes": has_optical_bite_holes,
         "surface_wrinkle_index": wrinkle_index,
         "mean_saturation_pct": round(float(np.mean(s_ch) / 255.0 * 100.0), 1),
         "is_dried": is_dried,
@@ -476,8 +499,14 @@ def diagnose_surface_condition(
     exempt_host_classes = []
     if verified_pathology:
         exempt_host_classes.append(verified_pathology)
+    if verified_pest:
+        exempt_host_classes.append(verified_pest)
     if stress_metrics.get("has_rust_pustules", False):
         exempt_host_classes.append("Rust_Fungi")
+        exempt_host_classes.append("Rust_Fungi_With_Bug_Bites")
+    if stress_metrics.get("has_optical_bite_holes", False):
+        exempt_host_classes.append("Chewing_Pests_Bug_Bites_Holes")
+        exempt_host_classes.append("Rust_Fungi_With_Bug_Bites")
     fine_probs, host_meta = apply_biological_host_prior(
         fine_probs, ref_classes, plant_family, exempt_classes=exempt_host_classes
     )
@@ -519,12 +548,13 @@ def diagnose_surface_condition(
         primary = "Healthy_Foliage"
         primary_conf = round(max(p_healthy_sup * 100.0, 78.5), 1)
 
-    # Super-head healthy protection: only declare healthy if super-head healthy dominates AND zero YOLO spots AND no pest/disease
+    # Super-head healthy protection: only declare healthy if super-head healthy dominates AND zero YOLO spots AND no pest/disease/holes
     healthy_thresh = float(calib.get("healthy_override_thresh", 0.62))
     if (
         not verified_pest
         and not verified_pathology
         and not stress_metrics.get("has_rust_pustules", False)
+        and not stress_metrics.get("has_optical_bite_holes", False)
         and not is_dried_plant
         and not is_dead_plant
         and not is_externally_underwatered
@@ -535,7 +565,19 @@ def diagnose_surface_condition(
         primary = "Healthy_Foliage"
         primary_conf = round(p_healthy_sup * 100.0, 2)
 
-    if verified_pest:
+    if verified_pathology == "Rust_Fungi_With_Bug_Bites":
+        primary = "Rust_Fungi_With_Bug_Bites"
+        primary_conf = max(primary_conf, 97.0)
+        super_state = "Biotic_Pathology"
+        p_healthy_sup = min(p_healthy_sup, 0.01)
+        p_biotic_sup = max(p_biotic_sup, 0.98)
+        p_abiotic_sup = min(p_abiotic_sup, 0.01)
+        other_preds = [p for p in preds if p["class_name"] != "Rust_Fungi_With_Bug_Bites"][:4]
+        preds = [{"rank": 1, "class_name": "Rust_Fungi_With_Bug_Bites", "confidence": primary_conf}] + [
+            {"rank": r + 2, "class_name": p["class_name"], "confidence": round(p["confidence"] * 0.20, 2)}
+            for r, p in enumerate(other_preds)
+        ]
+    elif verified_pest:
         primary = verified_pest
         primary_conf = max(primary_conf, 96.5)
         super_state = "Biotic_Pathology"
@@ -559,6 +601,18 @@ def diagnose_surface_condition(
             {"rank": r + 2, "class_name": p["class_name"], "confidence": round(p["confidence"] * 0.20, 2)}
             for r, p in enumerate(other_preds)
         ]
+    elif stress_metrics.get("has_rust_pustules", False) and stress_metrics.get("has_optical_bite_holes", False):
+        primary = "Rust_Fungi_With_Bug_Bites"
+        primary_conf = max(primary_conf, 96.5)
+        super_state = "Biotic_Pathology"
+        p_healthy_sup = min(p_healthy_sup, 0.01)
+        p_biotic_sup = max(p_biotic_sup, 0.98)
+        p_abiotic_sup = min(p_abiotic_sup, 0.01)
+        other_preds = [p for p in preds if p["class_name"] != "Rust_Fungi_With_Bug_Bites"][:4]
+        preds = [{"rank": 1, "class_name": "Rust_Fungi_With_Bug_Bites", "confidence": primary_conf}] + [
+            {"rank": r + 2, "class_name": p["class_name"], "confidence": round(p["confidence"] * 0.20, 2)}
+            for r, p in enumerate(other_preds)
+        ]
     elif stress_metrics.get("has_rust_pustules", False) and (
         primary in ("Fungal_Leaf_Spot_Anthracnose", "Healthy_Foliage", "Abiotic_Overwatering_Edema", "Abiotic_Sunburn_Scald")
         or primary_conf < 78.0
@@ -572,6 +626,22 @@ def diagnose_surface_condition(
         p_abiotic_sup = min(p_abiotic_sup, 0.01)
         other_preds = [p for p in preds if p["class_name"] != "Rust_Fungi"][:4]
         preds = [{"rank": 1, "class_name": "Rust_Fungi", "confidence": primary_conf}] + [
+            {"rank": r + 2, "class_name": p["class_name"], "confidence": round(p["confidence"] * 0.20, 2)}
+            for r, p in enumerate(other_preds)
+        ]
+    elif stress_metrics.get("has_optical_bite_holes", False) and (
+        primary in ("Healthy_Foliage", "Abiotic_Overwatering_Edema", "Abiotic_Sunburn_Scald")
+        or primary_conf < 75.0
+    ):
+        # Optical safeguard: internal bite holes / leaf perforations
+        primary = "Chewing_Pests_Bug_Bites_Holes"
+        primary_conf = max(primary_conf, 94.0)
+        super_state = "Biotic_Pathology"
+        p_healthy_sup = min(p_healthy_sup, 0.01)
+        p_biotic_sup = max(p_biotic_sup, 0.98)
+        p_abiotic_sup = min(p_abiotic_sup, 0.01)
+        other_preds = [p for p in preds if p["class_name"] != "Chewing_Pests_Bug_Bites_Holes"][:4]
+        preds = [{"rank": 1, "class_name": "Chewing_Pests_Bug_Bites_Holes", "confidence": primary_conf}] + [
             {"rank": r + 2, "class_name": p["class_name"], "confidence": round(p["confidence"] * 0.20, 2)}
             for r, p in enumerate(other_preds)
         ]
@@ -633,7 +703,8 @@ def diagnose_surface_condition(
         and not verified_pest
         and not verified_pathology
         and not is_externally_underwatered
-        and not stress_metrics.get("has_rust_pustules", False),
+        and not stress_metrics.get("has_rust_pustules", False)
+        and not stress_metrics.get("has_optical_bite_holes", False),
         "predictions": preds,
         "lesion_info": lesion_info,
         "surface_stress": stress_metrics,

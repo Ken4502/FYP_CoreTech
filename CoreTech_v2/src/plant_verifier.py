@@ -88,6 +88,7 @@ def verify_plant_online(
             "   - 'spider_mites': Fine silky webbing, microscopic moving specks, stippling.\n"
             "   - 'whiteflies': Tiny white powdery moth-like insects or clear nymphs under leaves.\n"
             "   - 'leaf_miners': Pale winding serpentine squiggly tunnels burrowed through leaf mesophyll.\n"
+            "   - 'chewing_pests_bug_bites_holes': Foliar chew holes, bite marks, shot-hole perforations, missing leaf margins, or chewed foliage eaten by caterpillars, beetles, grasshoppers, leaf-cutter bees, or slugs/snails.\n"
             "   - 'none': No visible insects, mealybugs, scale, aphids, or pests.\n\n"
             "3. Assess Hydration, Viability, and Desiccation State:\n"
             "   Pay special attention to posture, wilting, and leaf turgor firmness:\n"
@@ -106,21 +107,25 @@ def verify_plant_online(
             "   - 'bacterial_wilt_soft_rot': Water-soaked, translucent, foul-smelling soft mushy rotting patches or sudden bacterial wilt.\n"
             "   - 'none': No active fungal or bacterial disease.\n\n"
             "5. Determine Primary Surface Pathology:\n"
-            "   Choose the single most dominant condition: 'pest_infestation', 'rust_fungi', 'powdery_mildew', "
+            "   Choose the single most dominant condition: 'chewing_pests_bug_bites_holes', 'rust_fungi', 'rust_with_bug_bites', 'pest_infestation', 'powdery_mildew', "
             "   'fungal_leaf_spot_anthracnose', 'bacterial_wilt_soft_rot', 'sooty_mold', 'underwatering_needs_water', "
             "   'severe_desiccation', 'dead_plant', or 'healthy'.\n\n"
             "Respond ONLY with valid JSON:\n"
             "{\n"
             '  "is_plant": true or false,\n'
-            '  "detected_pest": "mealybugs" or "aphids" or "scale_insects" or "thrips" or "spider_mites" or "whiteflies" or "leaf_miners" or "none",\n'
+            '  "detected_pest": "chewing_pests_bug_bites_holes" or "mealybugs" or "aphids" or "scale_insects" or "thrips" or "spider_mites" or "whiteflies" or "leaf_miners" or "none",\n'
             '  "detected_disease": "rust_fungi" or "powdery_mildew" or "sooty_mold" or "downy_mildew" or "botrytis_gray_mold" or "fungal_leaf_spot_anthracnose" or "bacterial_wilt_soft_rot" or "none",\n'
+            '  "has_bug_bites_holes": true or false,\n'
+            '  "has_rusting": true or false,\n'
+            '  "bug_bite_holes_severity": "none" or "mild" or "moderate" or "severe",\n'
+            '  "rust_severity": "none" or "mild" or "moderate" or "severe",\n'
             '  "water_and_viability": "needs_water" or "severely_dried" or "dead_beyond_saving" or "normal_healthy_turgor",\n'
-            '  "primary_pathology": "pest_infestation" or "rust_fungi" or "powdery_mildew" or "fungal_leaf_spot_anthracnose" or "bacterial_wilt_soft_rot" or "sooty_mold" or "underwatering_needs_water" or "severe_desiccation" or "dead_plant" or "healthy",\n'
+            '  "primary_pathology": "chewing_pests_bug_bites_holes" or "rust_fungi" or "rust_with_bug_bites" or "pest_infestation" or "powdery_mildew" or "fungal_leaf_spot_anthracnose" or "bacterial_wilt_soft_rot" or "sooty_mold" or "underwatering_needs_water" or "severe_desiccation" or "dead_plant" or "healthy",\n'
             '  "is_dried": true or false,\n'
             '  "is_dead_beyond_saving": true or false,\n'
             '  "desiccation_status": "fresh_living" or "severely_dried_withered" or "dead_beyond_saving",\n'
             '  "confidence": 0.0 to 1.0,\n'
-            '  "detected_subject": "concise description of main subject (e.g. leaf with orange rust pustules, or drooping peace lily)",\n'
+            '  "detected_subject": "concise description of main subject (e.g. leaf with caterpillar bite holes, orange rust pustules, or drooping peace lily)",\n'
             '  "multiple_plants": true or false,\n'
             '  "reason": "1 concise sentence explaining the finding"\n'
             "}"
@@ -153,6 +158,52 @@ def verify_plant_online(
         detected_pest = str(data.get("detected_pest", "none")).lower().strip()
         water_and_viability = str(data.get("water_and_viability", "normal_healthy_turgor")).lower().strip()
         primary_pathology = str(data.get("primary_pathology", "healthy")).lower().strip()
+        detected_disease = str(data.get("detected_disease", "none")).lower().strip()
+        reason_lower = str(data.get("reason", "")).lower()
+        subject_lower = str(data.get("detected_subject", "")).lower()
+
+        combined_diagnostic_text = f"{detected_pest} {detected_disease} {primary_pathology} {reason_lower} {subject_lower}"
+
+        # Dedicated bug bite holes & chewing pest indicators
+        has_bug_bites_holes = bool(
+            data.get("has_bug_bites_holes", False)
+            or any(
+                w in combined_diagnostic_text
+                for w in [
+                    "bite",
+                    "chew",
+                    "hole",
+                    "caterpillar",
+                    "beetle",
+                    "slug",
+                    "snail",
+                    "grasshopper",
+                    "shot hole",
+                    "shothole",
+                    "perforat",
+                    "ragged margin",
+                    "eaten leaf",
+                    "chewed leaf",
+                ]
+            )
+        )
+
+        # Dedicated rust fungi indicators
+        has_rusting = bool(
+            data.get("has_rusting", False)
+            or any(
+                w in combined_diagnostic_text
+                for w in ["rust", "puccinial", "uredini", "orange pustule", "rusty", "cinnamon spore"]
+            )
+        )
+
+        bug_bite_holes_severity = str(data.get("bug_bite_holes_severity", "none")).capitalize()
+        if bug_bite_holes_severity == "None" and has_bug_bites_holes:
+            bug_bite_holes_severity = "Moderate"
+
+        rust_severity = str(data.get("rust_severity", "none")).capitalize()
+        if rust_severity == "None" and has_rusting:
+            rust_severity = "Moderate"
 
         # Map pest to canonical CoreTech v2 surface class
         verified_pest_class = None
@@ -170,40 +221,33 @@ def verify_plant_online(
             verified_pest_class = "Whiteflies"
         elif "miner" in detected_pest:
             verified_pest_class = "Leaf_Miners"
+        elif has_bug_bites_holes or "chew" in detected_pest or "hole" in detected_pest:
+            verified_pest_class = "Chewing_Pests_Bug_Bites_Holes"
 
-        # Map specific disease to canonical CoreTech v2 surface pathology class
-        detected_disease = str(data.get("detected_disease", "none")).lower().strip()
-        reason_lower = str(data.get("reason", "")).lower()
-        subject_lower = str(data.get("detected_subject", "")).lower()
-        disease_context = f"{detected_disease} {primary_pathology} {reason_lower} {subject_lower}"
-
+        # Map disease to canonical CoreTech v2 surface pathology class
         verified_pathology_class = None
-        if (
-            "rust" in disease_context
-            or "puccinial" in disease_context
-            or "uredini" in disease_context
-            or "orange pustule" in disease_context
-            or "rusty" in disease_context
-        ):
+        if has_bug_bites_holes and has_rusting:
+            verified_pathology_class = "Rust_Fungi_With_Bug_Bites"
+        elif has_rusting:
             verified_pathology_class = "Rust_Fungi"
-        elif "powdery" in disease_context or ("mildew" in disease_context and "downy" not in disease_context):
+        elif "powdery" in combined_diagnostic_text or ("mildew" in combined_diagnostic_text and "downy" not in combined_diagnostic_text):
             verified_pathology_class = "Powdery_Mildew"
-        elif "sooty" in disease_context:
+        elif "sooty" in combined_diagnostic_text:
             verified_pathology_class = "Sooty_Mold"
-        elif "downy" in disease_context:
+        elif "downy" in combined_diagnostic_text:
             verified_pathology_class = "Downy_Mildew"
-        elif "botrytis" in disease_context or "gray mold" in disease_context or "grey mold" in disease_context:
+        elif "botrytis" in combined_diagnostic_text or "gray mold" in combined_diagnostic_text or "grey mold" in combined_diagnostic_text:
             verified_pathology_class = "Botrytis_Gray_Mold"
-        elif "anthracnose" in disease_context or "leaf spot" in disease_context:
+        elif "anthracnose" in combined_diagnostic_text or "leaf spot" in combined_diagnostic_text:
             verified_pathology_class = "Fungal_Leaf_Spot_Anthracnose"
-        elif "bacterial" in disease_context or "soft rot" in disease_context:
+        elif "bacterial" in combined_diagnostic_text or "soft rot" in combined_diagnostic_text:
             verified_pathology_class = "Bacterial_Wilt_Soft_Rot"
 
-        is_infestation = bool(verified_pest_class is not None or primary_pathology == "pest_infestation")
+        is_infestation = bool(verified_pest_class is not None or primary_pathology in ("pest_infestation", "chewing_pests_bug_bites_holes"))
         is_verified_disease = bool(verified_pathology_class is not None)
 
         # Crucial: Pest infestations & active diseases must NOT be labeled as dried or dead!
-        if is_infestation or is_verified_disease:
+        if is_infestation or is_verified_disease or has_bug_bites_holes or has_rusting:
             is_dried = False
             is_dead = False
             is_underwatered = False
@@ -239,6 +283,10 @@ def verify_plant_online(
 
         if not is_plant:
             msg = f"Non-plant detected: {subject}. {reason}".strip()
+        elif verified_pathology_class == "Rust_Fungi_With_Bug_Bites":
+            msg = f"Dual foliar condition verified (Rust Fungi & Bug Bite Holes): {subject}."
+        elif has_bug_bites_holes and verified_pest_class == "Chewing_Pests_Bug_Bites_Holes":
+            msg = f"Insect chewing damage & bug bite holes verified: {subject}."
         elif is_infestation and verified_pest_class:
             msg = f"Pest infestation verified ({verified_pest_class}): {subject}."
         elif verified_pathology_class == "Rust_Fungi":
@@ -263,6 +311,10 @@ def verify_plant_online(
             "verified_pest_class": verified_pest_class,
             "detected_disease": detected_disease,
             "verified_pathology_class": verified_pathology_class,
+            "has_bug_bites_holes": has_bug_bites_holes,
+            "has_rusting": has_rusting,
+            "bug_bite_holes_severity": bug_bite_holes_severity,
+            "rust_severity": rust_severity,
             "is_infestation": is_infestation,
             "is_underwatered": is_underwatered,
             "is_dried": is_dried,

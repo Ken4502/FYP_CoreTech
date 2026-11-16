@@ -115,6 +115,18 @@ SURFACE_CARE_MAP = {
             "Apply sulfur or neem fungicide and eliminate leaf-surface condensation.",
         ],
     },
+    "Rust_Fungi_With_Bug_Bites": {
+        "condition_name": "Rust Fungi (Pucciniales) & Insect Chew Holes",
+        "category": "Co-Occurring Biotic Infection & Pest Damage",
+        "severity": "High",
+        "summary": "Both raised orange fungal rust spore pustules (Pucciniales) and insect chew holes / bite perforations are actively detected on foliage.",
+        "immediate_actions": [
+            "Prune heavily rusted and chewed leaves cleanly into a sealed disposal bag to stop spore spread.",
+            "Apply dual treatment: spray neem oil emulsion or Bacillus thuringiensis (Bt) for chewing pests, combined with sulfur or copper fungicide for rust.",
+            "Inspect leaf undersides at night for nocturnal chewing caterpillars, beetles, or slugs.",
+            "Eliminate overhead leaf misting and provide gentle airflow to prevent new fungal spore germination.",
+        ],
+    },
     "Sooty_Mold": {
         "condition_name": "Sooty Mold",
         "category": "Secondary Fungal Crust",
@@ -133,6 +145,19 @@ SURFACE_CARE_MAP = {
         "immediate_actions": [
             "Prune heavily mined leaves or gently crush larvae visible at tunnel ends.",
             "Apply Spinosad or neem oil if new trails continue appearing.",
+        ],
+    },
+    "Chewing_Pests_Bug_Bites_Holes": {
+        "condition_name": "Insect Feeding Damage (Bug Bites & Chewed Holes)",
+        "category": "Insect Feeding Damage",
+        "severity": "Moderate to High",
+        "summary": "Foliar chew holes, shot-hole perforations, or ragged bitten leaf margins detected from chewing insect pests (caterpillars, beetles, grasshoppers, leaf-cutter bees, or slugs/snails).",
+        "immediate_actions": [
+            "Inspect the plant carefully, especially leaf undersides and stem bases at night or dusk, for active caterpillars, beetles, slugs, or snails.",
+            "Hand-pick and remove any visible caterpillars, beetles, or worms immediately.",
+            "Apply Bacillus thuringiensis (Bt) spray for caterpillars, or food-grade diatomaceous earth around the soil base for crawling pests/slugs.",
+            "Spray cold-pressed neem oil or organic insecticidal soap across foliage to deter further chewing feeding.",
+            "Prune severely tattered or perforated leaves that have lost photosynthetic capacity.",
         ],
     },
     "Spider_Mites": {
@@ -421,15 +446,43 @@ def run_v2_diagnosis(
     care = SURFACE_CARE_MAP.get(primary_cond, SURFACE_CARE_MAP["Healthy_Foliage"])
     lesion_info = path_res["lesion_info"]
 
-    is_pest = bool(verified_pest or primary_cond in ("Mealybugs_Cochineal", "Aphids", "Scale_Insects", "Thrips_Damage", "Spider_Mites", "Whiteflies", "Leaf_Miners"))
+    is_pest = bool(
+        verified_pest
+        or primary_cond in (
+            "Mealybugs_Cochineal",
+            "Aphids",
+            "Scale_Insects",
+            "Thrips_Damage",
+            "Spider_Mites",
+            "Whiteflies",
+            "Leaf_Miners",
+            "Chewing_Pests_Bug_Bites_Holes",
+            "Rust_Fungi_With_Bug_Bites",
+        )
+    )
     is_dead = bool((is_dead_specimen or path_res.get("is_dead", False) or primary_cond == "Abiotic_Terminal_Dead_Plant") and not is_pest and not is_verified_disease)
     is_dried = bool((is_dead or is_dried_specimen or primary_cond == "Abiotic_Severe_Desiccation_Dried_Plant") and not is_pest and not is_verified_disease)
     is_underwatered = bool((is_underwatered_specimen or primary_cond == "Abiotic_Dehydration_Underwatering") and not is_pest and not is_dried and not is_dead and not is_verified_disease)
 
+    has_bug_bites = bool(
+        ver_meta.get("has_bug_bites_holes", False)
+        or primary_cond in ("Chewing_Pests_Bug_Bites_Holes", "Rust_Fungi_With_Bug_Bites")
+        or path_res["surface_stress"].get("has_optical_bite_holes", False)
+    )
+    has_rust = bool(
+        ver_meta.get("has_rusting", False)
+        or primary_cond in ("Rust_Fungi", "Rust_Fungi_With_Bug_Bites")
+        or path_res["surface_stress"].get("has_rust_pustules", False)
+    )
+
     raw_species = id_res.get("raw_top_species") or id_res.get("species", "Botanical Specimen")
-    if is_pest and verified_pest:
+    if primary_cond == "Rust_Fungi_With_Bug_Bites":
+        species_name = f"{raw_species} (Rust & Insect Bite Holes)"
+    elif is_pest and verified_pest:
         pest_label = care["condition_name"].split("/")[0].split("(")[0].strip()
         species_name = f"{raw_species} ({pest_label} Infestation)"
+    elif primary_cond == "Chewing_Pests_Bug_Bites_Holes":
+        species_name = f"{raw_species} (Insect Chew Holes / Bug Bites)"
     elif primary_cond == "Rust_Fungi":
         species_name = f"{raw_species} (Rust Fungi Infection)"
     elif is_dead:
@@ -446,7 +499,11 @@ def run_v2_diagnosis(
         if iso["instances_count"] > 1
         else f"Primary plant isolated cleanly ({iso['dominant_coverage_pct']}% frame coverage)."
     )
-    if is_pest and verified_pest:
+    if primary_cond == "Rust_Fungi_With_Bug_Bites":
+        multi_note = f"{multi_note} Co-occurring foliar rust pustules and insect chew holes actively verified."
+    elif primary_cond == "Chewing_Pests_Bug_Bites_Holes":
+        multi_note = f"{multi_note} Active insect chewing damage and bug bite holes verified on foliage."
+    elif is_pest and verified_pest:
         multi_note = f"{multi_note} Active pest infestation verified: {care['condition_name']}."
     elif primary_cond == "Rust_Fungi":
         multi_note = f"{multi_note} Fungal rust pustules verified on leaf surface (Pucciniales)."
@@ -459,7 +516,15 @@ def run_v2_diagnosis(
 
     all_recs = list(care["immediate_actions"]) + [r for r in id_res.get("recommendations", []) if r not in care["immediate_actions"]]
 
-    if is_pest and verified_pest:
+    if primary_cond == "Rust_Fungi_With_Bug_Bites":
+        pustule_pct = path_res["surface_stress"].get("rust_pustule_pct", 0.0)
+        holes_cnt = max(1, path_res["surface_stress"].get("bite_holes_count", 1))
+        spots_status_msg = f"Dual damage: {holes_cnt} insect bite hole(s) and {pustule_pct}% fungal rust pustule coverage detected on foliage."
+    elif primary_cond == "Chewing_Pests_Bug_Bites_Holes":
+        holes_cnt = max(1, path_res["surface_stress"].get("bite_holes_count", 1))
+        holes_pct = path_res["surface_stress"].get("bite_holes_area_pct", 0.0)
+        spots_status_msg = f"{holes_cnt} insect chew hole(s) / bitten perforation zone(s) detected on foliage ({holes_pct}% area loss)."
+    elif is_pest and verified_pest:
         spots_status_msg = f"Active biotic pest infestation detected: {care['condition_name']}. Inspect leaf nodes, axils, and leaf undersides immediately."
     elif primary_cond == "Rust_Fungi":
         pustule_pct = path_res["surface_stress"].get("rust_pustule_pct", 0.0)
@@ -474,6 +539,49 @@ def run_v2_diagnosis(
         spots_status_msg = f"{lesion_info['spots_count']} surface lesion/symptom zone(s) detected ({lesion_info['infected_area_pct']}% of plant mask)."
     else:
         spots_status_msg = "No distinct localized lesion boxes detected."
+
+    co_alerts = []
+    if has_bug_bites and has_rust:
+        co_alerts.append({
+            "type": "Co-Occurring Foliar Alert",
+            "badge": "Bug Bites & Rusting",
+            "message": "Foliage exhibits BOTH insect chewing bite holes and fungal rust spore pustules. Apply dual protocol: spray Bt/neem for chewing pests and copper/sulfur fungicide for rust.",
+        })
+    elif has_bug_bites:
+        co_alerts.append({
+            "type": "Insect Feeding Alert",
+            "badge": "Bug Bites & Chewed Holes",
+            "message": "Chewed holes, shot-hole punctures, or missing leaf blade sections detected. Inspect leaf undersides at night for caterpillars, beetles, or slugs and apply Bt or neem oil.",
+        })
+    elif has_rust:
+        pustule_pct = path_res["surface_stress"].get("rust_pustule_pct", 0.0)
+        co_alerts.append({
+            "type": "Fungal Spore Alert",
+            "badge": "Rust Fungi (Pucciniales)",
+            "message": f"Raised orange/rusty-cinnamon fungal pustules (uredinia) detected on foliage ({pustule_pct}% spore pustule coverage). Prune infected leaves and apply sulfur or copper fungicide.",
+        })
+
+    foliar_damage_indicators = {
+        "has_bug_bite_holes": has_bug_bites,
+        "has_rusting": has_rust,
+        "bug_bite_holes_severity": ver_meta.get("bug_bite_holes_severity", "Moderate" if has_bug_bites else "None"),
+        "rusting_severity": ver_meta.get("rust_severity", "Moderate" if has_rust else "None"),
+        "spore_pustule_pct": path_res["surface_stress"].get("rust_pustule_pct", 0.0),
+        "bite_holes_count": path_res["surface_stress"].get("bite_holes_count", 0),
+        "status_summary": (
+            "Dual condition: Foliar bug bite holes AND fungal rust pustules detected on foliage."
+            if (has_bug_bites and has_rust)
+            else (
+                "Foliar bug bite holes / insect chewing damage detected on foliage."
+                if has_bug_bites
+                else (
+                    "Fungal rust pustules (Pucciniales) detected on foliage."
+                    if has_rust
+                    else "No bug bite holes or fungal rust pustules detected."
+                )
+            )
+        ),
+    }
 
     return {
         "status": "success",
@@ -510,16 +618,30 @@ def run_v2_diagnosis(
         "spots": {
             "has_spots": (
                 (not path_res["is_healthy"])
-                and (lesion_info["spots_count"] > 0 or primary_cond == "Rust_Fungi")
+                and (
+                    lesion_info["spots_count"] > 0
+                    or primary_cond in ("Rust_Fungi", "Rust_Fungi_With_Bug_Bites", "Chewing_Pests_Bug_Bites_Holes")
+                    or has_bug_bites
+                    or has_rust
+                )
                 and not is_underwatered
                 and not is_dead
                 and not is_dried
             ),
-            "spots_count": max(lesion_info["spots_count"], 1 if primary_cond == "Rust_Fungi" else 0) if (not is_underwatered and not is_dead and not is_dried) else 0,
-            "infected_area_pct": max(lesion_info["infected_area_pct"], path_res["surface_stress"].get("rust_pustule_pct", 0.0) if primary_cond == "Rust_Fungi" else 0.0) if (not is_underwatered and not is_dead and not is_dried) else 0.0,
+            "spots_count": max(
+                lesion_info["spots_count"],
+                1 if (primary_cond in ("Rust_Fungi", "Rust_Fungi_With_Bug_Bites", "Chewing_Pests_Bug_Bites_Holes") or has_bug_bites or has_rust) else 0
+            ) if (not is_underwatered and not is_dead and not is_dried) else 0,
+            "infected_area_pct": max(
+                lesion_info["infected_area_pct"],
+                path_res["surface_stress"].get("rust_pustule_pct", 0.0) if has_rust else 0.0,
+                path_res["surface_stress"].get("bite_holes_area_pct", 0.0) if has_bug_bites else 0.0,
+            ) if (not is_underwatered and not is_dead and not is_dried) else 0.0,
             "status_message": spots_status_msg,
             "annotated_image_base64": _img_to_b64(lesion_info["annotated_img"]),
         },
+        "co_alerts": co_alerts,
+        "foliar_damage_indicators": foliar_damage_indicators,
         "surface_stress": path_res["surface_stress"],
         "xai_heatmap_base64": path_res.get("xai_heatmap_base64", ""),
         "tile_attention_pct": path_res.get("tile_attention_pct", []),
@@ -546,7 +668,15 @@ def run_v2_diagnosis(
                             else (
                                 ["Aphidoidea sap-sucker colonies (black aphids / plant lice)", "Tender new vegetative shoots attracting pests", "Lack of natural predatory insects"]
                                 if (primary_cond == "Aphids")
-                                else []
+                                else (
+                                    ["Chewing insect pests (caterpillars, beetles, grasshoppers, leaf-cutter bees, or snails/slugs)", "Outdoor exposure or open greenhouse vents", "Tender foliage attracting defoliating insects"]
+                                    if (primary_cond in ("Chewing_Pests_Bug_Bites_Holes", "Rust_Fungi_With_Bug_Bites"))
+                                    else (
+                                        ["Pucciniales airborne fungal spore infection", "Persistent water droplets or high relative humidity on foliage", "Airborne spore transmission from infected neighboring plants"]
+                                        if (primary_cond == "Rust_Fungi")
+                                        else []
+                                    )
+                                )
                             )
                         )
                     )
