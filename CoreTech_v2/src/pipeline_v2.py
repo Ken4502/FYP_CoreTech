@@ -266,6 +266,13 @@ def run_v2_diagnosis(
     pil_img: Image.Image, gemini_api_key: Optional[str] = None
 ) -> Dict[str, Any]:
     t0 = time.time()
+    try:
+        from PIL import ImageOps
+        transposed = ImageOps.exif_transpose(pil_img)
+        if transposed is not None:
+            pil_img = transposed
+    except Exception:
+        pass
     prep_b64 = _img_to_b64(pil_img, max_size=512)
 
     # 1. Stage 0: Objective Image Quality Gate (global pre-check)

@@ -142,13 +142,16 @@
                 <button type="button" class="toggle-btn" id="view-xai-btn" style="display: none;">👁️ AI Attention Heatmap (XAI)</button>
                 <button type="button" class="toggle-btn" id="view-preprocessed-btn">🌿 Isolated Specimen</button>
                 <button type="button" class="toggle-btn" id="view-original-btn">📸 Original</button>
+                <button type="button" class="toggle-btn" id="rotate-image-btn" title="Rotate image 90° clockwise">🔄 Rotate 90°</button>
+                <button type="button" class="toggle-btn" id="zoom-expand-btn" title="Open Full-Screen Zoom View">🔎 Full-Screen Zoom</button>
               </div>
             </div>
-            <div class="annotated-image-container" id="annotated-container">
+            <div class="annotated-image-container" id="annotated-container" style="cursor: zoom-in;" title="Click to open Full-Screen Zoom &amp; Pan view">
               <img id="annotated-preview" src="" alt="Annotated Lesion Detection">
               <div class="magnifier-lens" id="magnifier-lens" style="display: none;"></div>
+              <div class="card-zoom-badge" id="card-zoom-badge">🔍 Click to zoom &amp; inspect</div>
             </div>
-            <div class="loupe-hint">🔍 Move cursor or drag on image for 3× Micro-Fovea Optical Loupe</div>
+            <div class="loupe-hint">🔍 Move cursor on image for 3× Optical Loupe, or click image / 'Full-Screen Zoom' to pan &amp; inspect</div>
             <div class="spot-status-text" id="spot-status-text">
               No pathological spots detected across leaf tissue.
             </div>
@@ -380,6 +383,29 @@
         <div class="modal-body" id="encyclopedia-grid">
           <div class="modal-loading">Loading clinical knowledge database...</div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Full-Screen Interactive Zoom Modal -->
+  <div class="image-zoom-modal" id="image-zoom-modal" style="display: none;">
+    <div class="zoom-modal-backdrop" id="zoom-modal-backdrop"></div>
+    <div class="zoom-modal-container">
+      <div class="zoom-modal-topbar">
+        <div class="zoom-modal-title" id="zoom-modal-title">Pathology Diagnostic Inspection</div>
+        <div class="zoom-modal-controls">
+          <button type="button" class="zoom-ctrl-btn" id="zoom-in-btn" title="Zoom In">➕ Zoom In</button>
+          <button type="button" class="zoom-ctrl-btn" id="zoom-out-btn" title="Zoom Out">➖ Zoom Out</button>
+          <button type="button" class="zoom-ctrl-btn" id="zoom-rotate-btn" title="Rotate 90°">🔄 Rotate 90°</button>
+          <button type="button" class="zoom-ctrl-btn" id="zoom-reset-btn" title="Reset View">⏮️ Reset</button>
+          <button type="button" class="zoom-exit-btn" id="zoom-modal-close" title="Close Preview (Esc)">✕</button>
+        </div>
+      </div>
+      <div class="zoom-modal-viewport" id="zoom-modal-viewport">
+        <img id="zoom-modal-image" src="" alt="Pathology Inspection Zoom">
+      </div>
+      <div class="zoom-modal-footer">
+        <span>Mouse scroll or buttons to zoom (up to 6×) • Click and drag to pan • Click <strong>✕</strong> or press <strong>Esc</strong> to close</span>
       </div>
     </div>
   </div>

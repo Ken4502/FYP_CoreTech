@@ -10,7 +10,7 @@ import time
 from pathlib import Path
 from typing import List, Optional
 
-from PIL import Image
+from PIL import Image, ImageOps
 from fastapi import FastAPI, File, UploadFile, HTTPException, Request
 from fastapi.responses import HTMLResponse, StreamingResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -134,7 +134,11 @@ async def compare_models(request: Request):
             if file_item is None:
                 raise HTTPException(status_code=400, detail="No file in multipart form data")
             content = await file_item.read()
-            pil_img = Image.open(io.BytesIO(content)).convert("RGB")
+            raw_img = Image.open(io.BytesIO(content))
+            pil_img = ImageOps.exif_transpose(raw_img)
+            if pil_img is None:
+                pil_img = raw_img
+            pil_img = pil_img.convert("RGB")
             gt_common = str(form.get("ground_truth_common", ""))
             gt_sci = str(form.get("ground_truth_scientific", ""))
         else:
@@ -240,7 +244,11 @@ async def predict_plant(file: UploadFile = File(...)):
     start_time = time.time()
     try:
         content = await file.read()
-        pil_img = Image.open(io.BytesIO(content)).convert("RGB")
+        raw_img = Image.open(io.BytesIO(content))
+        pil_img = ImageOps.exif_transpose(raw_img)
+        if pil_img is None:
+            pil_img = raw_img
+        pil_img = pil_img.convert("RGB")
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Invalid image file: {e}")
 

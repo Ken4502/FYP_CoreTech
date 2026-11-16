@@ -15,7 +15,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional
-from PIL import Image
+from PIL import Image, ImageOps
 import torch
 
 EXPERIMENT_ROOT = Path(__file__).resolve().parent.parent
@@ -197,7 +197,11 @@ async def api_predict(
     t0 = time.time()
     try:
         contents = await file.read()
-        pil_img = Image.open(io.BytesIO(contents)).convert("RGB")
+        raw_img = Image.open(io.BytesIO(contents))
+        pil_img = ImageOps.exif_transpose(raw_img)
+        if pil_img is None:
+            pil_img = raw_img
+        pil_img = pil_img.convert("RGB")
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Invalid image file: {e}")
 

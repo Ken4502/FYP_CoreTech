@@ -271,6 +271,140 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // 4c. Diagnostic Image Rotation & Full-Screen Interactive Zoom Modal
+  let cardRotation = 0;
+  const rotateImageBtn = document.getElementById("rotate-image-btn");
+  if (rotateImageBtn) {
+    rotateImageBtn.addEventListener("click", () => {
+      cardRotation = (cardRotation + 90) % 360;
+      annotatedPreview.style.transform = `rotate(${cardRotation}deg)`;
+    });
+  }
+
+  const zoomModal = document.getElementById("image-zoom-modal");
+  const zoomBackdrop = document.getElementById("zoom-modal-backdrop");
+  const zoomCloseBtn = document.getElementById("zoom-modal-close");
+  const zoomModalImg = document.getElementById("zoom-modal-image");
+  const zoomViewport = document.getElementById("zoom-modal-viewport");
+  const zoomExpandBtn = document.getElementById("zoom-expand-btn");
+  const zoomInBtn = document.getElementById("zoom-in-btn");
+  const zoomOutBtn = document.getElementById("zoom-out-btn");
+  const zoomRotateBtn = document.getElementById("zoom-rotate-btn");
+  const zoomResetBtn = document.getElementById("zoom-reset-btn");
+
+  let zoomScale = 1.0;
+  let zoomRotation = 0;
+  let panX = 0;
+  let panY = 0;
+  let isDragging = false;
+  let dragStartX = 0;
+  let dragStartY = 0;
+
+  function updateZoomTransform() {
+    if (!zoomModalImg) return;
+    zoomModalImg.style.transform = `translate(${panX}px, ${panY}px) scale(${zoomScale}) rotate(${zoomRotation}deg)`;
+  }
+
+  function openZoomModal() {
+    if (!annotatedPreview || !annotatedPreview.src || annotatedPreview.src.length < 5) return;
+    zoomModalImg.src = annotatedPreview.src;
+    zoomScale = 1.0;
+    zoomRotation = cardRotation;
+    panX = 0;
+    panY = 0;
+    updateZoomTransform();
+    zoomModal.style.display = "flex";
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeZoomModal() {
+    if (!zoomModal) return;
+    zoomModal.style.display = "none";
+    document.body.style.overflow = "";
+  }
+
+  if (annotatedContainer) {
+    annotatedContainer.addEventListener("click", (e) => {
+      openZoomModal();
+    });
+  }
+
+  if (zoomExpandBtn) {
+    zoomExpandBtn.addEventListener("click", openZoomModal);
+  }
+
+  if (zoomCloseBtn) {
+    zoomCloseBtn.addEventListener("click", closeZoomModal);
+  }
+
+  if (zoomBackdrop) {
+    zoomBackdrop.addEventListener("click", closeZoomModal);
+  }
+
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && zoomModal && zoomModal.style.display !== "none") {
+      closeZoomModal();
+    }
+  });
+
+  if (zoomInBtn) {
+    zoomInBtn.addEventListener("click", () => {
+      zoomScale = Math.min(6.0, zoomScale + 0.4);
+      updateZoomTransform();
+    });
+  }
+
+  if (zoomOutBtn) {
+    zoomOutBtn.addEventListener("click", () => {
+      zoomScale = Math.max(0.5, zoomScale - 0.4);
+      updateZoomTransform();
+    });
+  }
+
+  if (zoomRotateBtn) {
+    zoomRotateBtn.addEventListener("click", () => {
+      zoomRotation = (zoomRotation + 90) % 360;
+      updateZoomTransform();
+    });
+  }
+
+  if (zoomResetBtn) {
+    zoomResetBtn.addEventListener("click", () => {
+      zoomScale = 1.0;
+      zoomRotation = 0;
+      panX = 0;
+      panY = 0;
+      updateZoomTransform();
+    });
+  }
+
+  if (zoomViewport) {
+    zoomViewport.addEventListener("wheel", (e) => {
+      e.preventDefault();
+      const delta = e.deltaY < 0 ? 0.25 : -0.25;
+      zoomScale = Math.min(6.0, Math.max(0.5, zoomScale + delta));
+      updateZoomTransform();
+    }, { passive: false });
+
+    zoomViewport.addEventListener("mousedown", (e) => {
+      if (e.button !== 0) return;
+      isDragging = true;
+      dragStartX = e.clientX - panX;
+      dragStartY = e.clientY - panY;
+    });
+
+    window.addEventListener("mousemove", (e) => {
+      if (!isDragging) return;
+      panX = e.clientX - dragStartX;
+      panY = e.clientY - dragStartY;
+      updateZoomTransform();
+    });
+
+    window.addEventListener("mouseup", () => {
+      isDragging = false;
+    });
+  }
+
   // 5. Diagnosis Execution
   diagnoseBtn.addEventListener("click", async () => {
     if (!selectedFile) return;
