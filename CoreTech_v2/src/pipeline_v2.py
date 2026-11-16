@@ -498,9 +498,15 @@ def run_v2_diagnosis(
             "severity": care["severity"],
         },
         "spots": {
-            "has_spots": (not path_res["is_healthy"]) and lesion_info["spots_count"] > 0,
-            "spots_count": lesion_info["spots_count"],
-            "infected_area_pct": lesion_info["infected_area_pct"],
+            "has_spots": (
+                (not path_res["is_healthy"])
+                and lesion_info["spots_count"] > 0
+                and not is_underwatered
+                and not is_dead
+                and not is_dried
+            ),
+            "spots_count": lesion_info["spots_count"] if (not is_underwatered and not is_dead and not is_dried) else 0,
+            "infected_area_pct": lesion_info["infected_area_pct"] if (not is_underwatered and not is_dead and not is_dried) else 0.0,
             "status_message": spots_status_msg,
             "annotated_image_base64": _img_to_b64(lesion_info["annotated_img"]),
         },

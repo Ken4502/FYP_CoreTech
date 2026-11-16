@@ -90,10 +90,11 @@ def verify_plant_online(
             "   - 'leaf_miners': Pale winding serpentine squiggly tunnels burrowed through leaf mesophyll.\n"
             "   - 'none': No visible insects, mealybugs, scale, aphids, or pests.\n\n"
             "3. Assess Hydration, Viability, and Desiccation State:\n"
-            "   - 'needs_water': Living green foliage that is wilting, drooping, curling inward, or limp from lack of water (turgor loss), but tissue is still alive and green.\n"
-            "   - 'severely_dried': Foliage is crispy, brown, dried out, papery, or curled, but root crown/stem may be recoverable.\n"
-            "   - 'dead_beyond_saving': Completely dead, black/brittle collapsed tissue, dead dry kindling with zero living green cambium.\n"
-            "   - 'normal_healthy_turgor': Firm, healthy green leaves with normal moisture balance.\n\n"
+            "   Pay special attention to posture, wilting, and leaf turgor firmness:\n"
+            "   - 'needs_water': Living foliage that is visibly wilting, drooping downward, limp/flaccid, curling inward, or losing turgidity due to acute water deficit (even if leaves are still green!).\n"
+            "   - 'severely_dried': Foliage or cuttings are completely crispy, papery, brown, withered, or desiccated (can snap/crackle, but root crown/stem base may still have living cambium).\n"
+            "   - 'dead_beyond_saving': Completely dead, black/dark brown collapsed, rotted, or dry brittle dead kindling with zero living green cambium tissue.\n"
+            "   - 'normal_healthy_turgor': Upright, firm, turgid healthy foliage with optimal hydration and normal turgor.\n\n"
             "4. Determine Primary Surface Pathology:\n"
             "   Choose the single most dominant condition: 'pest_infestation', 'underwatering_needs_water', "
             "   'severe_desiccation', 'dead_plant', 'fungal_bacterial_disease', or 'healthy'.\n\n"
@@ -107,7 +108,7 @@ def verify_plant_online(
             '  "is_dead_beyond_saving": true or false,\n'
             '  "desiccation_status": "fresh_living" or "severely_dried_withered" or "dead_beyond_saving",\n'
             '  "confidence": 0.0 to 1.0,\n'
-            '  "detected_subject": "concise description of main subject (e.g. money plant with mealybug clusters, or dried leaf)",\n'
+            '  "detected_subject": "concise description of main subject (e.g. drooping peace lily needing water, money plant with mealybug clusters, or dried leaf)",\n'
             '  "multiple_plants": true or false,\n'
             '  "reason": "1 concise sentence explaining the finding"\n'
             "}"
@@ -166,8 +167,14 @@ def verify_plant_online(
             is_dead = False
             is_underwatered = False
         else:
+            reason_lower = str(data.get("reason", "")).lower()
+            subject_lower = str(data.get("detected_subject", "")).lower()
+            combined_text = f"{reason_lower} {subject_lower}"
+
             is_underwatered = bool(
-                water_and_viability == "needs_water" or primary_pathology == "underwatering_needs_water"
+                water_and_viability == "needs_water"
+                or primary_pathology == "underwatering_needs_water"
+                or any(w in combined_text for w in ["wilt", "droop", "flaccid", "thirst", "underwater"])
             )
             desiccation_status = str(data.get("desiccation_status", "fresh_living")).lower()
             is_dead = bool(
@@ -175,6 +182,7 @@ def verify_plant_online(
                 or water_and_viability == "dead_beyond_saving"
                 or primary_pathology == "dead_plant"
                 or desiccation_status == "dead_beyond_saving"
+                or any(w in combined_text for w in ["dead plant", "dead leaf", "dead stem", "completely dead", "beyond saving"])
             )
             is_dried = bool(
                 is_dead
@@ -183,6 +191,7 @@ def verify_plant_online(
                 or primary_pathology == "severe_desiccation"
                 or "dried" in desiccation_status
                 or "withered" in desiccation_status
+                or any(w in combined_text for w in ["crispy leaf", "dried leaf", "dried plant", "desiccated", "dry brittle"])
             )
 
         subject = str(data.get("detected_subject", "Unknown subject"))

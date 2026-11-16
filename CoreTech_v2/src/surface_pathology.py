@@ -479,16 +479,28 @@ def diagnose_surface_condition(
     primary = preds[0]["class_name"]
     primary_conf = preds[0]["confidence"]
 
+    # Overwatering Edema Guard: Real edema requires either active YOLO blisters/spots or severe water-soaked swelling.
+    # If zero spots are detected and chlorophyll vigor is high, don't let noisy overwatering eclipse Healthy_Foliage.
+    if (
+        primary == "Abiotic_Overwatering_Edema"
+        and lesion_info["spots_count"] == 0
+        and stress_metrics.get("chlorophyll_vigor_pct", 0) >= 65.0
+        and stress_metrics.get("dry_necrotic_margin_pct", 0) < 15.0
+        and p_healthy_sup >= 0.40
+    ):
+        primary = "Healthy_Foliage"
+        primary_conf = round(max(p_healthy_sup * 100.0, 78.5), 1)
+
     # Super-head healthy protection: only declare healthy if super-head healthy dominates AND zero YOLO spots AND no pest
     healthy_thresh = float(calib.get("healthy_override_thresh", 0.62))
     if (
         not verified_pest
         and not is_dried_plant
         and not is_dead_plant
+        and not is_externally_underwatered
         and primary != "Healthy_Foliage"
         and p_healthy_sup >= healthy_thresh
         and lesion_info["spots_count"] == 0
-        and primary_conf < 65.0
     ):
         primary = "Healthy_Foliage"
         primary_conf = round(p_healthy_sup * 100.0, 2)
@@ -530,11 +542,7 @@ def diagnose_surface_condition(
             {"rank": r + 2, "class_name": p["class_name"], "confidence": round(p["confidence"] * 0.15, 2)}
             for r, p in enumerate(preds[:4])
         ]
-    elif is_externally_underwatered and primary in (
-        "Healthy_Foliage",
-        "Abiotic_Severe_Desiccation_Dried_Plant",
-        "Abiotic_Nutrient_Chlorosis",
-    ):
+    elif is_externally_underwatered:
         primary = "Abiotic_Dehydration_Underwatering"
         primary_conf = max(primary_conf, 93.5)
         super_state = "Abiotic_Stress"
