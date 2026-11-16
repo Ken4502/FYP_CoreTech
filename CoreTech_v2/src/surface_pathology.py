@@ -206,23 +206,29 @@ def analyze_masked_surface_stress(pil_crop: Image.Image, mask_crop: np.ndarray) 
     crispy_brown_pct = round(float(np.mean((h_ch >= 5) & (h_ch <= 19) & (s_ch >= 35) & (v_ch <= 165)) * 100.0), 1)
     bleached_pct = round(float(np.mean((s_ch < 35) & (v_ch > 185)) * 100.0), 1)
 
+    # White cottony / powdery wax cluster index (characteristic of mealybugs & cochineal)
+    white_waxy_pct = round(float(np.mean((s_ch < 50) & (v_ch > 180) & (b_ch < 138)) * 100.0), 1)
+
     # Surface wrinkling / shriveling texture index (high local high-freq directional ridges inside mask)
     lap_abs = np.abs(cv2.Laplacian(gray, cv2.CV_32F, ksize=3))
     wrinkle_index = round(float(np.percentile(lap_abs[m], 85)), 2)
 
+    # White cottony mealybugs produce high high-frequency edge variance; protect against false dried calls
+    is_mealybug_cotton = bool(white_waxy_pct >= 3.5 and wrinkle_index >= 12.0)
+
     # Detect dead / non-viable tissue (beyond saving) vs recoverable dehydration
-    is_dead = (
+    is_dead = (not is_mealybug_cotton) and (
         (chlorophyll_vigor <= 3.0 and crispy_brown_pct >= 45.0) or
         (chlorophyll_vigor <= 1.0 and (crispy_brown_pct + yellow_pct) >= 60.0) or
         (chlorophyll_vigor <= 4.0 and crispy_brown_pct >= 55.0)
     )
 
-    is_dried = is_dead or (
+    is_dried = (not is_mealybug_cotton) and (is_dead or (
         (crispy_brown_pct >= 25.0 and chlorophyll_vigor <= 25.0) or
         (crispy_brown_pct + yellow_pct >= 50.0 and chlorophyll_vigor <= 15.0) or
-        (wrinkle_index >= 16.0 and chlorophyll_vigor <= 20.0 and crispy_brown_pct >= 15.0) or
+        (wrinkle_index >= 16.0 and chlorophyll_vigor <= 20.0 and crispy_brown_pct >= 18.0) or
         (chlorophyll_vigor <= 8.0 and crispy_brown_pct >= 18.0)
-    )
+    ))
     desiccation_grade = (
         "Non-Viable / Dead (Beyond Saving)"
         if is_dead
@@ -238,6 +244,8 @@ def analyze_masked_surface_stress(pil_crop: Image.Image, mask_crop: np.ndarray) 
         "chlorosis_yellowing_pct": yellow_pct,
         "dry_necrotic_margin_pct": crispy_brown_pct,
         "sunburn_bleached_pct": bleached_pct,
+        "white_waxy_pct": white_waxy_pct,
+        "is_mealybug_cotton": is_mealybug_cotton,
         "surface_wrinkle_index": wrinkle_index,
         "mean_saturation_pct": round(float(np.mean(s_ch) / 255.0 * 100.0), 1),
         "is_dried": is_dried,
@@ -291,22 +299,38 @@ def diagnose_surface_condition(
     plant_family: str = "Unknown",
     is_externally_dried: bool = False,
     is_externally_dead: bool = False,
+    is_externally_underwatered: bool = False,
+    verified_pest: Optional[str] = None,
 ) -> Dict[str, Any]:
     """Runs Stage 3 Multi-Tile MIL Ensemble + YOLO Lesion Localizer + Masked Surface Stress."""
     mil_dict, yolo_lesion, calib = load_pathology_suite()
     stress_metrics = analyze_masked_surface_stress(pil_crop, mask_crop)
     lesion_info = detect_surface_lesions(pil_crop, mask_crop, yolo_lesion)
-    is_dead_plant = bool(is_externally_dead or stress_metrics.get("is_dead", False))
-    is_dried_plant = bool(is_externally_dried or stress_metrics.get("is_dried", False) or is_dead_plant)
+
+    if verified_pest:
+        is_dead_plant = False
+        is_dried_plant = False
+    else:
+        is_dead_plant = bool(is_externally_dead or stress_metrics.get("is_dead", False))
+        is_dried_plant = bool(is_externally_dried or stress_metrics.get("is_dried", False) or is_dead_plant)
 
     if not mil_dict:
+        if verified_pest:
+            return {
+                "primary_class": verified_pest,
+                "super_state": "Biotic_Pathology",
+                "confidence": 96.5,
+                "is_healthy": False,
+                "predictions": [{"rank": 1, "class_name": verified_pest, "confidence": 96.5}],
+                "lesion_info": lesion_info,
+                "surface_stress": stress_metrics,
+            }
         if is_dead_plant:
             return {
                 "primary_class": "Abiotic_Terminal_Dead_Plant",
-                "super_state": "Terminal_Mortality",
+                "super_state": "Abiotic_Stress",
                 "confidence": 97.0,
                 "is_healthy": False,
-                "is_dead": True,
                 "predictions": [{"rank": 1, "class_name": "Abiotic_Terminal_Dead_Plant", "confidence": 97.0}],
                 "lesion_info": lesion_info,
                 "surface_stress": stress_metrics,
@@ -317,8 +341,17 @@ def diagnose_surface_condition(
                 "super_state": "Abiotic_Stress",
                 "confidence": 94.0,
                 "is_healthy": False,
-                "is_dead": False,
                 "predictions": [{"rank": 1, "class_name": "Abiotic_Severe_Desiccation_Dried_Plant", "confidence": 94.0}],
+                "lesion_info": lesion_info,
+                "surface_stress": stress_metrics,
+            }
+        if is_externally_underwatered:
+            return {
+                "primary_class": "Abiotic_Dehydration_Underwatering",
+                "super_state": "Abiotic_Stress",
+                "confidence": 93.5,
+                "is_healthy": False,
+                "predictions": [{"rank": 1, "class_name": "Abiotic_Dehydration_Underwatering", "confidence": 93.5}],
                 "lesion_info": lesion_info,
                 "surface_stress": stress_metrics,
             }
@@ -327,7 +360,6 @@ def diagnose_surface_condition(
             "super_state": "Unknown",
             "confidence": 0.0,
             "is_healthy": True,
-            "is_dead": False,
             "predictions": [],
             "lesion_info": lesion_info,
             "surface_stress": stress_metrics,
@@ -447,38 +479,78 @@ def diagnose_surface_condition(
     primary = preds[0]["class_name"]
     primary_conf = preds[0]["confidence"]
 
-    # Super-head healthy protection: only declare healthy if super-head healthy dominates AND zero YOLO spots
+    # Super-head healthy protection: only declare healthy if super-head healthy dominates AND zero YOLO spots AND no pest
     healthy_thresh = float(calib.get("healthy_override_thresh", 0.62))
-    if not is_dried_plant and not is_dead_plant and primary != "Healthy_Foliage" and p_healthy_sup >= healthy_thresh and lesion_info["spots_count"] == 0 and primary_conf < 65.0:
+    if (
+        not verified_pest
+        and not is_dried_plant
+        and not is_dead_plant
+        and primary != "Healthy_Foliage"
+        and p_healthy_sup >= healthy_thresh
+        and lesion_info["spots_count"] == 0
+        and primary_conf < 65.0
+    ):
         primary = "Healthy_Foliage"
         primary_conf = round(p_healthy_sup * 100.0, 2)
 
-    if is_dead_plant:
-        primary = "Abiotic_Terminal_Dead_Plant"
+    if verified_pest:
+        primary = verified_pest
         primary_conf = max(primary_conf, 96.5)
-        super_state = "Terminal_Mortality"
+        super_state = "Biotic_Pathology"
         p_healthy_sup = min(p_healthy_sup, 0.01)
-        p_abiotic_sup = max(p_abiotic_sup, 0.99)
+        p_biotic_sup = max(p_biotic_sup, 0.98)
+        p_abiotic_sup = min(p_abiotic_sup, 0.01)
+        other_preds = [p for p in preds if p["class_name"] != verified_pest][:4]
+        preds = [{"rank": 1, "class_name": verified_pest, "confidence": primary_conf}] + [
+            {"rank": r + 2, "class_name": p["class_name"], "confidence": round(p["confidence"] * 0.25, 2)}
+            for r, p in enumerate(other_preds)
+        ]
+    elif is_dead_plant:
+        primary = "Abiotic_Terminal_Dead_Plant"
+        primary_conf = max(primary_conf, 97.0)
+        super_state = "Abiotic_Stress"
+        p_healthy_sup = min(p_healthy_sup, 0.01)
+        p_abiotic_sup = max(p_abiotic_sup, 0.98)
+        p_biotic_sup = min(p_biotic_sup, 0.01)
         preds = [
             {"rank": 1, "class_name": "Abiotic_Terminal_Dead_Plant", "confidence": primary_conf}
         ] + [
-            {"rank": r + 1, "class_name": p["class_name"], "confidence": round(p["confidence"] * 0.1, 2)}
+            {"rank": r + 2, "class_name": p["class_name"], "confidence": round(p["confidence"] * 0.10, 2)}
             for r, p in enumerate(preds[:4])
         ]
     elif is_dried_plant:
         primary = "Abiotic_Severe_Desiccation_Dried_Plant"
-        primary_conf = max(primary_conf, 93.0)
+        primary_conf = max(primary_conf, 94.0)
         super_state = "Abiotic_Stress"
         p_healthy_sup = min(p_healthy_sup, 0.02)
         p_abiotic_sup = max(p_abiotic_sup, 0.96)
         preds = [
             {"rank": 1, "class_name": "Abiotic_Severe_Desiccation_Dried_Plant", "confidence": primary_conf}
         ] + [
-            {"rank": r + 1, "class_name": p["class_name"], "confidence": round(p["confidence"] * 0.15, 2)}
+            {"rank": r + 2, "class_name": p["class_name"], "confidence": round(p["confidence"] * 0.15, 2)}
             for r, p in enumerate(preds[:4])
         ]
+    elif is_externally_underwatered and primary in (
+        "Healthy_Foliage",
+        "Abiotic_Severe_Desiccation_Dried_Plant",
+        "Abiotic_Nutrient_Chlorosis",
+    ):
+        primary = "Abiotic_Dehydration_Underwatering"
+        primary_conf = max(primary_conf, 93.5)
+        super_state = "Abiotic_Stress"
+        p_abiotic_sup = max(p_abiotic_sup, 0.92)
+        p_healthy_sup = min(p_healthy_sup, 0.05)
+        other_preds = [p for p in preds if p["class_name"] != "Abiotic_Dehydration_Underwatering"][:4]
+        preds = [{"rank": 1, "class_name": "Abiotic_Dehydration_Underwatering", "confidence": primary_conf}] + [
+            {"rank": r + 2, "class_name": p["class_name"], "confidence": round(p["confidence"] * 0.25, 2)}
+            for r, p in enumerate(other_preds)
+        ]
     else:
-        super_state = "Healthy" if primary == "Healthy_Foliage" else ("Abiotic_Stress" if primary.startswith("Abiotic_") else "Biotic_Pathology")
+        super_state = (
+            "Healthy"
+            if primary == "Healthy_Foliage"
+            else ("Abiotic_Stress" if primary.startswith("Abiotic_") else "Biotic_Pathology")
+        )
 
     return {
         "primary_class": primary,
@@ -489,8 +561,11 @@ def diagnose_surface_condition(
             "abiotic_pct": round(p_abiotic_sup * 100.0, 1),
         },
         "confidence": primary_conf,
-        "is_healthy": (primary == "Healthy_Foliage") and not is_dried_plant and not is_dead_plant,
-        "is_dead": is_dead_plant,
+        "is_healthy": (primary == "Healthy_Foliage")
+        and not is_dried_plant
+        and not is_dead_plant
+        and not verified_pest
+        and not is_externally_underwatered,
         "predictions": preds,
         "lesion_info": lesion_info,
         "surface_stress": stress_metrics,

@@ -51,19 +51,33 @@ HOST_COMPATIBILITY_MATRIX: Dict[str, Dict[str, float]] = {
         "Leaf_Miners": 0.05,
         "Fungal_Leaf_Spot_Anthracnose": 1.15,
         "Bacterial_Wilt_Soft_Rot": 1.15,
-        "Spider_Mites": 1.05,
-        "Scale_Insects": 1.10,
+        "Spider_Mites": 1.15,
+        "Scale_Insects": 1.20,
+        "Mealybugs_Cochineal": 1.30,
+        "Aphids": 1.20,
     },
     "araceae": {
         # Monstera, Philodendron, Epipremnum (Money Plant), Pothos, Aglaonema, ZZ Plant
         "Rust_Fungi": 0.02,  # Rust does not infect indoor Araceae foliage
         "Downy_Mildew": 0.05,
+        "Leaf_Miners": 0.05,  # Leaf miners do not attack thick indoor Araceae; black pests are aphids/scale
         "Fungal_Leaf_Spot_Anthracnose": 1.25,
         "Bacterial_Wilt_Soft_Rot": 1.20,
         "Thrips_Damage": 1.25,
         "Spider_Mites": 1.20,
-        "Scale_Insects": 1.10,
-        "Mealybugs_Cochineal": 1.10,
+        "Scale_Insects": 1.25,
+        "Mealybugs_Cochineal": 1.35,
+        "Aphids": 1.30,  # Black aphids / sap-suckers
+    },
+    "moraceae": {
+        # Ficus elastica, Ficus lyrata, Ficus benjamina
+        "Leaf_Miners": 0.05,
+        "Downy_Mildew": 0.05,
+        "Mealybugs_Cochineal": 1.35,
+        "Scale_Insects": 1.25,
+        "Aphids": 1.25,
+        "Spider_Mites": 1.20,
+        "Fungal_Leaf_Spot_Anthracnose": 1.20,
     },
     "orchidaceae": {
         "Downy_Mildew": 0.02,
@@ -128,6 +142,8 @@ def _match_family_key(plant_family: str) -> str:
         return "begoniaceae"
     if "succulent" in fl or "crassula" in fl or "echeveria" in fl or "kalanchoe" in fl:
         return "crassulaceae"
+    if "ficus" in fl or "fig" in fl or "rubber" in fl:
+        return "moraceae"
     return ""
 
 

@@ -71,29 +71,45 @@ def verify_plant_online(
         image_bytes = buf.getvalue()
 
         prompt = (
-            "Examine this photo carefully.\n"
+            "Examine this photo with expert botanical and entomological precision.\n"
             "1. Determine whether genuine botanical plant matter is present.\n"
-            "   This includes: living green plants, dried leaves, dry/withered stems, desiccated foliage, "
-            "   fallen brown leaves, crispy dried cuttings, flowers, crops, trees, cacti, or succulents.\n"
-            "   Even if the plant is completely dried up, brown, withered, severely underwatered, or dead, "
+            "   Includes: living plants, dried leaves, dry/withered stems, desiccated foliage, "
+            "   fallen leaves, cuttings, flowers, crops, trees, cacti, or succulents.\n"
+            "   Even if completely dried up, brown, withered, severely underwatered, or dead, "
             "   it MUST be marked is_plant=true.\n"
-            "2. Non-plant subjects (such as artificial plastic/silk plants, green furniture/walls, screens, "
-            "   clothing, electronics, animals, food dishes, or humans WITHOUT any plant matter) must be marked is_plant=false.\n"
-            "3. Assess viability and desiccation state:\n"
-            "   - 'fresh_living': Healthy or living tissue with active chlorophyll.\n"
-            "   - 'severely_dried_withered': Severely dehydrated/shriveled, but potentially recoverable with care/soak.\n"
-            "   - 'dead_beyond_saving': Completely dead, brittle brown/black collapsed tissue, fully dead leaf/stem that is beyond saving and cannot be revived.\n"
-            "4. Also note if multiple separate plants are visible.\n\n"
+            "   Non-plant subjects (plastic/silk artificial plants, green walls, furniture, "
+            "   clothing, electronics, dishes, animals, humans without plants) MUST be marked is_plant=false.\n\n"
+            "2. Detect Biotic Pests & Insect Infestations:\n"
+            "   Carefully inspect stems, nodes, leaf axils, veins, and leaf undersides for:\n"
+            "   - 'mealybugs': White cottony, powdery, or waxy fluff/clusters/cushions.\n"
+            "   - 'aphids': Clusters of tiny soft-bodied sap-sucking insects (black aphids / black pests, brown, or green plant lice).\n"
+            "   - 'scale_insects': Brown, black, or tan waxy shell-like or armored bumps stuck to stems/midribs.\n"
+            "   - 'thrips': Slender tiny dark/yellow insects with silvery stippling/rasping and dark frass spots.\n"
+            "   - 'spider_mites': Fine silky webbing, microscopic moving specks, stippling.\n"
+            "   - 'whiteflies': Tiny white powdery moth-like insects or clear nymphs under leaves.\n"
+            "   - 'leaf_miners': Pale winding serpentine squiggly tunnels burrowed through leaf mesophyll.\n"
+            "   - 'none': No visible insects, mealybugs, scale, aphids, or pests.\n\n"
+            "3. Assess Hydration, Viability, and Desiccation State:\n"
+            "   - 'needs_water': Living green foliage that is wilting, drooping, curling inward, or limp from lack of water (turgor loss), but tissue is still alive and green.\n"
+            "   - 'severely_dried': Foliage is crispy, brown, dried out, papery, or curled, but root crown/stem may be recoverable.\n"
+            "   - 'dead_beyond_saving': Completely dead, black/brittle collapsed tissue, dead dry kindling with zero living green cambium.\n"
+            "   - 'normal_healthy_turgor': Firm, healthy green leaves with normal moisture balance.\n\n"
+            "4. Determine Primary Surface Pathology:\n"
+            "   Choose the single most dominant condition: 'pest_infestation', 'underwatering_needs_water', "
+            "   'severe_desiccation', 'dead_plant', 'fungal_bacterial_disease', or 'healthy'.\n\n"
             "Respond ONLY with valid JSON:\n"
             "{\n"
             '  "is_plant": true or false,\n'
+            '  "detected_pest": "mealybugs" or "aphids" or "scale_insects" or "thrips" or "spider_mites" or "whiteflies" or "leaf_miners" or "none",\n'
+            '  "water_and_viability": "needs_water" or "severely_dried" or "dead_beyond_saving" or "normal_healthy_turgor",\n'
+            '  "primary_pathology": "pest_infestation" or "underwatering_needs_water" or "severe_desiccation" or "dead_plant" or "fungal_bacterial_disease" or "healthy",\n'
             '  "is_dried": true or false,\n'
             '  "is_dead_beyond_saving": true or false,\n'
             '  "desiccation_status": "fresh_living" or "severely_dried_withered" or "dead_beyond_saving",\n'
             '  "confidence": 0.0 to 1.0,\n'
-            '  "detected_subject": "concise description of main subject (e.g. completely dead brown leaf or living plant)",\n'
+            '  "detected_subject": "concise description of main subject (e.g. money plant with mealybug clusters, or dried leaf)",\n'
             '  "multiple_plants": true or false,\n'
-            '  "reason": "1 concise sentence explaining whether specimen is living, recoverable, or completely dead"\n'
+            '  "reason": "1 concise sentence explaining the finding"\n'
             "}"
         )
 
@@ -121,21 +137,68 @@ def verify_plant_online(
 
         data = json.loads(response.text.strip())
         is_plant = bool(data.get("is_plant", False))
-        is_dried = bool(data.get("is_dried", False))
-        desiccation_status = str(data.get("desiccation_status", "fresh_living"))
-        is_dead = bool(data.get("is_dead_beyond_saving", False) or desiccation_status == "dead_beyond_saving")
-        if is_dead or "dried" in desiccation_status or "withered" in desiccation_status:
-            is_dried = True
+        detected_pest = str(data.get("detected_pest", "none")).lower().strip()
+        water_and_viability = str(data.get("water_and_viability", "normal_healthy_turgor")).lower().strip()
+        primary_pathology = str(data.get("primary_pathology", "healthy")).lower().strip()
+
+        # Map pest to canonical CoreTech v2 surface class
+        verified_pest_class = None
+        if "mealy" in detected_pest or "cochineal" in detected_pest:
+            verified_pest_class = "Mealybugs_Cochineal"
+        elif "aphid" in detected_pest or "black" in detected_pest or "lice" in detected_pest:
+            verified_pest_class = "Aphids"
+        elif "scale" in detected_pest:
+            verified_pest_class = "Scale_Insects"
+        elif "thrip" in detected_pest:
+            verified_pest_class = "Thrips_Damage"
+        elif "spider" in detected_pest or "mite" in detected_pest:
+            verified_pest_class = "Spider_Mites"
+        elif "whitefl" in detected_pest:
+            verified_pest_class = "Whiteflies"
+        elif "miner" in detected_pest:
+            verified_pest_class = "Leaf_Miners"
+
+        is_infestation = bool(verified_pest_class is not None or primary_pathology == "pest_infestation")
+
+        # Crucial: Pest infestations (e.g. white cottony mealybugs) must NOT be labeled as dried or dead!
+        if is_infestation:
+            is_dried = False
+            is_dead = False
+            is_underwatered = False
+        else:
+            is_underwatered = bool(
+                water_and_viability == "needs_water" or primary_pathology == "underwatering_needs_water"
+            )
+            desiccation_status = str(data.get("desiccation_status", "fresh_living")).lower()
+            is_dead = bool(
+                data.get("is_dead_beyond_saving", False)
+                or water_and_viability == "dead_beyond_saving"
+                or primary_pathology == "dead_plant"
+                or desiccation_status == "dead_beyond_saving"
+            )
+            is_dried = bool(
+                is_dead
+                or data.get("is_dried", False)
+                or water_and_viability == "severely_dried"
+                or primary_pathology == "severe_desiccation"
+                or "dried" in desiccation_status
+                or "withered" in desiccation_status
+            )
+
         subject = str(data.get("detected_subject", "Unknown subject"))
         reason = str(data.get("reason", ""))
         conf = float(data.get("confidence", 1.0))
 
         if not is_plant:
             msg = f"Non-plant detected: {subject}. {reason}".strip()
+        elif is_infestation and verified_pest_class:
+            msg = f"Pest infestation verified ({verified_pest_class}): {subject}."
         elif is_dead:
             msg = f"Non-viable dead botanical matter verified (Beyond Saving): {subject}."
         elif is_dried:
             msg = f"Botanical specimen verified (Dried/Desiccated State): {subject}."
+        elif is_underwatered:
+            msg = f"Botanical specimen verified (Underwatering / Needs Water): {subject}."
         else:
             msg = f"Living botanical specimen verified: {subject}."
 
@@ -144,9 +207,15 @@ def verify_plant_online(
             "confidence": round(conf * 100.0, 1),
             "detected_subject": subject,
             "multiple_plants": bool(data.get("multiple_plants", False)),
+            "detected_pest": detected_pest,
+            "verified_pest_class": verified_pest_class,
+            "is_infestation": is_infestation,
+            "is_underwatered": is_underwatered,
             "is_dried": is_dried,
             "is_dead_beyond_saving": is_dead,
-            "desiccation_status": desiccation_status,
+            "water_and_viability": water_and_viability,
+            "primary_pathology": primary_pathology,
+            "desiccation_status": data.get("desiccation_status", "fresh_living"),
             "reason": reason,
         }
     except Exception as e:

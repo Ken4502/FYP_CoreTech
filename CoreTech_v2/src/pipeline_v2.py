@@ -14,6 +14,7 @@ import time
 import base64
 from pathlib import Path
 from typing import Any, Dict, Optional
+import numpy as np
 from PIL import Image
 
 V2_ROOT = Path(__file__).resolve().parent.parent
@@ -145,40 +146,48 @@ SURFACE_CARE_MAP = {
         ],
     },
     "Mealybugs_Cochineal": {
-        "condition_name": "Mealybugs / Cochineal Scale",
+        "condition_name": "Mealybugs / Cochineal Wax Scale",
         "category": "Insect Infestation",
-        "severity": "Moderate to High",
-        "summary": "White cottony wax clusters detected on ribs, stems, or leaf axils.",
+        "severity": "High",
+        "summary": "White cottony, powdery, or waxy masses/clusters detected along stems, leaf joints, or leaf undersides. Mealybugs suck vital plant sap and excrete sticky honeydew.",
         "immediate_actions": [
-            "Dab all white cottony clusters directly with a cotton swab dipped in 70% isopropyl alcohol.",
-            "Follow up with horticultural oil or systemic drench if colonies persist.",
+            "Isolate specimen immediately to prevent mealybugs spreading to neighboring plants.",
+            "Dip a cotton swab in 70% isopropyl alcohol and dab directly onto all white cottony clusters to dissolve their protective wax and kill pests on contact.",
+            "Spray the entire plant thoroughly (especially leaf undersides, stem joints, and petiole crotches) with neem oil emulsion or insecticidal soap.",
+            "Inspect soil surface; drench root zone with systemic pesticide if subterranean root mealybugs are present.",
+            "Repeat weekly checks and treatments until all white waxy fluff and insects are eradicated.",
         ],
     },
     "Scale_Insects": {
-        "condition_name": "Scale Insects",
+        "condition_name": "Scale Insects (Armored / Soft Shell)",
         "category": "Insect Infestation",
         "severity": "High",
-        "summary": "Convex waxy brown or armored shell bumps adhered along stems or midribs.",
+        "summary": "Waxy brown, black, or tan oval shell bumps firmly adhered along stems, petioles, and leaf midribs sucking sap.",
         "immediate_actions": [
-            "Scrape off visible shells gently with 70% isopropyl alcohol on a soft brush.",
-            "Coat stems thoroughly with horticultural oil to suffocate nymphs.",
+            "Isolate plant immediately to halt nymph crawler migration.",
+            "Scrape off visible adult scale shells gently using a soft toothbrush dipped in 70% isopropyl alcohol.",
+            "Suffocate crawler nymphs by spraying thoroughly with horticultural dormant oil or insecticidal soap.",
+            "Check leaf undersides and stem crotches weekly for new scale clusters.",
         ],
     },
     "Aphids": {
-        "condition_name": "Aphids",
+        "condition_name": "Aphids (Black Aphids / Plant Lice)",
         "category": "Insect Infestation",
-        "severity": "Moderate",
-        "summary": "Soft-bodied sap-sucking colonies clustered on tender shoots or curled tips.",
+        "severity": "Moderate to High",
+        "summary": "Dense colonies of small soft-bodied sap-sucking insects (black aphids, brown, or green plant lice) clustered on tender shoots, new leaf buds, or stem nodes.",
         "immediate_actions": [
-            "Blast aphids off shoots with a stream of lukewarm water.",
-            "Spray insecticidal soap or neem emulsion onto shoot tips and undersides.",
+            "Quarantine the plant away from clean foliage immediately.",
+            "Blast visible aphid clusters off shoots and foliage using a firm stream of lukewarm water in the sink or shower.",
+            "Spray foliage thoroughly with insecticidal soap, neem oil emulsion, or pyrethrin spray, ensuring complete coverage under leaves and along stems.",
+            "Wipe away sticky honeydew residues to prevent secondary black sooty mold crust from developing.",
+            "Reapply spray every 3-4 days for two weeks to eliminate newly hatched nymphs.",
         ],
     },
     "Thrips_Damage": {
         "condition_name": "Thrips Damage",
         "category": "Insect Infestation",
         "severity": "High",
-        "summary": "Silvery rasped patches and fine dark frass speckling detected on surface.",
+        "summary": "Silvery rasped patches, mottled stippling, and fine dark frass speckling detected on surface.",
         "immediate_actions": [
             "Quarantine immediately and place blue sticky traps beside canopy.",
             "Spray Spinosad across upper and lower leaf surfaces every 5 days.",
@@ -195,13 +204,16 @@ SURFACE_CARE_MAP = {
         ],
     },
     "Abiotic_Dehydration_Underwatering": {
-        "condition_name": "Surface Dehydration / Underwatering Stress",
+        "condition_name": "Underwatering Dehydration Stress (Needs Water)",
         "category": "Abiotic Water Stress",
         "severity": "Moderate",
-        "summary": "Surface shows signs of moisture deficit (shriveled ribs, wilting curl, or dry crispy tips/margins).",
+        "summary": "Foliage exhibits acute moisture deficit and loss of cellular turgor (limp, drooping, wilting, or inward-curling green leaves). The root zone is dry and the plant urgently needs water.",
         "immediate_actions": [
-            "Check soil dryness 2 inches deep; perform a thorough deep soak and allow excess water to drain.",
-            "Trim dead crispy margins cleanly without cutting live green tissue.",
+            "Check soil moisture: Insert a finger or moisture meter 2 inches into soil. If dry and crumbly, water thoroughly immediately.",
+            "Perform deep soaking: Water from above until water flows freely out of bottom drainage holes, or bottom-soak the pot in a basin of lukewarm water for 25-35 minutes.",
+            "Empty drainage saucer: Allow excess water to drain out completely so roots do not sit in stagnant pools.",
+            "Avoid direct harsh sun: Keep the recovering plant in bright indirect light until foliage regains full turgor firmness (usually within 3-6 hours).",
+            "Maintain regular watering schedule: Water whenever top 1-2 inches of soil feel dry to touch.",
         ],
     },
     "Abiotic_Overwatering_Edema": {
@@ -328,12 +340,15 @@ def run_v2_diagnosis(
 
     # 3. Stage 1B: Dominant Multi-Plant Instance Segmentation (Highest Coverage Focus)
     iso = isolate_dominant_plant(pil_img, min_coverage_pct=QUALITY_THRESHOLDS["min_plant_coverage_pct"], allow_fallback=True)
-    is_dried_specimen = bool(ver_meta.get("is_dried", False))
-    is_dead_specimen = bool(ver_meta.get("is_dead_beyond_saving", False))
+    verified_pest = ver_meta.get("verified_pest_class")
+    is_infestation = bool(ver_meta.get("is_infestation", False) or verified_pest is not None)
+    is_underwatered_specimen = bool(ver_meta.get("is_underwatered", False))
+    is_dried_specimen = bool(ver_meta.get("is_dried", False)) and not is_infestation
+    is_dead_specimen = bool(ver_meta.get("is_dead_beyond_saving", False)) and not is_infestation
 
     if not iso["detected"] or iso["dominant_coverage_pct"] < QUALITY_THRESHOLDS["min_plant_coverage_pct"]:
-        if is_plant or is_dried_specimen or is_dead_specimen:
-            # Fall back to using the full photo for dried, dead, or irregular botanical subjects
+        if is_plant or is_dried_specimen or is_dead_specimen or is_infestation or is_underwatered_specimen:
+            # Fall back to using the full photo for dried, dead, infested, or irregular botanical subjects
             iso["crop_img"] = pil_img
             iso["masked_crop_img"] = pil_img
             iso["mask_crop"] = np.ones((pil_img.height, pil_img.width), dtype=bool)
@@ -369,7 +384,7 @@ def run_v2_diagnosis(
 
     # Re-run sharp focus verification strictly on the isolated dominant plant pixels
     fg_ok, fg_code, fg_q = evaluate_image_quality(iso["crop_img"], foreground_mask=iso["mask_crop"], min_short_side=120)
-    if not fg_ok and not is_dried_specimen and not is_dead_specimen:
+    if not fg_ok and not is_dried_specimen and not is_dead_specimen and not is_infestation and not is_underwatered_specimen:
         return {
             "status": "retake_recommended",
             "grace_code": f"SUBJECT_{fg_code}",
@@ -396,18 +411,28 @@ def run_v2_diagnosis(
         plant_family=id_res.get("family", "Unknown"),
         is_externally_dried=is_dried_specimen,
         is_externally_dead=is_dead_specimen,
+        is_externally_underwatered=is_underwatered_specimen,
+        verified_pest=verified_pest,
     )
     primary_cond = path_res["primary_class"]
     care = SURFACE_CARE_MAP.get(primary_cond, SURFACE_CARE_MAP["Healthy_Foliage"])
     lesion_info = path_res["lesion_info"]
 
-    is_dead = bool(is_dead_specimen or path_res.get("is_dead", False) or primary_cond == "Abiotic_Terminal_Dead_Plant")
-    is_dried = is_dead or is_dried_specimen or (primary_cond == "Abiotic_Severe_Desiccation_Dried_Plant")
+    is_pest = bool(verified_pest or primary_cond in ("Mealybugs_Cochineal", "Aphids", "Scale_Insects", "Thrips_Damage", "Spider_Mites", "Whiteflies", "Leaf_Miners"))
+    is_dead = bool((is_dead_specimen or path_res.get("is_dead", False) or primary_cond == "Abiotic_Terminal_Dead_Plant") and not is_pest)
+    is_dried = bool((is_dead or is_dried_specimen or primary_cond == "Abiotic_Severe_Desiccation_Dried_Plant") and not is_pest)
+    is_underwatered = bool((is_underwatered_specimen or primary_cond == "Abiotic_Dehydration_Underwatering") and not is_pest and not is_dried and not is_dead)
+
     raw_species = id_res.get("raw_top_species") or id_res.get("species", "Botanical Specimen")
-    if is_dead:
+    if is_pest and verified_pest:
+        pest_label = care["condition_name"].split("/")[0].split("(")[0].strip()
+        species_name = f"{raw_species} ({pest_label} Infestation)"
+    elif is_dead:
         species_name = f"{raw_species} (Dead / Non-Viable Specimen)"
     elif is_dried:
         species_name = f"{raw_species} (Dried / Withered Specimen)"
+    elif is_underwatered:
+        species_name = f"{raw_species} (Underwatered / Needs Water)"
     else:
         species_name = raw_species
 
@@ -416,12 +441,29 @@ def run_v2_diagnosis(
         if iso["instances_count"] > 1
         else f"Primary plant isolated cleanly ({iso['dominant_coverage_pct']}% frame coverage)."
     )
-    if is_dead:
+    if is_pest and verified_pest:
+        multi_note = f"{multi_note} Active pest infestation verified: {care['condition_name']}."
+    elif is_dead:
         multi_note = f"{multi_note} Specimen exhibits irreversible cellular mortality (beyond saving)."
     elif is_dried:
         multi_note = f"{multi_note} Specimen exhibits severe desiccation / dried foliage."
+    elif is_underwatered:
+        multi_note = f"{multi_note} Specimen exhibits foliar dehydration / loss of turgor (needs water)."
 
     all_recs = list(care["immediate_actions"]) + [r for r in id_res.get("recommendations", []) if r not in care["immediate_actions"]]
+
+    if is_pest and verified_pest:
+        spots_status_msg = f"Active biotic pest infestation detected: {care['condition_name']}. Inspect leaf nodes, axils, and leaf undersides immediately."
+    elif primary_cond == "Abiotic_Terminal_Dead_Plant":
+        spots_status_msg = f"Specimen exhibits irreversible cellular mortality ({path_res['surface_stress'].get('desiccation_grade', 'Dead')}). Zero living green tissue."
+    elif primary_cond == "Abiotic_Severe_Desiccation_Dried_Plant":
+        spots_status_msg = f"Specimen exhibits severe foliar desiccation ({path_res['surface_stress'].get('desiccation_grade', 'Dried')}). Foliage is dried and moisture-depleted."
+    elif primary_cond == "Abiotic_Dehydration_Underwatering":
+        spots_status_msg = "Specimen exhibits acute foliar dehydration and wilting (Needs Water). Living leaves are drooping."
+    elif lesion_info["spots_count"] > 0:
+        spots_status_msg = f"{lesion_info['spots_count']} surface lesion/symptom zone(s) detected ({lesion_info['infected_area_pct']}% of plant mask)."
+    else:
+        spots_status_msg = "No distinct localized lesion boxes detected."
 
     return {
         "status": "success",
@@ -459,23 +501,7 @@ def run_v2_diagnosis(
             "has_spots": (not path_res["is_healthy"]) and lesion_info["spots_count"] > 0,
             "spots_count": lesion_info["spots_count"],
             "infected_area_pct": lesion_info["infected_area_pct"],
-            "status_message": (
-                f"Specimen exhibits irreversible cellular mortality ({path_res['surface_stress'].get('desiccation_grade', 'Dead')}). "
-                if (primary_cond == "Abiotic_Terminal_Dead_Plant")
-                else (
-                    f"Specimen exhibits severe desiccation ({path_res['surface_stress'].get('desiccation_grade', 'Dried')}). "
-                    if (primary_cond == "Abiotic_Severe_Desiccation_Dried_Plant")
-                    else ""
-                )
-            ) + (
-                f"{lesion_info['spots_count']} surface lesion/symptom zone(s) detected ({lesion_info['infected_area_pct']}% of plant mask)."
-                if lesion_info["spots_count"] > 0
-                else "No active fungal/pest lesions detected; tissue exhibits total cellular death."
-                if (primary_cond == "Abiotic_Terminal_Dead_Plant")
-                else "No localized fungal/pest spots detected; pathology dominated by abiotic surface desiccation."
-                if (primary_cond == "Abiotic_Severe_Desiccation_Dried_Plant")
-                else "No distinct localized lesion boxes detected."
-            ),
+            "status_message": spots_status_msg,
             "annotated_image_base64": _img_to_b64(lesion_info["annotated_img"]),
         },
         "surface_stress": path_res["surface_stress"],
@@ -495,7 +521,19 @@ def run_v2_diagnosis(
                 else (
                     ["Severe moisture depletion", "Prolonged underwatering", "Root-ball dehydration", "Excess heat desiccation"]
                     if (primary_cond == "Abiotic_Severe_Desiccation_Dried_Plant")
-                    else []
+                    else (
+                        ["Inadequate watering volume or frequency", "Root zone moisture deficit", "Hydrophobic dry soil", "High ambient heat / transpiration"]
+                        if (primary_cond == "Abiotic_Dehydration_Underwatering")
+                        else (
+                            ["Infestation by Pseudococcidae sap-sucking insects", "Warm stagnant indoor environment", "Contaminated nursery stock or soil"]
+                            if (primary_cond == "Mealybugs_Cochineal")
+                            else (
+                                ["Aphidoidea sap-sucker colonies (black aphids / plant lice)", "Tender new vegetative shoots attracting pests", "Lack of natural predatory insects"]
+                                if (primary_cond == "Aphids")
+                                else []
+                            )
+                        )
+                    )
                 )
             ),
         },
