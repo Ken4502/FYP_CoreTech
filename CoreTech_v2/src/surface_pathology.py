@@ -209,6 +209,13 @@ def analyze_masked_surface_stress(pil_crop: Image.Image, mask_crop: np.ndarray) 
     # White cottony / powdery wax cluster index (characteristic of mealybugs & cochineal)
     white_waxy_pct = round(float(np.mean((s_ch < 50) & (v_ch > 180) & (b_ch < 138)) * 100.0), 1)
 
+    # Bright orange / cinnamon / reddish-orange spore pustule index (characteristic of Rust Fungi / Pucciniales)
+    rust_pustule_pct = round(
+        float(np.mean((h_ch >= 7) & (h_ch <= 26) & (s_ch >= 80) & (v_ch >= 80) & (a_ch >= 133) & (b_ch >= 135)) * 100.0),
+        2,
+    )
+    has_rust_pustules = bool(rust_pustule_pct >= 0.65)
+
     # Surface wrinkling / shriveling texture index (high local high-freq directional ridges inside mask)
     lap_abs = np.abs(cv2.Laplacian(gray, cv2.CV_32F, ksize=3))
     wrinkle_index = round(float(np.percentile(lap_abs[m], 85)), 2)
@@ -246,6 +253,8 @@ def analyze_masked_surface_stress(pil_crop: Image.Image, mask_crop: np.ndarray) 
         "sunburn_bleached_pct": bleached_pct,
         "white_waxy_pct": white_waxy_pct,
         "is_mealybug_cotton": is_mealybug_cotton,
+        "rust_pustule_pct": rust_pustule_pct,
+        "has_rust_pustules": has_rust_pustules,
         "surface_wrinkle_index": wrinkle_index,
         "mean_saturation_pct": round(float(np.mean(s_ch) / 255.0 * 100.0), 1),
         "is_dried": is_dried,
@@ -301,15 +310,17 @@ def diagnose_surface_condition(
     is_externally_dead: bool = False,
     is_externally_underwatered: bool = False,
     verified_pest: Optional[str] = None,
+    verified_pathology: Optional[str] = None,
 ) -> Dict[str, Any]:
     """Runs Stage 3 Multi-Tile MIL Ensemble + YOLO Lesion Localizer + Masked Surface Stress."""
     mil_dict, yolo_lesion, calib = load_pathology_suite()
     stress_metrics = analyze_masked_surface_stress(pil_crop, mask_crop)
     lesion_info = detect_surface_lesions(pil_crop, mask_crop, yolo_lesion)
 
-    if verified_pest:
+    if verified_pest or verified_pathology:
         is_dead_plant = False
         is_dried_plant = False
+        is_externally_underwatered = False
     else:
         is_dead_plant = bool(is_externally_dead or stress_metrics.get("is_dead", False))
         is_dried_plant = bool(is_externally_dried or stress_metrics.get("is_dried", False) or is_dead_plant)
@@ -322,6 +333,16 @@ def diagnose_surface_condition(
                 "confidence": 96.5,
                 "is_healthy": False,
                 "predictions": [{"rank": 1, "class_name": verified_pest, "confidence": 96.5}],
+                "lesion_info": lesion_info,
+                "surface_stress": stress_metrics,
+            }
+        if verified_pathology:
+            return {
+                "primary_class": verified_pathology,
+                "super_state": "Biotic_Pathology",
+                "confidence": 96.0,
+                "is_healthy": False,
+                "predictions": [{"rank": 1, "class_name": verified_pathology, "confidence": 96.0}],
                 "lesion_info": lesion_info,
                 "surface_stress": stress_metrics,
             }
@@ -452,7 +473,14 @@ def diagnose_surface_condition(
         super_probs = super_probs_sum / max(1e-6, total_w)
 
     # 2. Feature 1: Biological Host-Pathogen Compatibility Matrix (Bayesian Prior)
-    fine_probs, host_meta = apply_biological_host_prior(fine_probs, ref_classes, plant_family)
+    exempt_host_classes = []
+    if verified_pathology:
+        exempt_host_classes.append(verified_pathology)
+    if stress_metrics.get("has_rust_pustules", False):
+        exempt_host_classes.append("Rust_Fungi")
+    fine_probs, host_meta = apply_biological_host_prior(
+        fine_probs, ref_classes, plant_family, exempt_classes=exempt_host_classes
+    )
 
     # 3. Feature 3: Explainable AI (XAI) Grad-CAM / Attention Activation Heatmap
     xai_b64 = ""
@@ -491,10 +519,12 @@ def diagnose_surface_condition(
         primary = "Healthy_Foliage"
         primary_conf = round(max(p_healthy_sup * 100.0, 78.5), 1)
 
-    # Super-head healthy protection: only declare healthy if super-head healthy dominates AND zero YOLO spots AND no pest
+    # Super-head healthy protection: only declare healthy if super-head healthy dominates AND zero YOLO spots AND no pest/disease
     healthy_thresh = float(calib.get("healthy_override_thresh", 0.62))
     if (
         not verified_pest
+        and not verified_pathology
+        and not stress_metrics.get("has_rust_pustules", False)
         and not is_dried_plant
         and not is_dead_plant
         and not is_externally_underwatered
@@ -515,6 +545,34 @@ def diagnose_surface_condition(
         other_preds = [p for p in preds if p["class_name"] != verified_pest][:4]
         preds = [{"rank": 1, "class_name": verified_pest, "confidence": primary_conf}] + [
             {"rank": r + 2, "class_name": p["class_name"], "confidence": round(p["confidence"] * 0.25, 2)}
+            for r, p in enumerate(other_preds)
+        ]
+    elif verified_pathology:
+        primary = verified_pathology
+        primary_conf = max(primary_conf, 96.0)
+        super_state = "Biotic_Pathology"
+        p_healthy_sup = min(p_healthy_sup, 0.01)
+        p_biotic_sup = max(p_biotic_sup, 0.98)
+        p_abiotic_sup = min(p_abiotic_sup, 0.01)
+        other_preds = [p for p in preds if p["class_name"] != verified_pathology][:4]
+        preds = [{"rank": 1, "class_name": verified_pathology, "confidence": primary_conf}] + [
+            {"rank": r + 2, "class_name": p["class_name"], "confidence": round(p["confidence"] * 0.20, 2)}
+            for r, p in enumerate(other_preds)
+        ]
+    elif stress_metrics.get("has_rust_pustules", False) and (
+        primary in ("Fungal_Leaf_Spot_Anthracnose", "Healthy_Foliage", "Abiotic_Overwatering_Edema", "Abiotic_Sunburn_Scald")
+        or primary_conf < 78.0
+    ):
+        # Optical safeguard: raised bright orange/cinnamon urediniospores detected on leaf surface override Anthracnose
+        primary = "Rust_Fungi"
+        primary_conf = max(primary_conf, 95.0)
+        super_state = "Biotic_Pathology"
+        p_healthy_sup = min(p_healthy_sup, 0.01)
+        p_biotic_sup = max(p_biotic_sup, 0.98)
+        p_abiotic_sup = min(p_abiotic_sup, 0.01)
+        other_preds = [p for p in preds if p["class_name"] != "Rust_Fungi"][:4]
+        preds = [{"rank": 1, "class_name": "Rust_Fungi", "confidence": primary_conf}] + [
+            {"rank": r + 2, "class_name": p["class_name"], "confidence": round(p["confidence"] * 0.20, 2)}
             for r, p in enumerate(other_preds)
         ]
     elif is_dead_plant:
@@ -573,7 +631,9 @@ def diagnose_surface_condition(
         and not is_dried_plant
         and not is_dead_plant
         and not verified_pest
-        and not is_externally_underwatered,
+        and not verified_pathology
+        and not is_externally_underwatered
+        and not stress_metrics.get("has_rust_pustules", False),
         "predictions": preds,
         "lesion_info": lesion_info,
         "surface_stress": stress_metrics,

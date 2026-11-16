@@ -341,13 +341,15 @@ def run_v2_diagnosis(
     # 3. Stage 1B: Dominant Multi-Plant Instance Segmentation (Highest Coverage Focus)
     iso = isolate_dominant_plant(pil_img, min_coverage_pct=QUALITY_THRESHOLDS["min_plant_coverage_pct"], allow_fallback=True)
     verified_pest = ver_meta.get("verified_pest_class")
+    verified_pathology = ver_meta.get("verified_pathology_class")
     is_infestation = bool(ver_meta.get("is_infestation", False) or verified_pest is not None)
+    is_verified_disease = bool(ver_meta.get("is_verified_disease", False) or verified_pathology is not None)
     is_underwatered_specimen = bool(ver_meta.get("is_underwatered", False))
-    is_dried_specimen = bool(ver_meta.get("is_dried", False)) and not is_infestation
-    is_dead_specimen = bool(ver_meta.get("is_dead_beyond_saving", False)) and not is_infestation
+    is_dried_specimen = bool(ver_meta.get("is_dried", False)) and not is_infestation and not is_verified_disease
+    is_dead_specimen = bool(ver_meta.get("is_dead_beyond_saving", False)) and not is_infestation and not is_verified_disease
 
     if not iso["detected"] or iso["dominant_coverage_pct"] < QUALITY_THRESHOLDS["min_plant_coverage_pct"]:
-        if is_plant or is_dried_specimen or is_dead_specimen or is_infestation or is_underwatered_specimen:
+        if is_plant or is_dried_specimen or is_dead_specimen or is_infestation or is_underwatered_specimen or is_verified_disease:
             # Fall back to using the full photo for dried, dead, infested, or irregular botanical subjects
             iso["crop_img"] = pil_img
             iso["masked_crop_img"] = pil_img
@@ -384,7 +386,7 @@ def run_v2_diagnosis(
 
     # Re-run sharp focus verification strictly on the isolated dominant plant pixels
     fg_ok, fg_code, fg_q = evaluate_image_quality(iso["crop_img"], foreground_mask=iso["mask_crop"], min_short_side=120)
-    if not fg_ok and not is_dried_specimen and not is_dead_specimen and not is_infestation and not is_underwatered_specimen:
+    if not fg_ok and not is_dried_specimen and not is_dead_specimen and not is_infestation and not is_underwatered_specimen and not is_verified_disease:
         return {
             "status": "retake_recommended",
             "grace_code": f"SUBJECT_{fg_code}",
@@ -413,20 +415,23 @@ def run_v2_diagnosis(
         is_externally_dead=is_dead_specimen,
         is_externally_underwatered=is_underwatered_specimen,
         verified_pest=verified_pest,
+        verified_pathology=verified_pathology,
     )
     primary_cond = path_res["primary_class"]
     care = SURFACE_CARE_MAP.get(primary_cond, SURFACE_CARE_MAP["Healthy_Foliage"])
     lesion_info = path_res["lesion_info"]
 
     is_pest = bool(verified_pest or primary_cond in ("Mealybugs_Cochineal", "Aphids", "Scale_Insects", "Thrips_Damage", "Spider_Mites", "Whiteflies", "Leaf_Miners"))
-    is_dead = bool((is_dead_specimen or path_res.get("is_dead", False) or primary_cond == "Abiotic_Terminal_Dead_Plant") and not is_pest)
-    is_dried = bool((is_dead or is_dried_specimen or primary_cond == "Abiotic_Severe_Desiccation_Dried_Plant") and not is_pest)
-    is_underwatered = bool((is_underwatered_specimen or primary_cond == "Abiotic_Dehydration_Underwatering") and not is_pest and not is_dried and not is_dead)
+    is_dead = bool((is_dead_specimen or path_res.get("is_dead", False) or primary_cond == "Abiotic_Terminal_Dead_Plant") and not is_pest and not is_verified_disease)
+    is_dried = bool((is_dead or is_dried_specimen or primary_cond == "Abiotic_Severe_Desiccation_Dried_Plant") and not is_pest and not is_verified_disease)
+    is_underwatered = bool((is_underwatered_specimen or primary_cond == "Abiotic_Dehydration_Underwatering") and not is_pest and not is_dried and not is_dead and not is_verified_disease)
 
     raw_species = id_res.get("raw_top_species") or id_res.get("species", "Botanical Specimen")
     if is_pest and verified_pest:
         pest_label = care["condition_name"].split("/")[0].split("(")[0].strip()
         species_name = f"{raw_species} ({pest_label} Infestation)"
+    elif primary_cond == "Rust_Fungi":
+        species_name = f"{raw_species} (Rust Fungi Infection)"
     elif is_dead:
         species_name = f"{raw_species} (Dead / Non-Viable Specimen)"
     elif is_dried:
@@ -443,6 +448,8 @@ def run_v2_diagnosis(
     )
     if is_pest and verified_pest:
         multi_note = f"{multi_note} Active pest infestation verified: {care['condition_name']}."
+    elif primary_cond == "Rust_Fungi":
+        multi_note = f"{multi_note} Fungal rust pustules verified on leaf surface (Pucciniales)."
     elif is_dead:
         multi_note = f"{multi_note} Specimen exhibits irreversible cellular mortality (beyond saving)."
     elif is_dried:
@@ -454,6 +461,9 @@ def run_v2_diagnosis(
 
     if is_pest and verified_pest:
         spots_status_msg = f"Active biotic pest infestation detected: {care['condition_name']}. Inspect leaf nodes, axils, and leaf undersides immediately."
+    elif primary_cond == "Rust_Fungi":
+        pustule_pct = path_res["surface_stress"].get("rust_pustule_pct", 0.0)
+        spots_status_msg = f"Raised orange/rusty-cinnamon fungal pustules (uredinia) detected on foliage ({pustule_pct}% spore pustule coverage). Rust Fungi (Pucciniales)."
     elif primary_cond == "Abiotic_Terminal_Dead_Plant":
         spots_status_msg = f"Specimen exhibits irreversible cellular mortality ({path_res['surface_stress'].get('desiccation_grade', 'Dead')}). Zero living green tissue."
     elif primary_cond == "Abiotic_Severe_Desiccation_Dried_Plant":
@@ -500,13 +510,13 @@ def run_v2_diagnosis(
         "spots": {
             "has_spots": (
                 (not path_res["is_healthy"])
-                and lesion_info["spots_count"] > 0
+                and (lesion_info["spots_count"] > 0 or primary_cond == "Rust_Fungi")
                 and not is_underwatered
                 and not is_dead
                 and not is_dried
             ),
-            "spots_count": lesion_info["spots_count"] if (not is_underwatered and not is_dead and not is_dried) else 0,
-            "infected_area_pct": lesion_info["infected_area_pct"] if (not is_underwatered and not is_dead and not is_dried) else 0.0,
+            "spots_count": max(lesion_info["spots_count"], 1 if primary_cond == "Rust_Fungi" else 0) if (not is_underwatered and not is_dead and not is_dried) else 0,
+            "infected_area_pct": max(lesion_info["infected_area_pct"], path_res["surface_stress"].get("rust_pustule_pct", 0.0) if primary_cond == "Rust_Fungi" else 0.0) if (not is_underwatered and not is_dead and not is_dried) else 0.0,
             "status_message": spots_status_msg,
             "annotated_image_base64": _img_to_b64(lesion_info["annotated_img"]),
         },

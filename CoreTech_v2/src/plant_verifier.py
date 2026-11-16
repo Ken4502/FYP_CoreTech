@@ -95,20 +95,32 @@ def verify_plant_online(
             "   - 'severely_dried': Foliage or cuttings are completely crispy, papery, brown, withered, or desiccated (can snap/crackle, but root crown/stem base may still have living cambium).\n"
             "   - 'dead_beyond_saving': Completely dead, black/dark brown collapsed, rotted, or dry brittle dead kindling with zero living green cambium tissue.\n"
             "   - 'normal_healthy_turgor': Upright, firm, turgid healthy foliage with optimal hydration and normal turgor.\n\n"
-            "4. Determine Primary Surface Pathology:\n"
-            "   Choose the single most dominant condition: 'pest_infestation', 'underwatering_needs_water', "
-            "   'severe_desiccation', 'dead_plant', 'fungal_bacterial_disease', or 'healthy'.\n\n"
+            "4. Detect Specific Fungal or Bacterial Pathologies:\n"
+            "   Carefully inspect leaf surfaces for distinct foliar lesions:\n"
+            "   - 'rust_fungi': Raised bright orange, cinnamon, rust-brown, or yellow-orange powdery spore pustules / blisters (Pucciniales / uredinia) on foliage.\n"
+            "   - 'powdery_mildew': Superficial white or light-gray talcum powder-like fungal mycelium patches coating leaf surfaces.\n"
+            "   - 'sooty_mold': Black charcoal/soot-like superficial crust coating leaf surfaces (typically following sap-sucking pests).\n"
+            "   - 'downy_mildew': Angular chlorotic patches on upper leaf surface with fuzzy grayish-purple downy sporulation underneath.\n"
+            "   - 'botrytis_gray_mold': Fuzzy gray-brown mold cushions on decaying flowers, stems, or soft tissues.\n"
+            "   - 'fungal_leaf_spot_anthracnose': Dark brown, black, or tan necrotic circular/angular spots with concentric rings, yellow halos, or sunken lesions (WITHOUT powdery orange spore pustules).\n"
+            "   - 'bacterial_wilt_soft_rot': Water-soaked, translucent, foul-smelling soft mushy rotting patches or sudden bacterial wilt.\n"
+            "   - 'none': No active fungal or bacterial disease.\n\n"
+            "5. Determine Primary Surface Pathology:\n"
+            "   Choose the single most dominant condition: 'pest_infestation', 'rust_fungi', 'powdery_mildew', "
+            "   'fungal_leaf_spot_anthracnose', 'bacterial_wilt_soft_rot', 'sooty_mold', 'underwatering_needs_water', "
+            "   'severe_desiccation', 'dead_plant', or 'healthy'.\n\n"
             "Respond ONLY with valid JSON:\n"
             "{\n"
             '  "is_plant": true or false,\n'
             '  "detected_pest": "mealybugs" or "aphids" or "scale_insects" or "thrips" or "spider_mites" or "whiteflies" or "leaf_miners" or "none",\n'
+            '  "detected_disease": "rust_fungi" or "powdery_mildew" or "sooty_mold" or "downy_mildew" or "botrytis_gray_mold" or "fungal_leaf_spot_anthracnose" or "bacterial_wilt_soft_rot" or "none",\n'
             '  "water_and_viability": "needs_water" or "severely_dried" or "dead_beyond_saving" or "normal_healthy_turgor",\n'
-            '  "primary_pathology": "pest_infestation" or "underwatering_needs_water" or "severe_desiccation" or "dead_plant" or "fungal_bacterial_disease" or "healthy",\n'
+            '  "primary_pathology": "pest_infestation" or "rust_fungi" or "powdery_mildew" or "fungal_leaf_spot_anthracnose" or "bacterial_wilt_soft_rot" or "sooty_mold" or "underwatering_needs_water" or "severe_desiccation" or "dead_plant" or "healthy",\n'
             '  "is_dried": true or false,\n'
             '  "is_dead_beyond_saving": true or false,\n'
             '  "desiccation_status": "fresh_living" or "severely_dried_withered" or "dead_beyond_saving",\n'
             '  "confidence": 0.0 to 1.0,\n'
-            '  "detected_subject": "concise description of main subject (e.g. drooping peace lily needing water, money plant with mealybug clusters, or dried leaf)",\n'
+            '  "detected_subject": "concise description of main subject (e.g. leaf with orange rust pustules, or drooping peace lily)",\n'
             '  "multiple_plants": true or false,\n'
             '  "reason": "1 concise sentence explaining the finding"\n'
             "}"
@@ -159,16 +171,43 @@ def verify_plant_online(
         elif "miner" in detected_pest:
             verified_pest_class = "Leaf_Miners"
 
-        is_infestation = bool(verified_pest_class is not None or primary_pathology == "pest_infestation")
+        # Map specific disease to canonical CoreTech v2 surface pathology class
+        detected_disease = str(data.get("detected_disease", "none")).lower().strip()
+        reason_lower = str(data.get("reason", "")).lower()
+        subject_lower = str(data.get("detected_subject", "")).lower()
+        disease_context = f"{detected_disease} {primary_pathology} {reason_lower} {subject_lower}"
 
-        # Crucial: Pest infestations (e.g. white cottony mealybugs) must NOT be labeled as dried or dead!
-        if is_infestation:
+        verified_pathology_class = None
+        if (
+            "rust" in disease_context
+            or "puccinial" in disease_context
+            or "uredini" in disease_context
+            or "orange pustule" in disease_context
+            or "rusty" in disease_context
+        ):
+            verified_pathology_class = "Rust_Fungi"
+        elif "powdery" in disease_context or ("mildew" in disease_context and "downy" not in disease_context):
+            verified_pathology_class = "Powdery_Mildew"
+        elif "sooty" in disease_context:
+            verified_pathology_class = "Sooty_Mold"
+        elif "downy" in disease_context:
+            verified_pathology_class = "Downy_Mildew"
+        elif "botrytis" in disease_context or "gray mold" in disease_context or "grey mold" in disease_context:
+            verified_pathology_class = "Botrytis_Gray_Mold"
+        elif "anthracnose" in disease_context or "leaf spot" in disease_context:
+            verified_pathology_class = "Fungal_Leaf_Spot_Anthracnose"
+        elif "bacterial" in disease_context or "soft rot" in disease_context:
+            verified_pathology_class = "Bacterial_Wilt_Soft_Rot"
+
+        is_infestation = bool(verified_pest_class is not None or primary_pathology == "pest_infestation")
+        is_verified_disease = bool(verified_pathology_class is not None)
+
+        # Crucial: Pest infestations & active diseases must NOT be labeled as dried or dead!
+        if is_infestation or is_verified_disease:
             is_dried = False
             is_dead = False
             is_underwatered = False
         else:
-            reason_lower = str(data.get("reason", "")).lower()
-            subject_lower = str(data.get("detected_subject", "")).lower()
             combined_text = f"{reason_lower} {subject_lower}"
 
             is_underwatered = bool(
@@ -202,6 +241,10 @@ def verify_plant_online(
             msg = f"Non-plant detected: {subject}. {reason}".strip()
         elif is_infestation and verified_pest_class:
             msg = f"Pest infestation verified ({verified_pest_class}): {subject}."
+        elif verified_pathology_class == "Rust_Fungi":
+            msg = f"Fungal rust infection verified (Rust_Fungi): {subject}."
+        elif verified_pathology_class:
+            msg = f"Botanical disease verified ({verified_pathology_class}): {subject}."
         elif is_dead:
             msg = f"Non-viable dead botanical matter verified (Beyond Saving): {subject}."
         elif is_dried:
@@ -218,6 +261,8 @@ def verify_plant_online(
             "multiple_plants": bool(data.get("multiple_plants", False)),
             "detected_pest": detected_pest,
             "verified_pest_class": verified_pest_class,
+            "detected_disease": detected_disease,
+            "verified_pathology_class": verified_pathology_class,
             "is_infestation": is_infestation,
             "is_underwatered": is_underwatered,
             "is_dried": is_dried,
