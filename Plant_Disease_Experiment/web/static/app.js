@@ -22,8 +22,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const spotBadge = document.getElementById("spot-badge");
   const spotStatusText = document.getElementById("spot-status-text");
   const viewHighlightedBtn = document.getElementById("view-highlighted-btn");
+  const viewXaiBtn = document.getElementById("view-xai-btn");
   const viewPreprocessedBtn = document.getElementById("view-preprocessed-btn");
   const viewOriginalBtn = document.getElementById("view-original-btn");
+
+  const hostPriorPill = document.getElementById("host-prior-pill");
+  const ttaPill = document.getElementById("tta-pill");
 
   // EPPO / USDA PDI & Co-Infection Elements
   const pdiMeterCard = document.getElementById("pdi-meter-card");
@@ -71,6 +75,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let originalImageSrc = "";
   let annotatedImageSrc = "";
   let preprocessedImageSrc = "";
+  let xaiHeatmapSrc = "";
 
   // 1. Fetch system info
   async function fetchSystemInfo() {
@@ -190,15 +195,28 @@ document.addEventListener("DOMContentLoaded", () => {
   viewHighlightedBtn.addEventListener("click", () => {
     viewHighlightedBtn.classList.add("active");
     viewOriginalBtn.classList.remove("active");
+    if (viewXaiBtn) viewXaiBtn.classList.remove("active");
     if (viewPreprocessedBtn) viewPreprocessedBtn.classList.remove("active");
     annotatedPreview.src = annotatedImageSrc || originalImageSrc;
   });
+
+  if (viewXaiBtn) {
+    viewXaiBtn.addEventListener("click", () => {
+      viewXaiBtn.classList.add("active");
+      viewHighlightedBtn.classList.remove("active");
+      viewOriginalBtn.classList.remove("active");
+      if (viewPreprocessedBtn) viewPreprocessedBtn.classList.remove("active");
+      annotatedPreview.src = xaiHeatmapSrc || originalImageSrc;
+      spotStatusText.textContent = "Displaying Dual-Scale Multi-Tile Attention Heatmap (Grad-CAM spatial activation across plant foliage).";
+    });
+  }
 
   if (viewPreprocessedBtn) {
     viewPreprocessedBtn.addEventListener("click", () => {
       viewPreprocessedBtn.classList.add("active");
       viewHighlightedBtn.classList.remove("active");
       viewOriginalBtn.classList.remove("active");
+      if (viewXaiBtn) viewXaiBtn.classList.remove("active");
       annotatedPreview.src = preprocessedImageSrc || originalImageSrc;
     });
   }
@@ -206,6 +224,7 @@ document.addEventListener("DOMContentLoaded", () => {
   viewOriginalBtn.addEventListener("click", () => {
     viewOriginalBtn.classList.add("active");
     viewHighlightedBtn.classList.remove("active");
+    if (viewXaiBtn) viewXaiBtn.classList.remove("active");
     if (viewPreprocessedBtn) viewPreprocessedBtn.classList.remove("active");
     annotatedPreview.src = originalImageSrc;
   });
@@ -249,6 +268,140 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     annotatedContainer.addEventListener("touchend", () => {
       magnifierLens.style.display = "none";
+    });
+  }
+
+  // 4c. Diagnostic Image Rotation & Full-Screen Interactive Zoom Modal
+  let cardRotation = 0;
+  const rotateImageBtn = document.getElementById("rotate-image-btn");
+  if (rotateImageBtn) {
+    rotateImageBtn.addEventListener("click", () => {
+      cardRotation = (cardRotation + 90) % 360;
+      annotatedPreview.style.transform = `rotate(${cardRotation}deg)`;
+    });
+  }
+
+  const zoomModal = document.getElementById("image-zoom-modal");
+  const zoomBackdrop = document.getElementById("zoom-modal-backdrop");
+  const zoomCloseBtn = document.getElementById("zoom-modal-close");
+  const zoomModalImg = document.getElementById("zoom-modal-image");
+  const zoomViewport = document.getElementById("zoom-modal-viewport");
+  const zoomExpandBtn = document.getElementById("zoom-expand-btn");
+  const zoomInBtn = document.getElementById("zoom-in-btn");
+  const zoomOutBtn = document.getElementById("zoom-out-btn");
+  const zoomRotateBtn = document.getElementById("zoom-rotate-btn");
+  const zoomResetBtn = document.getElementById("zoom-reset-btn");
+
+  let zoomScale = 1.0;
+  let zoomRotation = 0;
+  let panX = 0;
+  let panY = 0;
+  let isDragging = false;
+  let dragStartX = 0;
+  let dragStartY = 0;
+
+  function updateZoomTransform() {
+    if (!zoomModalImg) return;
+    zoomModalImg.style.transform = `translate(${panX}px, ${panY}px) scale(${zoomScale}) rotate(${zoomRotation}deg)`;
+  }
+
+  function openZoomModal() {
+    if (!annotatedPreview || !annotatedPreview.src || annotatedPreview.src.length < 5) return;
+    zoomModalImg.src = annotatedPreview.src;
+    zoomScale = 1.0;
+    zoomRotation = cardRotation;
+    panX = 0;
+    panY = 0;
+    updateZoomTransform();
+    zoomModal.style.display = "flex";
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeZoomModal() {
+    if (!zoomModal) return;
+    zoomModal.style.display = "none";
+    document.body.style.overflow = "";
+  }
+
+  if (annotatedContainer) {
+    annotatedContainer.addEventListener("click", (e) => {
+      openZoomModal();
+    });
+  }
+
+  if (zoomExpandBtn) {
+    zoomExpandBtn.addEventListener("click", openZoomModal);
+  }
+
+  if (zoomCloseBtn) {
+    zoomCloseBtn.addEventListener("click", closeZoomModal);
+  }
+
+  if (zoomBackdrop) {
+    zoomBackdrop.addEventListener("click", closeZoomModal);
+  }
+
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && zoomModal && zoomModal.style.display !== "none") {
+      closeZoomModal();
+    }
+  });
+
+  if (zoomInBtn) {
+    zoomInBtn.addEventListener("click", () => {
+      zoomScale = Math.min(6.0, zoomScale + 0.4);
+      updateZoomTransform();
+    });
+  }
+
+  if (zoomOutBtn) {
+    zoomOutBtn.addEventListener("click", () => {
+      zoomScale = Math.max(0.5, zoomScale - 0.4);
+      updateZoomTransform();
+    });
+  }
+
+  if (zoomRotateBtn) {
+    zoomRotateBtn.addEventListener("click", () => {
+      zoomRotation = (zoomRotation + 90) % 360;
+      updateZoomTransform();
+    });
+  }
+
+  if (zoomResetBtn) {
+    zoomResetBtn.addEventListener("click", () => {
+      zoomScale = 1.0;
+      zoomRotation = 0;
+      panX = 0;
+      panY = 0;
+      updateZoomTransform();
+    });
+  }
+
+  if (zoomViewport) {
+    zoomViewport.addEventListener("wheel", (e) => {
+      e.preventDefault();
+      const delta = e.deltaY < 0 ? 0.25 : -0.25;
+      zoomScale = Math.min(6.0, Math.max(0.5, zoomScale + delta));
+      updateZoomTransform();
+    }, { passive: false });
+
+    zoomViewport.addEventListener("mousedown", (e) => {
+      if (e.button !== 0) return;
+      isDragging = true;
+      dragStartX = e.clientX - panX;
+      dragStartY = e.clientY - panY;
+    });
+
+    window.addEventListener("mousemove", (e) => {
+      if (!isDragging) return;
+      panX = e.clientX - dragStartX;
+      panY = e.clientY - dragStartY;
+      updateZoomTransform();
+    });
+
+    window.addEventListener("mouseup", () => {
+      isDragging = false;
     });
   }
 
@@ -312,6 +465,37 @@ document.addEventListener("DOMContentLoaded", () => {
     preprocessedImageSrc = data.preprocessed_image_base64 || "";
     if (viewPreprocessedBtn) {
       viewPreprocessedBtn.style.display = preprocessedImageSrc ? "inline-block" : "none";
+    }
+
+    xaiHeatmapSrc = data.xai_heatmap_base64 || "";
+    if (viewXaiBtn) {
+      viewXaiBtn.style.display = xaiHeatmapSrc ? "inline-block" : "none";
+    }
+
+    // Host Compatibility & TTA Status Badges
+    if (hostPriorPill) {
+      if (data.host_compatibility && data.host_compatibility.applied) {
+        hostPriorPill.style.display = "inline-block";
+        hostPriorPill.textContent = `🌱 Host Matrix: ${data.host_compatibility.matched_family}`;
+        const supp = data.host_compatibility.suppressed_diseases || [];
+        if (supp.length > 0) {
+          hostPriorPill.title = `Host prior suppressed: ${supp.map(s => s.disease).join(", ")}`;
+        } else {
+          hostPriorPill.title = `Host biological compatibility prior active for ${data.host_compatibility.matched_family}`;
+        }
+      } else {
+        hostPriorPill.style.display = "none";
+      }
+    }
+
+    if (ttaPill) {
+      if (data.tta_meta && data.tta_meta.applied) {
+        ttaPill.style.display = "inline-block";
+        ttaPill.textContent = `⚡ TTA ${data.tta_meta.iterations}× Consensus`;
+        ttaPill.title = `Test-Time Augmentation triggered by: ${data.tta_meta.trigger}`;
+      } else {
+        ttaPill.style.display = "none";
+      }
     }
 
     // Render Abiotic Stress & Senescence Assessment
@@ -451,7 +635,7 @@ document.addEventListener("DOMContentLoaded", () => {
       verdictBanner.classList.add("healthy");
       statusBadge.classList.add("healthy");
       statusBadge.textContent = "CLEAN & HEALTHY BASELINE";
-    } else if (diag.severity === "Severe") {
+    } else if (diag.severity === "Severe" || (diag.severity && (diag.severity.includes("Terminal") || diag.severity.includes("Critical")))) {
       verdictBanner.classList.add("diseased");
       statusBadge.classList.add("diseased");
       statusBadge.textContent = `CRITICAL: ${(diag.category || "PATHOLOGY").toUpperCase()}`;

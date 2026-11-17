@@ -273,8 +273,10 @@ def main():
                 m = url_pattern.search(line)
                 if m:
                     tunnel_url = m.group(0)
+                    print(f"[✓] Cloudflare HTTPS Tunnel established: {tunnel_url}")
                     break
-                if time.time() - start_t > 25:
+                if time.time() - start_t > 35:
+                    print("[!] Timeout waiting for Cloudflare Tunnel URL.")
                     break
 
     # Write active URLs to target files for local access and tools

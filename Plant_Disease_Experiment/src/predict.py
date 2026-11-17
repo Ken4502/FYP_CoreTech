@@ -11,7 +11,7 @@ import sys
 import json
 import numpy as np
 from pathlib import Path
-from PIL import Image
+from PIL import Image, ImageOps
 import torch
 
 EXPERIMENT_ROOT = Path(__file__).resolve().parent.parent
@@ -271,9 +271,12 @@ def diagnose_plant(image_input, target_group: str = None, top_k: int = 5, use_tt
     model, classes, spot_detector, kb = load_diagnostic_system()
 
     if isinstance(image_input, (str, Path)):
-        img = Image.open(image_input).convert("RGB")
+        raw_img = Image.open(image_input)
+        img = ImageOps.exif_transpose(raw_img) or raw_img
+        img = img.convert("RGB")
     elif isinstance(image_input, Image.Image):
-        img = image_input.convert("RGB")
+        img = ImageOps.exif_transpose(image_input) or image_input
+        img = img.convert("RGB")
     else:
         raise TypeError("Expected filepath or PIL Image instance")
 

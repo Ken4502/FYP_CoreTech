@@ -35,7 +35,10 @@ def load_plant_segmenter(device: str = "cuda"):
     if yoloe_path.exists():
         from ultralytics import YOLOE
         m = YOLOE(str(yoloe_path))
-        prompts = ["potted plant", "plant foliage", "cactus", "succulent", "houseplant leaves"]
+        prompts = [
+            "potted plant", "plant foliage", "cactus", "succulent", "houseplant leaves",
+            "dried leaf", "dried plant", "withered plant", "dead leaves", "dry brown leaf", "plant stem", "withered leaves"
+        ]
         m.set_classes(prompts, m.get_text_pe(prompts))
         m.to(device)
         _cached_seg_model = m
@@ -47,13 +50,16 @@ def load_plant_segmenter(device: str = "cuda"):
 
 def isolate_dominant_plant(
     pil_img: Image.Image,
-    conf_thresh: float = 0.18,
-    min_coverage_pct: float = 3.0,
+    conf_thresh: float = 0.12,
+    min_coverage_pct: float = 2.0,
+    allow_fallback: bool = True,
     device: str = "cuda",
 ) -> Dict[str, Any]:
     """
     Detects all plant instances in pil_img, selects the instance with highest coverage,
     suppresses secondary background plants, and returns clean crops & aligned masks.
+    If no separate instance is segmented and allow_fallback is True, gracefully provides
+    a full-specimen fallback so dried/withered leaves or single stems are not rejected.
     """
     rgb = np.array(pil_img.convert("RGB"))
     h, w, _ = rgb.shape
@@ -61,10 +67,11 @@ def isolate_dominant_plant(
 
     model, mode = load_plant_segmenter(device=device)
     if model is None:
-        # Clean fallback (should never happen once trained_yolo is built)
+        # Clean fallback
         full_mask = np.ones((h, w), dtype=bool)
         return {
             "detected": True,
+            "is_fallback": True,
             "instances_count": 1,
             "dominant_coverage_pct": 100.0,
             "dominant_conf": 1.0,
@@ -79,8 +86,25 @@ def isolate_dominant_plant(
 
     res = model.predict(pil_img, conf=conf_thresh, imgsz=640, verbose=False)[0]
     if res.masks is None or len(res.masks.data) == 0:
+        if allow_fallback:
+            full_mask = np.ones((h, w), dtype=bool)
+            return {
+                "detected": True,
+                "is_fallback": True,
+                "instances_count": 1,
+                "dominant_coverage_pct": 100.0,
+                "dominant_conf": 0.50,
+                "dominant_box": [0, 0, w, h],
+                "crop_img": pil_img,
+                "masked_crop_img": pil_img,
+                "mask_crop": full_mask,
+                "full_mask": full_mask,
+                "overlay_img": pil_img,
+                "mode": f"{mode}_specimen_fallback",
+            }
         return {
             "detected": False,
+            "is_fallback": False,
             "instances_count": 0,
             "dominant_coverage_pct": 0.0,
             "dominant_conf": 0.0,
@@ -125,8 +149,25 @@ def isolate_dominant_plant(
         })
 
     if not candidates:
+        if allow_fallback:
+            full_mask = np.ones((h, w), dtype=bool)
+            return {
+                "detected": True,
+                "is_fallback": True,
+                "instances_count": 1,
+                "dominant_coverage_pct": 100.0,
+                "dominant_conf": 0.50,
+                "dominant_box": [0, 0, w, h],
+                "crop_img": pil_img,
+                "masked_crop_img": pil_img,
+                "mask_crop": full_mask,
+                "full_mask": full_mask,
+                "overlay_img": pil_img,
+                "mode": f"{mode}_specimen_fallback",
+            }
         return {
             "detected": False,
+            "is_fallback": False,
             "instances_count": 0,
             "dominant_coverage_pct": 0.0,
             "dominant_conf": 0.0,

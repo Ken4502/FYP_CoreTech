@@ -15,7 +15,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional
-from PIL import Image
+from PIL import Image, ImageOps
 import torch
 
 EXPERIMENT_ROOT = Path(__file__).resolve().parent.parent
@@ -197,7 +197,11 @@ async def api_predict(
     t0 = time.time()
     try:
         contents = await file.read()
-        pil_img = Image.open(io.BytesIO(contents)).convert("RGB")
+        raw_img = Image.open(io.BytesIO(contents))
+        pil_img = ImageOps.exif_transpose(raw_img)
+        if pil_img is None:
+            pil_img = raw_img
+        pil_img = pil_img.convert("RGB")
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Invalid image file: {e}")
 
@@ -209,10 +213,55 @@ async def api_predict(
 
             # Ensure PDI rating for Flutter PDI meter widget
             is_healthy = v2_res.get("diagnosis", {}).get("is_healthy", False)
+            class_id = v2_res.get("diagnosis", {}).get("class_id", "")
+            stress = v2_res.get("surface_stress", {})
+            ver_meta = v2_res.get("verification_meta", {})
+
+            is_pest_cond = bool(
+                class_id in (
+                    "Mealybugs_Cochineal",
+                    "Aphids",
+                    "Scale_Insects",
+                    "Thrips_Damage",
+                    "Spider_Mites",
+                    "Whiteflies",
+                    "Leaf_Miners",
+                    "Chewing_Pests_Bug_Bites_Holes",
+                    "Rust_Fungi_With_Bug_Bites",
+                )
+                or ver_meta.get("is_infestation", False)
+                or ver_meta.get("has_bug_bites_holes", False)
+                or ver_meta.get("verified_pest_class") is not None
+            )
+            is_dead_cond = bool((class_id == "Abiotic_Terminal_Dead_Plant" or stress.get("is_dead", False) or ver_meta.get("is_dead_beyond_saving", False)) and not is_pest_cond)
+            is_desiccated_cond = bool((class_id == "Abiotic_Severe_Desiccation_Dried_Plant" or stress.get("is_dried", False) or ver_meta.get("is_dried", False) or is_dead_cond) and not is_pest_cond)
+            is_underwatered_cond = bool((class_id == "Abiotic_Dehydration_Underwatering" or ver_meta.get("is_underwatered", False)) and not is_pest_cond and not is_desiccated_cond and not is_dead_cond)
+
             spots_info = v2_res.get("spots", {})
             inf_area = float(spots_info.get("infected_area_pct", 0.0))
             has_spots = bool(spots_info.get("has_spots", False))
-            if is_healthy or not has_spots:
+
+            if is_pest_cond:
+                pdi_grade = 3 if inf_area > 10.0 else 2
+                pdi_label = f"Grade {pdi_grade}: Active Biotic Infestation ({class_id})"
+                pdi_color = "#dc2626"
+                pdi_action = "Isolate specimen immediately to halt pest spread. Dab with 70% alcohol and spray insecticidal soap / neem oil."
+            elif is_dead_cond:
+                pdi_grade = 4
+                pdi_label = "Grade 4: Total Cellular Death / Terminal (Non-Viable)"
+                pdi_color = "#450a0a"
+                pdi_action = "Irreversible tissue mortality. Perform stem snap test; safely prune or discard non-viable plant matter."
+            elif is_desiccated_cond:
+                pdi_grade = 3
+                pdi_label = "Grade 3: Severe Foliar Desiccation & Dehydration"
+                pdi_color = "#d97706"
+                pdi_action = "Conduct stem scratch viability test, execute 30-45 min bottom-watering soak, prune crispy leaves."
+            elif is_underwatered_cond:
+                pdi_grade = 2
+                pdi_label = "Grade 2: Foliar Dehydration / Underwatering (Needs Water)"
+                pdi_color = "#2563eb"
+                pdi_action = "Conduct thorough soil soak immediately. Foliage will regain cellular turgidity within hours."
+            elif is_healthy or (not has_spots and class_id == "Healthy_Foliage"):
                 pdi_grade = 0
                 pdi_label = "Grade 0: Optimal Foliar Health (Clean)"
                 pdi_color = "#10b981"
@@ -252,7 +301,6 @@ async def api_predict(
             spots_count = int(spots_info.get("spots_count", 0))
             abiotic_analysis = analyze_abiotic_stress(pil_img, spots_count=spots_count if has_spots else 0)
 
-            stress = v2_res.get("surface_stress", {})
             hyd = stress.get("hydration_stress", {}) if isinstance(stress, dict) else {}
             is_underwatered = hyd.get("is_underwatered", False) or (v2_res.get("diagnosis", {}).get("class_id") == "Abiotic_Dehydration_Underwatering")
             is_overwatered = hyd.get("is_overwatered", False) or (v2_res.get("diagnosis", {}).get("class_id") == "Abiotic_Overwatering_Edema")
@@ -264,7 +312,7 @@ async def api_predict(
                 level = "High"
                 stype = "Underwatering Dehydration"
                 rec = "Perform a deep root bottom-soak (30-45 min) and avoid chemical fungicides or pesticides."
-            elif is_underwatered:
+            elif is_underwatered or is_underwatered_cond:
                 level = "Moderate"
                 stype = "Underwatering Dehydration"
                 rec = "Check soil moisture and perform a deep root soak to restore leaf turgor."
@@ -276,17 +324,86 @@ async def api_predict(
                 level = "Moderate"
                 stype = "Solar Scorch / Sunburn"
                 rec = "Move plant back from harsh direct midday sunlight into bright indirect/filtered light."
+            elif is_pest_cond:
+                level = "Critical"
+                stype = f"Biotic Pest Infestation ({class_id})"
+                rec = f"Active pest infestation detected ({class_id}). Quarantine plant and treat immediately with targeted insecticidal soap, neem oil, or alcohol swabs."
+            elif is_dead_cond:
+                level = "Terminal"
+                stype = "Total Cellular Death / Dead Specimen"
+                rec = "Specimen is non-viable and beyond saving. Conduct stem snap test, prune non-viable tissue, or discard dead plant matter and sanitize container."
+            elif is_desiccated_cond:
+                level = "Critical"
+                stype = "Severe Desiccation / Dried Foliage"
+                rec = "Perform stem scratch viability test, execute 30-45 min bottom-watering soak, prune non-viable crispy foliage, and withhold fertilizer."
 
             abiotic_analysis.update({
-                "chlorosis_score": round(float(stress.get("chlorosis_score", 0.0)), 2) if isinstance(stress, dict) else 0.0,
-                "necrosis_score": round(float(stress.get("necrosis_score", 0.0)), 2) if isinstance(stress, dict) else 0.0,
+                "chlorosis_score": round(float(stress.get("chlorosis_yellowing_pct", 0.0)), 2) if isinstance(stress, dict) else 0.0,
+                "necrosis_score": round(float(stress.get("dry_necrotic_margin_pct", 0.0)), 2) if isinstance(stress, dict) else 0.0,
                 "stress_level": level,
                 "stress_type": stype,
                 "recommendation": rec,
-                "is_underwatered": is_underwatered,
+                "is_pest": is_pest_cond,
+                "is_underwatered": is_underwatered or is_underwatered_cond,
                 "is_overwatered": is_overwatered,
                 "is_sunburned": is_sunburned,
+                "is_dried": is_desiccated_cond,
+                "is_dead": is_dead_cond,
+                "desiccation_grade": stress.get("desiccation_grade", "Non-Viable / Dead") if is_dead_cond else (stress.get("desiccation_grade", "Severe Desiccation") if is_desiccated_cond else ("Needs Water" if (is_underwatered or is_underwatered_cond) else "Normal")),
             })
+
+            if is_pest_cond:
+                abiotic_analysis["water_status"] = "Normal (Pest Attack Dominates)"
+                abiotic_analysis["water_severity"] = "None"
+                abiotic_analysis["aging_status"] = "Pest Feeding Damage"
+                abiotic_analysis["status_summary"] = f"Active biotic pest infestation detected ({class_id}). Pests are actively attacking plant tissue and draining sap."
+                abiotic_analysis["abiotic_actions"] = [
+                    "Isolate plant immediately away from other houseplants to prevent pest migration.",
+                    "Inspect stem joints, leaf axils, and undersides with a bright flashlight.",
+                    "Dab alcohol-soaked cotton swabs directly on pests (mealybugs / scale) or spray off with water stream (aphids).",
+                    "Apply thorough coating of insecticidal soap or neem oil spray every 4-5 days.",
+                ]
+            elif is_dead_cond:
+                abiotic_analysis["water_status"] = "Terminal Moisture Depletion (Collapsed)"
+                abiotic_analysis["water_severity"] = "Severe"
+                abiotic_analysis["aging_status"] = "Irreversible Cellular Death (Non-Viable)"
+                abiotic_analysis["status_summary"] = "Specimen foliar tissue is completely dead and non-viable. Chlorophyll vigor is depleted. Conduct stem snap test to confirm vascular core mortality."
+                abiotic_analysis["vigor_pct"] = float(stress.get("chlorophyll_vigor_pct", 1.0))
+                abiotic_analysis["chlorosis_pct"] = float(stress.get("chlorosis_yellowing_pct", 0.0))
+                abiotic_analysis["crispness_pct"] = float(stress.get("dry_necrotic_margin_pct", 85.0))
+                abiotic_analysis["abiotic_actions"] = [
+                    "Perform stem snap test: bend lower stem; if it snaps brittle like dry wood with no green cambium inside, vascular core is dead.",
+                    "Single leaf: If only a detached or fallen leaf, prune it cleanly to prevent mold and monitor the parent plant.",
+                    "Whole plant: Safely discard dead plant matter; do not reuse soil without sanitizing pot in 10% bleach.",
+                ]
+            elif is_desiccated_cond:
+                abiotic_analysis["water_status"] = "Severe Desiccation / Moisture Deficit"
+                abiotic_analysis["water_severity"] = "Severe"
+                abiotic_analysis["aging_status"] = "Severe Dehydration & Shriveling"
+                abiotic_analysis["status_summary"] = "Specimen shows extreme desiccation with crispy brittle foliage. Root ball likely hydrophobic."
+                abiotic_analysis["vigor_pct"] = float(stress.get("chlorophyll_vigor_pct", 12.0))
+                abiotic_analysis["chlorosis_pct"] = float(stress.get("chlorosis_yellowing_pct", 25.0))
+                abiotic_analysis["crispness_pct"] = float(stress.get("dry_necrotic_margin_pct", 55.0))
+                abiotic_analysis["abiotic_actions"] = [
+                    "Perform stem scratch viability test: look for green moist cambium tissue beneath bark.",
+                    "Bottom-soak root ball in lukewarm water for 30-45 minutes.",
+                    "Prune completely dead brittle leaves to conserve residual moisture.",
+                    "Withhold fertilizer until fresh green shoots emerge.",
+                ]
+            elif is_underwatered_cond:
+                abiotic_analysis["water_status"] = "Underwatering (Needs Water)"
+                abiotic_analysis["water_severity"] = "Moderate"
+                abiotic_analysis["aging_status"] = "Loss of Foliar Turgor (Wilting / Drooping)"
+                abiotic_analysis["status_summary"] = "Specimen foliar tissue exhibits acute moisture deficit and wilting. Living leaves are drooping due to lack of water."
+                abiotic_analysis["vigor_pct"] = float(stress.get("chlorophyll_vigor_pct", 75.0))
+                abiotic_analysis["chlorosis_pct"] = float(stress.get("chlorosis_yellowing_pct", 10.0))
+                abiotic_analysis["crispness_pct"] = float(stress.get("dry_necrotic_margin_pct", 5.0))
+                abiotic_analysis["abiotic_actions"] = [
+                    "Check soil moisture 2 inches deep with your finger; if dry and crumbly, water thoroughly immediately.",
+                    "Give a thorough top watering or place pot in a basin of lukewarm water for 25-35 minutes (bottom soaking).",
+                    "Ensure excess water drains out completely from bottom drainage holes; do not let pot sit in standing water.",
+                    "Foliage will regain firmness and upright posture within 3 to 6 hours after root rehydration.",
+                ]
             v2_res["abiotic"] = abiotic_analysis
 
             if is_underwatered:

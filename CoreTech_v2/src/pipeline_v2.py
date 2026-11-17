@@ -14,6 +14,7 @@ import time
 import base64
 from pathlib import Path
 from typing import Any, Dict, Optional
+import numpy as np
 from PIL import Image
 
 V2_ROOT = Path(__file__).resolve().parent.parent
@@ -114,6 +115,18 @@ SURFACE_CARE_MAP = {
             "Apply sulfur or neem fungicide and eliminate leaf-surface condensation.",
         ],
     },
+    "Rust_Fungi_With_Bug_Bites": {
+        "condition_name": "Rust Fungi (Pucciniales) & Insect Chew Holes",
+        "category": "Co-Occurring Biotic Infection & Pest Damage",
+        "severity": "High",
+        "summary": "Both raised orange fungal rust spore pustules (Pucciniales) and insect chew holes / bite perforations are actively detected on foliage.",
+        "immediate_actions": [
+            "Prune heavily rusted and chewed leaves cleanly into a sealed disposal bag to stop spore spread.",
+            "Apply dual treatment: spray neem oil emulsion or Bacillus thuringiensis (Bt) for chewing pests, combined with sulfur or copper fungicide for rust.",
+            "Inspect leaf undersides at night for nocturnal chewing caterpillars, beetles, or slugs.",
+            "Eliminate overhead leaf misting and provide gentle airflow to prevent new fungal spore germination.",
+        ],
+    },
     "Sooty_Mold": {
         "condition_name": "Sooty Mold",
         "category": "Secondary Fungal Crust",
@@ -134,6 +147,19 @@ SURFACE_CARE_MAP = {
             "Apply Spinosad or neem oil if new trails continue appearing.",
         ],
     },
+    "Chewing_Pests_Bug_Bites_Holes": {
+        "condition_name": "Insect Feeding Damage (Bug Bites & Chewed Holes)",
+        "category": "Insect Feeding Damage",
+        "severity": "Moderate to High",
+        "summary": "Foliar chew holes, shot-hole perforations, or ragged bitten leaf margins detected from chewing insect pests (caterpillars, beetles, grasshoppers, leaf-cutter bees, or slugs/snails).",
+        "immediate_actions": [
+            "Inspect the plant carefully, especially leaf undersides and stem bases at night or dusk, for active caterpillars, beetles, slugs, or snails.",
+            "Hand-pick and remove any visible caterpillars, beetles, or worms immediately.",
+            "Apply Bacillus thuringiensis (Bt) spray for caterpillars, or food-grade diatomaceous earth around the soil base for crawling pests/slugs.",
+            "Spray cold-pressed neem oil or organic insecticidal soap across foliage to deter further chewing feeding.",
+            "Prune severely tattered or perforated leaves that have lost photosynthetic capacity.",
+        ],
+    },
     "Spider_Mites": {
         "condition_name": "Spider Mites",
         "category": "Mite Infestation",
@@ -145,40 +171,48 @@ SURFACE_CARE_MAP = {
         ],
     },
     "Mealybugs_Cochineal": {
-        "condition_name": "Mealybugs / Cochineal Scale",
+        "condition_name": "Mealybugs / Cochineal Wax Scale",
         "category": "Insect Infestation",
-        "severity": "Moderate to High",
-        "summary": "White cottony wax clusters detected on ribs, stems, or leaf axils.",
+        "severity": "High",
+        "summary": "White cottony, powdery, or waxy masses/clusters detected along stems, leaf joints, or leaf undersides. Mealybugs suck vital plant sap and excrete sticky honeydew.",
         "immediate_actions": [
-            "Dab all white cottony clusters directly with a cotton swab dipped in 70% isopropyl alcohol.",
-            "Follow up with horticultural oil or systemic drench if colonies persist.",
+            "Isolate specimen immediately to prevent mealybugs spreading to neighboring plants.",
+            "Dip a cotton swab in 70% isopropyl alcohol and dab directly onto all white cottony clusters to dissolve their protective wax and kill pests on contact.",
+            "Spray the entire plant thoroughly (especially leaf undersides, stem joints, and petiole crotches) with neem oil emulsion or insecticidal soap.",
+            "Inspect soil surface; drench root zone with systemic pesticide if subterranean root mealybugs are present.",
+            "Repeat weekly checks and treatments until all white waxy fluff and insects are eradicated.",
         ],
     },
     "Scale_Insects": {
-        "condition_name": "Scale Insects",
+        "condition_name": "Scale Insects (Armored / Soft Shell)",
         "category": "Insect Infestation",
         "severity": "High",
-        "summary": "Convex waxy brown or armored shell bumps adhered along stems or midribs.",
+        "summary": "Waxy brown, black, or tan oval shell bumps firmly adhered along stems, petioles, and leaf midribs sucking sap.",
         "immediate_actions": [
-            "Scrape off visible shells gently with 70% isopropyl alcohol on a soft brush.",
-            "Coat stems thoroughly with horticultural oil to suffocate nymphs.",
+            "Isolate plant immediately to halt nymph crawler migration.",
+            "Scrape off visible adult scale shells gently using a soft toothbrush dipped in 70% isopropyl alcohol.",
+            "Suffocate crawler nymphs by spraying thoroughly with horticultural dormant oil or insecticidal soap.",
+            "Check leaf undersides and stem crotches weekly for new scale clusters.",
         ],
     },
     "Aphids": {
-        "condition_name": "Aphids",
+        "condition_name": "Aphids (Black Aphids / Plant Lice)",
         "category": "Insect Infestation",
-        "severity": "Moderate",
-        "summary": "Soft-bodied sap-sucking colonies clustered on tender shoots or curled tips.",
+        "severity": "Moderate to High",
+        "summary": "Dense colonies of small soft-bodied sap-sucking insects (black aphids, brown, or green plant lice) clustered on tender shoots, new leaf buds, or stem nodes.",
         "immediate_actions": [
-            "Blast aphids off shoots with a stream of lukewarm water.",
-            "Spray insecticidal soap or neem emulsion onto shoot tips and undersides.",
+            "Quarantine the plant away from clean foliage immediately.",
+            "Blast visible aphid clusters off shoots and foliage using a firm stream of lukewarm water in the sink or shower.",
+            "Spray foliage thoroughly with insecticidal soap, neem oil emulsion, or pyrethrin spray, ensuring complete coverage under leaves and along stems.",
+            "Wipe away sticky honeydew residues to prevent secondary black sooty mold crust from developing.",
+            "Reapply spray every 3-4 days for two weeks to eliminate newly hatched nymphs.",
         ],
     },
     "Thrips_Damage": {
         "condition_name": "Thrips Damage",
         "category": "Insect Infestation",
         "severity": "High",
-        "summary": "Silvery rasped patches and fine dark frass speckling detected on surface.",
+        "summary": "Silvery rasped patches, mottled stippling, and fine dark frass speckling detected on surface.",
         "immediate_actions": [
             "Quarantine immediately and place blue sticky traps beside canopy.",
             "Spray Spinosad across upper and lower leaf surfaces every 5 days.",
@@ -195,15 +229,18 @@ SURFACE_CARE_MAP = {
         ],
     },
     "Abiotic_Dehydration_Underwatering": {
-        "condition_name": "Surface Dehydration / Underwatering Stress",
+        "condition_name": "Underwatering Dehydration Stress (Needs Water)",
         "category": "Abiotic Water Stress",
         "severity": "Moderate",
-        "summary": "Foliage exhibits prominent foliar dehydration (turgor loss, leaf blade wrinkling, wild curled margins, and dry papery tips). These symptoms are physiological moisture deficit stress, NOT infectious fungal rust or insect bite damage.",
+        "summary": "Foliage exhibits acute moisture deficit, loss of cellular turgor, leaf blade wrinkling, wild curled margins, and dry papery tips. These symptoms are physiological moisture deficit stress, NOT infectious fungal rust or insect bite damage.",
         "immediate_actions": [
-            "Perform a deep root soak (or bottom-water nursery pot in lukewarm water for 30-45 minutes) to rehydrate cellular turgor.",
+            "Check soil moisture: Insert a finger or moisture meter 2 inches into soil. If dry and crumbly, water thoroughly immediately.",
+            "Perform deep soaking: Water from above until water flows freely out of bottom drainage holes, or bottom-soak the pot in a basin of lukewarm water for 25-35 minutes.",
             "Do NOT apply chemical fungicides or pesticides; the plant is suffering from water deficit, not fungal rust or chewing insects.",
             "Prune only completely papery brown crispy margins using clean shears, leaving a thin dry buffer to protect healthy live tissue.",
-            "Check soil dryness 2 inches below the surface before watering again.",
+            "Empty drainage saucer: Allow excess water to drain out completely so roots do not sit in stagnant pools.",
+            "Avoid direct harsh sun: Keep the recovering plant in bright indirect light until foliage regains full turgor firmness (usually within 3-6 hours).",
+            "Maintain regular watering schedule: Water whenever top 1-2 inches of soil feel dry to touch.",
             "Increase ambient humidity using a pebble tray or humidifier to slow down foliar transpiration."
         ],
         "treatment": {
@@ -282,6 +319,32 @@ SURFACE_CARE_MAP = {
         "symptoms": ["Interveinal chlorosis (yellow tissue between dark green veins) and stunted shoot growth."],
         "causes": ["Soil nutrient depletion, high soil alkalinity locking out iron, or root root-bound root systems."]
     },
+    "Abiotic_Severe_Desiccation_Dried_Plant": {
+        "condition_name": "Severe Desiccation / Dried Plant Specimen",
+        "category": "Abiotic Water Deficit",
+        "severity": "High",
+        "summary": "Specimen foliage and stems are severely dried, crispy, or withered from extreme moisture depletion.",
+        "immediate_actions": [
+            "Perform a stem scratch test: scrape a tiny section of the main stem near the base with a fingernail or clean blade. If you see moist green cambium tissue beneath the bark, the root crown is still alive and can recover.",
+            "Emergency bottom-watering soak: place the pot into a basin with 2-3 inches of lukewarm water for 30-45 minutes so dry compacted soil can rehydrate from the bottom up, then drain completely.",
+            "Prune fully dead crispy leaves: prune completely brittle, brown leaves that snap easily so the plant conserves water and energy for new viable growth.",
+            "Provide recovery humidity: move the plant into bright indirect light away from hot direct sun, and place a clear bag or humidity tray nearby to reduce transpiration stress.",
+            "Withhold all fertilizer: never fertilize a dehydrated or stressed root ball; wait until healthy new green shoots emerge.",
+        ],
+    },
+    "Abiotic_Terminal_Dead_Plant": {
+        "condition_name": "Irreversible Tissue Mortality / Non-Viable Dead Specimen",
+        "category": "Terminal Tissue Necrosis",
+        "severity": "Terminal (Beyond Saving)",
+        "summary": "Specimen foliage and vascular tissue exhibit complete cellular collapse and irreversible necrosis. The sample is beyond recovery.",
+        "immediate_actions": [
+            "Perform a stem snap test: gently bend the lower stem. If it snaps cleanly like a brittle dry twig with no green interior cambium layer, the plant's vascular core is dead and cannot be revived.",
+            "Single Leaf Assessment: If this photograph is of an individual fallen or trimmed leaf from an otherwise living plant, simply prune and discard the dead leaf to prevent saprophytic mold, and inspect the parent plant's main stem and root ball.",
+            "Whole Plant Assessment: If the entire plant is brittle, dry, and lacks any green tissue or firm roots, safely discard the plant matter into compost or waste.",
+            "Sanitize pot and soil: Do not reuse unsterilized soil from a dead plant. Wash containers thoroughly with a 10% bleach solution before potting new plants.",
+            "Check neighboring plants: If plant death occurred suddenly, inspect surrounding plants for hidden root rot, soil pests, or systemic pathogen spread.",
+        ],
+    },
 }
 
 
@@ -289,6 +352,13 @@ def run_v2_diagnosis(
     pil_img: Image.Image, gemini_api_key: Optional[str] = None
 ) -> Dict[str, Any]:
     t0 = time.time()
+    try:
+        from PIL import ImageOps
+        transposed = ImageOps.exif_transpose(pil_img)
+        if transposed is not None:
+            pil_img = transposed
+    except Exception:
+        pass
     prep_b64 = _img_to_b64(pil_img, max_size=512)
 
     # 1. Stage 0: Objective Image Quality Gate (global pre-check)
@@ -343,34 +413,54 @@ def run_v2_diagnosis(
         }
 
     # 3. Stage 1B: Dominant Multi-Plant Instance Segmentation (Highest Coverage Focus)
-    iso = isolate_dominant_plant(pil_img, min_coverage_pct=QUALITY_THRESHOLDS["min_plant_coverage_pct"])
+    iso = isolate_dominant_plant(pil_img, min_coverage_pct=QUALITY_THRESHOLDS["min_plant_coverage_pct"], allow_fallback=True)
+    verified_pest = ver_meta.get("verified_pest_class")
+    verified_pathology = ver_meta.get("verified_pathology_class")
+    is_infestation = bool(ver_meta.get("is_infestation", False) or verified_pest is not None)
+    is_verified_disease = bool(ver_meta.get("is_verified_disease", False) or verified_pathology is not None)
+    is_underwatered_specimen = bool(ver_meta.get("is_underwatered", False))
+    is_dried_specimen = bool(ver_meta.get("is_dried", False)) and not is_infestation and not is_verified_disease
+    is_dead_specimen = bool(ver_meta.get("is_dead_beyond_saving", False)) and not is_infestation and not is_verified_disease
+
     if not iso["detected"] or iso["dominant_coverage_pct"] < QUALITY_THRESHOLDS["min_plant_coverage_pct"]:
-        cov = iso["dominant_coverage_pct"]
-        msg = f"Plant subject is too small or unclear in the frame ({cov:.1f}% coverage)."
-        recs = [
-            "Move the camera closer so the target plant fills at least 35-60% of the photo.",
-            "Keep pots, desks, and room walls minimized around the edges.",
-        ]
-        return {
-            "status": "retake_recommended",
-            "grace_code": "LOW_COVERAGE",
-            "is_plant": True,
-            "disease_available": False,
-            "inference_time_ms": round((time.time() - t0) * 1000.0, 1),
-            "status_message": msg,
-            "recommendations": recs,
-            "isolation_meta": {"instances_count": iso["instances_count"], "dominant_coverage_pct": cov},
-            "species": {"name": "Move Closer to Plant", "confidence": 0.0, "detected_mode": "Stage 1B Coverage Gate", "top_candidates": []},
-            "diagnosis": {"condition_name": "Subject Too Far", "category": "Framing Issue", "is_healthy": True, "confidence": 0.0, "severity": "None"},
-            "spots": {"has_spots": False, "spots_count": 0, "infected_area_pct": 0.0, "status_message": msg, "annotated_image_base64": _img_to_b64(iso["overlay_img"])},
-            "care_guide": {"summary": msg, "immediate_actions": recs, "treatment": {"organic": [], "chemical": []}, "prevention": [], "symptoms": [], "causes": []},
-            "predictions": [],
-            "preprocessed_image_base64": prep_b64,
-        }
+        if is_plant or is_dried_specimen or is_dead_specimen or is_infestation or is_underwatered_specimen or is_verified_disease:
+            # Fall back to using the full photo for dried, dead, infested, or irregular botanical subjects
+            iso["crop_img"] = pil_img
+            iso["masked_crop_img"] = pil_img
+            iso["mask_crop"] = np.ones((pil_img.height, pil_img.width), dtype=bool)
+            iso["full_mask"] = iso["mask_crop"]
+            iso["dominant_coverage_pct"] = 100.0
+            iso["dominant_conf"] = 0.50
+            iso["detected"] = True
+            iso["instances_count"] = 1
+            iso["mode"] = "verified_plant_full_frame"
+        else:
+            cov = iso["dominant_coverage_pct"]
+            msg = f"Plant subject is too small or unclear in the frame ({cov:.1f}% coverage)."
+            recs = [
+                "Move the camera closer so the target plant fills at least 35-60% of the photo.",
+                "Keep pots, desks, and room walls minimized around the edges.",
+            ]
+            return {
+                "status": "retake_recommended",
+                "grace_code": "LOW_COVERAGE",
+                "is_plant": True,
+                "disease_available": False,
+                "inference_time_ms": round((time.time() - t0) * 1000.0, 1),
+                "status_message": msg,
+                "recommendations": recs,
+                "isolation_meta": {"instances_count": iso["instances_count"], "dominant_coverage_pct": cov},
+                "species": {"name": "Move Closer to Plant", "confidence": 0.0, "detected_mode": "Stage 1B Coverage Gate", "top_candidates": []},
+                "diagnosis": {"condition_name": "Subject Too Far", "category": "Framing Issue", "is_healthy": True, "confidence": 0.0, "severity": "None"},
+                "spots": {"has_spots": False, "spots_count": 0, "infected_area_pct": 0.0, "status_message": msg, "annotated_image_base64": _img_to_b64(iso["overlay_img"])},
+                "care_guide": {"summary": msg, "immediate_actions": recs, "treatment": {"organic": [], "chemical": []}, "prevention": [], "symptoms": [], "causes": []},
+                "predictions": [],
+                "preprocessed_image_base64": prep_b64,
+            }
 
     # Re-run sharp focus verification strictly on the isolated dominant plant pixels
     fg_ok, fg_code, fg_q = evaluate_image_quality(iso["crop_img"], foreground_mask=iso["mask_crop"], min_short_side=120)
-    if not fg_ok:
+    if not fg_ok and not is_dried_specimen and not is_dead_specimen and not is_infestation and not is_underwatered_specimen and not is_verified_disease:
         return {
             "status": "retake_recommended",
             "grace_code": f"SUBJECT_{fg_code}",
@@ -391,18 +481,156 @@ def run_v2_diagnosis(
     id_res = identify_dominant_plant(iso["crop_img"], top_k=5)
 
     # 5. Stage 3: Dual-Scale Surface Pathology, Lesion Localization & Masked Stress
-    path_res = diagnose_surface_condition(iso["crop_img"], iso["mask_crop"], plant_family=id_res.get("family", "Unknown"))
+    path_res = diagnose_surface_condition(
+        iso["crop_img"],
+        iso["mask_crop"],
+        plant_family=id_res.get("family", "Unknown"),
+        is_externally_dried=is_dried_specimen,
+        is_externally_dead=is_dead_specimen,
+        is_externally_underwatered=is_underwatered_specimen,
+        verified_pest=verified_pest,
+        verified_pathology=verified_pathology,
+    )
     primary_cond = path_res["primary_class"]
     care = SURFACE_CARE_MAP.get(primary_cond, SURFACE_CARE_MAP["Healthy_Foliage"])
     lesion_info = path_res["lesion_info"]
+
+    is_pest = bool(
+        verified_pest
+        or primary_cond in (
+            "Mealybugs_Cochineal",
+            "Aphids",
+            "Scale_Insects",
+            "Thrips_Damage",
+            "Spider_Mites",
+            "Whiteflies",
+            "Leaf_Miners",
+            "Chewing_Pests_Bug_Bites_Holes",
+            "Rust_Fungi_With_Bug_Bites",
+        )
+    )
+    is_dead = bool((is_dead_specimen or path_res.get("is_dead", False) or primary_cond == "Abiotic_Terminal_Dead_Plant") and not is_pest and not is_verified_disease)
+    is_dried = bool((is_dead or is_dried_specimen or primary_cond == "Abiotic_Severe_Desiccation_Dried_Plant") and not is_pest and not is_verified_disease)
+    is_underwatered = bool((is_underwatered_specimen or primary_cond == "Abiotic_Dehydration_Underwatering") and not is_pest and not is_dried and not is_dead and not is_verified_disease)
+
+    has_bug_bites = bool(
+        ver_meta.get("has_bug_bites_holes", False)
+        or primary_cond in ("Chewing_Pests_Bug_Bites_Holes", "Rust_Fungi_With_Bug_Bites")
+        or path_res["surface_stress"].get("has_optical_bite_holes", False)
+    )
+    has_rust = bool(
+        ver_meta.get("has_rusting", False)
+        or primary_cond in ("Rust_Fungi", "Rust_Fungi_With_Bug_Bites")
+        or path_res["surface_stress"].get("has_rust_pustules", False)
+    )
+
+    raw_species = id_res.get("raw_top_species") or id_res.get("species", "Botanical Specimen")
+    if primary_cond == "Rust_Fungi_With_Bug_Bites":
+        species_name = f"{raw_species} (Rust & Insect Bite Holes)"
+    elif is_pest and verified_pest:
+        pest_label = care["condition_name"].split("/")[0].split("(")[0].strip()
+        species_name = f"{raw_species} ({pest_label} Infestation)"
+    elif primary_cond == "Chewing_Pests_Bug_Bites_Holes":
+        species_name = f"{raw_species} (Insect Chew Holes / Bug Bites)"
+    elif primary_cond == "Rust_Fungi":
+        species_name = f"{raw_species} (Rust Fungi Infection)"
+    elif is_dead:
+        species_name = f"{raw_species} (Dead / Non-Viable Specimen)"
+    elif is_dried:
+        species_name = f"{raw_species} (Dried / Withered Specimen)"
+    elif is_underwatered:
+        species_name = f"{raw_species} (Underwatered / Needs Water)"
+    else:
+        species_name = raw_species
 
     multi_note = (
         f"Detected {iso['instances_count']} plants; focused exclusively on largest foreground plant ({iso['dominant_coverage_pct']}% frame coverage)."
         if iso["instances_count"] > 1
         else f"Primary plant isolated cleanly ({iso['dominant_coverage_pct']}% frame coverage)."
     )
+    if primary_cond == "Rust_Fungi_With_Bug_Bites":
+        multi_note = f"{multi_note} Co-occurring foliar rust pustules and insect chew holes actively verified."
+    elif primary_cond == "Chewing_Pests_Bug_Bites_Holes":
+        multi_note = f"{multi_note} Active insect chewing damage and bug bite holes verified on foliage."
+    elif is_pest and verified_pest:
+        multi_note = f"{multi_note} Active pest infestation verified: {care['condition_name']}."
+    elif primary_cond == "Rust_Fungi":
+        multi_note = f"{multi_note} Fungal rust pustules verified on leaf surface (Pucciniales)."
+    elif is_dead:
+        multi_note = f"{multi_note} Specimen exhibits irreversible cellular mortality (beyond saving)."
+    elif is_dried:
+        multi_note = f"{multi_note} Specimen exhibits severe desiccation / dried foliage."
+    elif is_underwatered:
+        multi_note = f"{multi_note} Specimen exhibits foliar dehydration / loss of turgor (needs water)."
 
-    all_recs = list(id_res.get("recommendations", [])) + list(care["immediate_actions"])
+    all_recs = list(care["immediate_actions"]) + [r for r in id_res.get("recommendations", []) if r not in care["immediate_actions"]]
+
+    if primary_cond == "Rust_Fungi_With_Bug_Bites":
+        pustule_pct = path_res["surface_stress"].get("rust_pustule_pct", 0.0)
+        holes_cnt = max(1, path_res["surface_stress"].get("bite_holes_count", 1))
+        spots_status_msg = f"Dual damage: {holes_cnt} insect bite hole(s) and {pustule_pct}% fungal rust pustule coverage detected on foliage."
+    elif primary_cond == "Chewing_Pests_Bug_Bites_Holes":
+        holes_cnt = max(1, path_res["surface_stress"].get("bite_holes_count", 1))
+        holes_pct = path_res["surface_stress"].get("bite_holes_area_pct", 0.0)
+        spots_status_msg = f"{holes_cnt} insect chew hole(s) / bitten perforation zone(s) detected on foliage ({holes_pct}% area loss)."
+    elif is_pest and verified_pest:
+        spots_status_msg = f"Active biotic pest infestation detected: {care['condition_name']}. Inspect leaf nodes, axils, and leaf undersides immediately."
+    elif primary_cond == "Rust_Fungi":
+        pustule_pct = path_res["surface_stress"].get("rust_pustule_pct", 0.0)
+        spots_status_msg = f"Raised orange/rusty-cinnamon fungal pustules (uredinia) detected on foliage ({pustule_pct}% spore pustule coverage). Rust Fungi (Pucciniales)."
+    elif primary_cond == "Abiotic_Terminal_Dead_Plant":
+        spots_status_msg = f"Specimen exhibits irreversible cellular mortality ({path_res['surface_stress'].get('desiccation_grade', 'Dead')}). Zero living green tissue."
+    elif primary_cond == "Abiotic_Severe_Desiccation_Dried_Plant":
+        spots_status_msg = f"Specimen exhibits severe foliar desiccation ({path_res['surface_stress'].get('desiccation_grade', 'Dried')}). Foliage is dried and moisture-depleted."
+    elif primary_cond == "Abiotic_Dehydration_Underwatering":
+        spots_status_msg = "Specimen exhibits acute foliar dehydration and wilting (Needs Water). Living leaves are drooping."
+    elif lesion_info["spots_count"] > 0:
+        spots_status_msg = f"{lesion_info['spots_count']} surface lesion/symptom zone(s) detected ({lesion_info['infected_area_pct']}% of plant mask)."
+    else:
+        spots_status_msg = "No distinct localized lesion boxes detected."
+
+    co_alerts = []
+    if has_bug_bites and has_rust:
+        co_alerts.append({
+            "type": "Co-Occurring Foliar Alert",
+            "badge": "Bug Bites & Rusting",
+            "message": "Foliage exhibits BOTH insect chewing bite holes and fungal rust spore pustules. Apply dual protocol: spray Bt/neem for chewing pests and copper/sulfur fungicide for rust.",
+        })
+    elif has_bug_bites:
+        co_alerts.append({
+            "type": "Insect Feeding Alert",
+            "badge": "Bug Bites & Chewed Holes",
+            "message": "Chewed holes, shot-hole punctures, or missing leaf blade sections detected. Inspect leaf undersides at night for caterpillars, beetles, or slugs and apply Bt or neem oil.",
+        })
+    elif has_rust:
+        pustule_pct = path_res["surface_stress"].get("rust_pustule_pct", 0.0)
+        co_alerts.append({
+            "type": "Fungal Spore Alert",
+            "badge": "Rust Fungi (Pucciniales)",
+            "message": f"Raised orange/rusty-cinnamon fungal pustules (uredinia) detected on foliage ({pustule_pct}% spore pustule coverage). Prune infected leaves and apply sulfur or copper fungicide.",
+        })
+
+    foliar_damage_indicators = {
+        "has_bug_bite_holes": has_bug_bites,
+        "has_rusting": has_rust,
+        "bug_bite_holes_severity": ver_meta.get("bug_bite_holes_severity", "Moderate" if has_bug_bites else "None"),
+        "rusting_severity": ver_meta.get("rust_severity", "Moderate" if has_rust else "None"),
+        "spore_pustule_pct": path_res["surface_stress"].get("rust_pustule_pct", 0.0),
+        "bite_holes_count": path_res["surface_stress"].get("bite_holes_count", 0),
+        "status_summary": (
+            "Dual condition: Foliar bug bite holes AND fungal rust pustules detected on foliage."
+            if (has_bug_bites and has_rust)
+            else (
+                "Foliar bug bite holes / insect chewing damage detected on foliage."
+                if has_bug_bites
+                else (
+                    "Fungal rust pustules (Pucciniales) detected on foliage."
+                    if has_rust
+                    else "No bug bite holes or fungal rust pustules detected."
+                )
+            )
+        ),
+    }
 
     return {
         "status": "success",
@@ -419,7 +647,7 @@ def run_v2_diagnosis(
             "mode": iso["mode"],
         },
         "species": {
-            "name": id_res["species"],
+            "name": species_name,
             "raw_top_species": id_res.get("raw_top_species"),
             "family": id_res.get("family"),
             "confidence": id_res["confidence"],
@@ -437,20 +665,72 @@ def run_v2_diagnosis(
             "severity": care["severity"],
         },
         "spots": {
-            "has_spots": (not path_res["is_healthy"]) and lesion_info["spots_count"] > 0,
-            "spots_count": lesion_info["spots_count"],
-            "infected_area_pct": lesion_info["infected_area_pct"],
-            "status_message": f"{lesion_info['spots_count']} surface lesion/symptom zone(s) detected ({lesion_info['infected_area_pct']}% of plant mask)." if lesion_info["spots_count"] > 0 else "No distinct localized lesion boxes detected.",
+            "has_spots": (
+                (not path_res["is_healthy"])
+                and (
+                    lesion_info["spots_count"] > 0
+                    or primary_cond in ("Rust_Fungi", "Rust_Fungi_With_Bug_Bites", "Chewing_Pests_Bug_Bites_Holes")
+                    or has_bug_bites
+                    or has_rust
+                )
+                and not is_underwatered
+                and not is_dead
+                and not is_dried
+            ),
+            "spots_count": max(
+                lesion_info["spots_count"],
+                1 if (primary_cond in ("Rust_Fungi", "Rust_Fungi_With_Bug_Bites", "Chewing_Pests_Bug_Bites_Holes") or has_bug_bites or has_rust) else 0
+            ) if (not is_underwatered and not is_dead and not is_dried) else 0,
+            "infected_area_pct": max(
+                lesion_info["infected_area_pct"],
+                path_res["surface_stress"].get("rust_pustule_pct", 0.0) if has_rust else 0.0,
+                path_res["surface_stress"].get("bite_holes_area_pct", 0.0) if has_bug_bites else 0.0,
+            ) if (not is_underwatered and not is_dead and not is_dried) else 0.0,
+            "status_message": spots_status_msg,
             "annotated_image_base64": _img_to_b64(lesion_info["annotated_img"]),
         },
+        "co_alerts": co_alerts,
+        "foliar_damage_indicators": foliar_damage_indicators,
         "surface_stress": path_res["surface_stress"],
+        "xai_heatmap_base64": path_res.get("xai_heatmap_base64", ""),
+        "tile_attention_pct": path_res.get("tile_attention_pct", []),
+        "host_compatibility": path_res.get("host_compatibility", {}),
+        "tta_meta": path_res.get("tta_meta", {}),
         "care_guide": {
             "summary": care["summary"],
             "immediate_actions": all_recs,
             "treatment": {"organic": [], "chemical": []},
             "prevention": [],
             "symptoms": [care["summary"]],
-            "causes": [],
+            "causes": (
+                ["Complete vascular collapse", "Severe irreversible dehydration", "Total chlorophyll loss", "Terminal root desiccation or rot"]
+                if (primary_cond == "Abiotic_Terminal_Dead_Plant")
+                else (
+                    ["Severe moisture depletion", "Prolonged underwatering", "Root-ball dehydration", "Excess heat desiccation"]
+                    if (primary_cond == "Abiotic_Severe_Desiccation_Dried_Plant")
+                    else (
+                        ["Inadequate watering volume or frequency", "Root zone moisture deficit", "Hydrophobic dry soil", "High ambient heat / transpiration"]
+                        if (primary_cond == "Abiotic_Dehydration_Underwatering")
+                        else (
+                            ["Infestation by Pseudococcidae sap-sucking insects", "Warm stagnant indoor environment", "Contaminated nursery stock or soil"]
+                            if (primary_cond == "Mealybugs_Cochineal")
+                            else (
+                                ["Aphidoidea sap-sucker colonies (black aphids / plant lice)", "Tender new vegetative shoots attracting pests", "Lack of natural predatory insects"]
+                                if (primary_cond == "Aphids")
+                                else (
+                                    ["Chewing insect pests (caterpillars, beetles, grasshoppers, leaf-cutter bees, or snails/slugs)", "Outdoor exposure or open greenhouse vents", "Tender foliage attracting defoliating insects"]
+                                    if (primary_cond in ("Chewing_Pests_Bug_Bites_Holes", "Rust_Fungi_With_Bug_Bites"))
+                                    else (
+                                        ["Pucciniales airborne fungal spore infection", "Persistent water droplets or high relative humidity on foliage", "Airborne spore transmission from infected neighboring plants"]
+                                        if (primary_cond == "Rust_Fungi")
+                                        else []
+                                    )
+                                )
+                            )
+                        )
+                    )
+                )
+            ),
         },
         "predictions": path_res["predictions"],
         "preprocessed_image_base64": _img_to_b64(iso["crop_img"]),
