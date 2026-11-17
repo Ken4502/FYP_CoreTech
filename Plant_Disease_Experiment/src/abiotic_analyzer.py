@@ -27,9 +27,23 @@ def analyze_abiotic_stress(pil_img: Image.Image, spots_count: int = 0) -> dict:
 
     # 1. Segment Foliage Mask (Exclude white/dark sterile studio background)
     # Background is typically near-white (V > 230, S < 30) or near-black (V < 30)
-    bg_white = (hsv[:, :, 1] < 28) & (hsv[:, :, 2] > 215)
-    bg_black = (hsv[:, :, 2] < 25)
-    leaf_mask = ~(bg_white | bg_black)
+    bg_white = (hsv[:, :, 1] < 25) & (hsv[:, :, 2] > 225)
+    bg_black = (hsv[:, :, 2] < 20)
+    raw_leaf_mask = ~(bg_white | bg_black)
+
+    # Fill internal leaf holes so bleached sunburn patches, powdery mildew, and lesions are not discarded as background
+    contours, _ = cv2.findContours(raw_leaf_mask.astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    leaf_mask = np.zeros((h, w), dtype=bool)
+    if contours:
+        valid_cnts = [c for c in contours if cv2.contourArea(c) >= total_pixels * 0.02]
+        if valid_cnts:
+            filled_mask = np.zeros((h, w), dtype=np.uint8)
+            cv2.drawContours(filled_mask, valid_cnts, -1, 1, thickness=cv2.FILLED)
+            leaf_mask = filled_mask > 0
+        else:
+            leaf_mask = raw_leaf_mask
+    else:
+        leaf_mask = raw_leaf_mask
 
     leaf_pixel_count = np.count_nonzero(leaf_mask)
     if leaf_pixel_count < total_pixels * 0.05:
@@ -112,6 +126,25 @@ def analyze_abiotic_stress(pil_img: Image.Image, spots_count: int = 0) -> dict:
         (wrinkle_index >= 36.0)
     )
 
+    # Check Overwatering / Edema
+    is_overwatered = bool(
+        (chlorosis_pct >= 14.0 and crispness_pct <= 2.2 and wrinkle_index <= 18.0) or
+        (chlorosis_pct >= 20.0 and crispness_pct <= 4.0 and mean_sat <= 48.0) or
+        (mean_val >= 62.0 and chlorosis_pct >= 10.0 and crispness_pct <= 2.0 and wrinkle_index <= 16.0)
+    ) and not is_underwatered
+    severe_overwatering = bool(
+        (chlorosis_pct >= 28.0 and crispness_pct <= 3.0 and wrinkle_index <= 16.0) or
+        (chlorosis_pct >= 40.0 and crispness_pct <= 5.0)
+    ) and is_overwatered
+
+    # Check Sunburn / Solar Scorch
+    bleached_mask = (s_leaf < 35) & (v_leaf > 185)
+    bleached_pct = round(float(np.mean(bleached_mask) * 100.0), 1) if leaf_pixel_count > 0 else 0.0
+    is_sunburned = bool(
+        (bleached_pct >= 5.0 and wrinkle_index <= 22.0) or
+        (bleached_pct >= 3.5 and (crispness_pct >= 1.2 or chlorosis_pct >= 6.0) and wrinkle_index <= 22.0)
+    ) and not is_underwatered and not is_overwatered
+
     if is_underwatered:
         water_status = "Foliar Dehydration (Underwatering)"
         water_severity = "High" if severe_underwatering else "Moderate"
@@ -126,22 +159,35 @@ def analyze_abiotic_stress(pil_img: Image.Image, spots_count: int = 0) -> dict:
             "Prune only completely crispy, dead tip margins with clean scissors (leave a thin brown buffer to protect healthy live veins).",
             "Increase ambient humidity using a pebble tray or room humidifier to slow down foliar transpiration."
         ]
+    elif is_overwatered:
+        water_status = "Overwatering / Moisture Saturation"
+        water_severity = "High" if severe_overwatering else "Moderate"
+        status_summary = (
+            f"Foliar moisture analysis indicates waterlogging and root hypoxia ({chlorosis_pct}% diffuse "
+            f"yellow chlorosis, high tissue translucency). Corky bumps or edema blisters represent physiological "
+            f"cellular rupture, NOT scale insects or bacterial blight."
+        )
+        remedial_advice = [
+            "Cease watering immediately and allow the top 50% of potting mix to dry out thoroughly.",
+            "Empty any standing water pooled in the decorative saucer and ensure drainage holes are completely open.",
+            "Aerate potting soil by gently poking 4-5 holes around root perimeter with a chopstick to introduce root oxygen.",
+            "Do NOT apply chemical fungicides or pesticides; the condition is root suffocation from moisture excess."
+        ]
+    elif is_sunburned:
+        water_status = "Solar Scorch / Sunburn"
+        water_severity = "Moderate"
+        status_summary = f"Foliar analysis indicates solar radiation scorch ({bleached_pct}% bleached leaf tissue). Non-infectious sunscald, NOT fungal leaf spot."
+        remedial_advice = [
+            "Move plant immediately back from direct midday sun into bright indirect, filtered light.",
+            "Do NOT prune mildly scorched leaves that still retain healthy green photosynthetic tissue.",
+            "Ensure consistent root hydration to help foliage withstand ambient heat."
+        ]
     elif mean_sat < 32.0 and vigor_pct < 60.0:
         water_status = "Mild Dehydration / Desaturation"
         water_severity = "Low"
         status_summary = "Foliage shows slight desaturation and reduced chlorophyll glossiness, consistent with early moisture depletion."
         remedial_advice = [
             "Check soil moisture 2 inches below surface; water thoroughly if soil feels dry and crumbly."
-        ]
-    # Check Overwatering / Edema
-    elif mean_val > 70.0 and chlorosis_pct > 20.0 and spots_count == 0:
-        water_status = "Overwatering / Moisture Saturation"
-        water_severity = "Moderate"
-        status_summary = "High tissue translucency and diffuse yellowing without crisp margins suggest roots are suffocating from excessive soil water retention."
-        remedial_advice = [
-            "Cease watering immediately and allow the root ball to dry out.",
-            "Empty any standing water pooled in the decorative saucer.",
-            "Aerate potting soil by gently poking 4-5 holes around root perimeter with a chopstick to introduce oxygen."
         ]
     else:
         water_status = "Optimal Foliar Turgor & Hydration"
@@ -165,8 +211,16 @@ def analyze_abiotic_stress(pil_img: Image.Image, spots_count: int = 0) -> dict:
         aging_status = "Active Vegetative Photosynthesis"
         aging_severity = "Normal"
 
-    stress_level = water_severity if is_underwatered else ("Moderate" if water_status != "Optimal Foliar Turgor & Hydration" else "Low")
-    stress_type = "Underwatering Dehydration" if is_underwatered else (water_status if water_status != "Optimal Foliar Turgor & Hydration" else "Normal")
+    stress_level = water_severity if (is_underwatered or is_overwatered) else ("Moderate" if (water_status != "Optimal Foliar Turgor & Hydration" or is_sunburned) else "Low")
+    if is_underwatered:
+        stress_type = "Underwatering Dehydration"
+    elif is_overwatered:
+        stress_type = "Overwatering / Waterlogging"
+    elif is_sunburned:
+        stress_type = "Solar Scorch / Sunburn"
+    else:
+        stress_type = water_status if water_status != "Optimal Foliar Turgor & Hydration" else "Normal"
+
     recommendation = remedial_advice[0] if remedial_advice else "Optimal foliar hydration detected."
 
     return {
@@ -188,6 +242,10 @@ def analyze_abiotic_stress(pil_img: Image.Image, spots_count: int = 0) -> dict:
         "recommendation": recommendation,
         "is_underwatered": is_underwatered,
         "severe_underwatering": severe_underwatering,
+        "is_overwatered": is_overwatered,
+        "severe_overwatering": severe_overwatering,
+        "is_sunburned": is_sunburned,
+        "bleached_pct": bleached_pct,
         "surface_wrinkle_index": wrinkle_index,
         "contour_tortuosity": tortuosity,
     }

@@ -221,30 +221,66 @@ SURFACE_CARE_MAP = {
         "condition_name": "Overwatering / Edema Stress",
         "category": "Abiotic Water Stress",
         "severity": "Moderate",
-        "summary": "Surface shows translucent water-soaked swelling/blisters or soggy yellowing from excess root moisture.",
+        "summary": "Foliage exhibits symptoms of overwatering and root waterlogging (translucent water-soaked tissue, soggy chlorosis, or corky edema blisters). Roots are experiencing hypoxia from saturated potting substrate.",
         "immediate_actions": [
-            "Pause watering until the top half of the potting mix dries out.",
-            "Empty standing saucer water and verify pot drainage holes are unblocked.",
+            "Cease watering immediately and allow the top 50% of the potting mix to dry out thoroughly.",
+            "Empty any standing water pooled in the saucer and ensure bottom drainage holes are completely unblocked.",
+            "Aerate potting soil by gently poking 4-5 holes around root perimeter with a chopstick to introduce root oxygen.",
+            "Do NOT apply chemical fungicides or pesticides; the condition is physiological root suffocation, not an infection.",
+            "Inspect roots for root rot (black/mushy tissue); trim dead roots and repot in fresh, well-draining mix if necessary."
         ],
+        "treatment": {
+            "organic": ["Soil aeration, drying root ball, and repotting in perlite-rich fast-draining substrate."],
+            "chemical": ["No chemical fungicides needed; ensure soil oxygenation and moisture control."]
+        },
+        "prevention": [
+            "Always check soil dryness 2 inches deep before watering.",
+            "Use pots with functional drainage holes and well-aerated potting soil."
+        ],
+        "symptoms": ["Translucent water-soaked patches, diffuse leaf yellowing, soggy stems, and raised corky edema bumps."],
+        "causes": ["Excessive watering frequency, poorly draining soil mix, or standing saucer water."]
     },
     "Abiotic_Sunburn_Scald": {
         "condition_name": "Solar Scorch / Sunburn",
         "category": "Abiotic Light Stress",
         "severity": "Mild to Moderate",
-        "summary": "Bleached white, tan, or scorched surface patches from excessive direct UV/light exposure.",
+        "summary": "Bleached tan, white, or papery scorched patches detected on sun-facing foliage surfaces caused by excessive direct ultraviolet radiation and solar heat.",
         "immediate_actions": [
-            "Move the plant slightly back from intense midday direct sun into bright filtered light.",
-            "Leave mildly scorched leaves attached while green tissue remains photosynthetically active.",
+            "Move the plant immediately back from direct midday sun into bright filtered/indirect light.",
+            "Do NOT prune mildly scorched leaves that still retain healthy green photosynthetic tissue.",
+            "Maintain consistent root hydration to help plant foliage endure ambient heat."
         ],
+        "treatment": {
+            "organic": ["Relocate to filtered canopy light or install sheer curtains."],
+            "chemical": ["No chemical intervention needed; sunburn is non-infectious radiation damage."]
+        },
+        "prevention": [
+            "Acclimate plants gradually to increased light levels over 2-3 weeks.",
+            "Avoid placing delicate foliage directly behind hot window glass in summer."
+        ],
+        "symptoms": ["Bleached white or tan dry surface patches with crisp dry borders."],
+        "causes": ["Sudden exposure to intense direct sunlight, magnifying water droplets, or unshaded outdoor placement."]
     },
     "Abiotic_Nutrient_Chlorosis": {
         "condition_name": "Nutrient Chlorosis / Mineral Deficiency",
         "category": "Abiotic Nutritional Stress",
         "severity": "Mild to Moderate",
-        "summary": "Interveinal yellowing or chlorotic surface mottling indicating mineral uptake imbalance.",
+        "summary": "Interveinal yellowing (green veins with pale yellow leaf blade tissue) or chlorotic mottling indicating micronutrient (Iron/Magnesium/Nitrogen) deficiency or pH uptake lockout.",
         "immediate_actions": [
-            "Check soil pH and feed with a balanced half-strength liquid fertilizer containing chelated micronutrients (Fe, Mn, Mg).",
+            "Check soil pH; nutrient lockout occurs if pH is too alkaline (> 7.0) or too acidic (< 5.5).",
+            "Feed with a balanced half-strength liquid fertilizer containing chelated micronutrients (Fe, Mn, Mg).",
+            "Flush potting mix with distilled water if mineral salts have accumulated in the soil."
         ],
+        "treatment": {
+            "organic": ["Chelated iron foliar spray and balanced organic liquid kelp/seaweed fertilizer."],
+            "chemical": ["Apply balanced NPK fertilizer with complete micronutrient package at half strength."]
+        },
+        "prevention": [
+            "Maintain seasonal feeding schedule during active spring/summer vegetative growth.",
+            "Repot every 1-2 years to replenish degraded potting soil nutrients."
+        ],
+        "symptoms": ["Interveinal chlorosis (yellow tissue between dark green veins) and stunted shoot growth."],
+        "causes": ["Soil nutrient depletion, high soil alkalinity locking out iron, or root root-bound root systems."]
     },
 }
 

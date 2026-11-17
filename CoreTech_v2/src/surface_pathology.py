@@ -168,7 +168,12 @@ def analyze_masked_surface_stress(pil_crop: Image.Image, mask_crop: np.ndarray) 
         if compact_spots >= 3:
             has_compact_rust_pustules = True
 
-    # Hydration stress evaluation
+    # Natural white farina wax / trichome bloom check (succulents, cacti, Saintpaulia)
+    white_wax_mask = (s_ch < 45) & (v_ch > 200) & (a_ch >= 118) & (a_ch <= 135)
+    white_wax_pct = round(float(np.mean(white_wax_mask) * 100.0), 1)
+    has_diffuse_white_bloom = white_wax_pct >= 2.5
+
+    # Hydration & Moisture stress evaluation
     is_underwatered = bool(
         (wrinkle_index >= 20.0 and (crispy_brown_pct >= 1.8 or mean_sat < 40.0)) or
         (crispy_brown_pct >= 4.5 and (wrinkle_index >= 15.0 or mean_sat < 42.0)) or
@@ -181,16 +186,33 @@ def analyze_masked_surface_stress(pil_crop: Image.Image, mask_crop: np.ndarray) 
         (wrinkle_index >= 36.0)
     )
 
+    mean_val = float(np.mean(v_ch) / 255.0 * 100.0)
+    is_overwatered = bool(
+        (yellow_pct >= 14.0 and crispy_brown_pct <= 2.2 and wrinkle_index <= 18.0) or
+        (yellow_pct >= 22.0 and crispy_brown_pct <= 4.0 and mean_sat <= 48.0) or
+        (mean_val >= 62.0 and yellow_pct >= 10.0 and crispy_brown_pct <= 2.0 and wrinkle_index <= 16.0)
+    ) and not is_underwatered
+    severe_overwatering = bool(
+        (yellow_pct >= 28.0 and crispy_brown_pct <= 3.0 and wrinkle_index <= 16.0) or
+        (yellow_pct >= 40.0 and crispy_brown_pct <= 5.0)
+    ) and is_overwatered
+
+    is_sunburned = bool(
+        bleached_pct >= 4.5 and (crispy_brown_pct >= 1.5 or yellow_pct >= 8.0) and wrinkle_index <= 22.0
+    ) and not is_underwatered and not is_overwatered
+
     hydration_dict = {
         "is_underwatered": is_underwatered,
         "severe_underwatering": severe_underwatering,
-        "severe_overwatering": False,
+        "is_overwatered": is_overwatered,
+        "severe_overwatering": severe_overwatering,
         "wrinkle_index": wrinkle_index,
         "wrinkle_p95": wrinkle_p95,
         "crispy_margin_pct": crispy_brown_pct,
         "mean_saturation_pct": mean_sat,
         "tortuosity": tortuosity,
         "has_compact_rust_pustules": has_compact_rust_pustules,
+        "has_diffuse_white_bloom": has_diffuse_white_bloom,
     }
 
     return {
@@ -205,6 +227,8 @@ def analyze_masked_surface_stress(pil_crop: Image.Image, mask_crop: np.ndarray) 
         "chlorosis_score": yellow_pct,
         "necrosis_score": crispy_brown_pct,
         "has_compact_rust_pustules": has_compact_rust_pustules,
+        "has_diffuse_white_bloom": has_diffuse_white_bloom,
+        "is_sunburned": is_sunburned,
     }
 
 
@@ -275,6 +299,42 @@ def diagnose_surface_condition(
                 "lesion_info": lesion_info,
                 "surface_stress": stress_metrics,
             }
+        elif hyd.get("is_overwatered", False):
+            primary = "Abiotic_Overwatering_Edema"
+            super_state = "Abiotic_Stress"
+            conf = 86.0 if hyd.get("severe_overwatering", False) else 76.0
+            lesion_info["spots_count"] = 0
+            lesion_info["infected_area_pct"] = 0.0
+            lesion_info["status_message"] = "Foliar surface exhibits moisture saturation and edema swelling. No infectious fungal or pest lesions detected."
+            preds = [{"rank": 1, "class_name": primary, "confidence": conf}]
+            return {
+                "primary_class": primary,
+                "super_state": super_state,
+                "super_probs": {"healthy_pct": 0.0, "biotic_pct": 0.0, "abiotic_pct": 100.0},
+                "confidence": conf,
+                "is_healthy": False,
+                "predictions": preds,
+                "lesion_info": lesion_info,
+                "surface_stress": stress_metrics,
+            }
+        elif stress_metrics.get("is_sunburned", False):
+            primary = "Abiotic_Sunburn_Scald"
+            super_state = "Abiotic_Stress"
+            conf = 85.0
+            lesion_info["spots_count"] = 0
+            lesion_info["infected_area_pct"] = 0.0
+            lesion_info["status_message"] = "Foliar surface exhibits bleached solar scorch. No infectious fungal or pest lesions detected."
+            preds = [{"rank": 1, "class_name": primary, "confidence": conf}]
+            return {
+                "primary_class": primary,
+                "super_state": super_state,
+                "super_probs": {"healthy_pct": 0.0, "biotic_pct": 0.0, "abiotic_pct": 100.0},
+                "confidence": conf,
+                "is_healthy": False,
+                "predictions": preds,
+                "lesion_info": lesion_info,
+                "surface_stress": stress_metrics,
+            }
         return {
             "primary_class": "Healthy_Foliage",
             "super_state": "Healthy",
@@ -316,12 +376,37 @@ def diagnose_surface_condition(
     fine_probs = fine_probs_sum / max(1e-6, total_w)
     super_probs = super_probs_sum / max(1e-6, total_w)
 
-    # Apply biological host-family impossibility masking (e.g. foliar downy mildew cannot infect ribbed desert cacti)
-    fam_l = plant_family.lower()
-    if "cactaceae" in fam_l or "cactus" in fam_l:
-        for idx, cname in enumerate(ref_classes):
-            if cname in {"Downy_Mildew", "Powdery_Mildew", "Leaf_Miners", "Whiteflies", "Rust_Fungi"}:
-                fine_probs[idx] *= 0.05
+    # Apply biological host-family impossibility masking
+    fam_l = (plant_family or "").lower()
+    if ref_classes is not None:
+        # 1. Cactaceae, Crassulaceae, Succulents, Sansevieria, Aloe
+        if any(k in fam_l for k in ["cactaceae", "cactus", "crassulaceae", "aloe", "succulent", "agavaceae", "asphodelaceae", "sansevieria"]):
+            for idx, cname in enumerate(ref_classes):
+                if cname in {"Downy_Mildew", "Powdery_Mildew", "Leaf_Miners", "Whiteflies", "Rust_Fungi"}:
+                    fine_probs[idx] *= 0.03
+                # Suppress false-positive mealybugs on cacti/succulents with natural areoles or farina bloom
+                if cname == "Mealybugs_Cochineal" and stress_metrics.get("has_diffuse_white_bloom", False):
+                    fine_probs[idx] *= 0.15
+        # 2. Araceae (Monstera, Pothos, Philodendron, Anthurium, Alocasia, Spathiphyllum)
+        elif any(k in fam_l for k in ["araceae", "monstera", "philodendron", "pothos", "anthurium", "alocasia", "spathiphyllum"]):
+            for idx, cname in enumerate(ref_classes):
+                if cname in {"Leaf_Miners", "Powdery_Mildew", "Downy_Mildew", "Rust_Fungi"}:
+                    fine_probs[idx] *= 0.03
+        # 3. Orchidaceae (Orchids)
+        elif any(k in fam_l for k in ["orchidaceae", "orchid"]):
+            for idx, cname in enumerate(ref_classes):
+                if cname in {"Leaf_Miners", "Powdery_Mildew", "Downy_Mildew", "Rust_Fungi"}:
+                    fine_probs[idx] *= 0.03
+        # 4. Arecaceae (Palms)
+        elif any(k in fam_l for k in ["arecaceae", "palm"]):
+            for idx, cname in enumerate(ref_classes):
+                if cname in {"Leaf_Miners", "Powdery_Mildew", "Downy_Mildew"}:
+                    fine_probs[idx] *= 0.03
+        # 5. Ferns (Pteridophytes)
+        elif any(k in fam_l for k in ["fern", "pteridophyta", "polypodiaceae"]):
+            for idx, cname in enumerate(ref_classes):
+                if cname in {"Powdery_Mildew", "Downy_Mildew", "Rust_Fungi", "Leaf_Miners"}:
+                    fine_probs[idx] *= 0.03
         fine_probs = fine_probs / fine_probs.sum().clamp(min=1e-8)
 
     p_healthy_sup = float(super_probs[0].item())
@@ -333,6 +418,9 @@ def diagnose_surface_condition(
     hyd = stress_metrics.get("hydration_stress", {})
     is_underwatered = hyd.get("is_underwatered", False)
     severe_underwatering = hyd.get("severe_underwatering", False)
+    is_overwatered = hyd.get("is_overwatered", False)
+    severe_overwatering = hyd.get("severe_overwatering", False)
+    is_sunburned = stress_metrics.get("is_sunburned", False)
     has_compact_rust = hyd.get("has_compact_rust_pustules", False)
 
     if is_underwatered and ref_classes is not None:
@@ -355,6 +443,35 @@ def diagnose_surface_condition(
 
         fine_probs = fine_probs / fine_probs.sum().clamp(min=1e-8)
 
+    elif is_overwatered and ref_classes is not None:
+        idx_overwater = ref_classes.index("Abiotic_Overwatering_Edema") if "Abiotic_Overwatering_Edema" in ref_classes else -1
+        idx_scale = ref_classes.index("Scale_Insects") if "Scale_Insects" in ref_classes else -1
+        idx_bact = ref_classes.index("Bacterial_Wilt_Soft_Rot") if "Bacterial_Wilt_Soft_Rot" in ref_classes else -1
+
+        # 1. Suppress false-positive Scale Insects (corky edema blisters vs true waxy scale insects)
+        if idx_scale != -1:
+            fine_probs[idx_scale] *= 0.12
+
+        # 2. Suppress false-positive Bacterial Soft Rot (water-soaked translucent chlorosis vs true bacterial blight)
+        if idx_bact != -1:
+            fine_probs[idx_bact] *= 0.18
+
+        # 3. Boost Abiotic_Overwatering_Edema
+        if idx_overwater != -1:
+            boost_min = 0.72 if severe_overwatering else 0.55
+            fine_probs[idx_overwater] = torch.clamp(fine_probs[idx_overwater] * 4.0, min=boost_min)
+
+        fine_probs = fine_probs / fine_probs.sum().clamp(min=1e-8)
+
+    elif is_sunburned and ref_classes is not None:
+        idx_sunburn = ref_classes.index("Abiotic_Sunburn_Scald") if "Abiotic_Sunburn_Scald" in ref_classes else -1
+        idx_fungal = ref_classes.index("Fungal_Leaf_Spot_Anthracnose") if "Fungal_Leaf_Spot_Anthracnose" in ref_classes else -1
+        if idx_fungal != -1:
+            fine_probs[idx_fungal] *= 0.15
+        if idx_sunburn != -1:
+            fine_probs[idx_sunburn] = torch.clamp(fine_probs[idx_sunburn] * 3.5, min=0.60)
+        fine_probs = fine_probs / fine_probs.sum().clamp(min=1e-8)
+
     top_p, top_i = fine_probs.topk(5)
     preds = [
         {"rank": r, "class_name": ref_classes[i.item()], "confidence": round(p.item() * 100.0, 2)}
@@ -370,12 +487,19 @@ def diagnose_surface_condition(
         primary = "Healthy_Foliage"
         primary_conf = round(p_healthy_sup * 100.0, 2)
 
-    # If diagnosed as Abiotic_Dehydration_Underwatering, calibrate lesion detector output:
-    # Bounding boxes caused by shriveled folds / curled margins are non-infectious mechanical turgor collapse
-    if primary == "Abiotic_Dehydration_Underwatering":
+    # For all Abiotic stress conditions, calibrate lesion detector output:
+    # Bounding boxes caused by shriveled folds, edema blisters, or sunscald are non-infectious physiological marks
+    if primary.startswith("Abiotic_"):
         lesion_info["spots_count"] = 0
         lesion_info["infected_area_pct"] = 0.0
-        lesion_info["status_message"] = "Foliar surface exhibits moisture deficit and turgor loss (wrinkled folds and dry papery tips). No infectious fungal or pest lesions detected."
+        if primary == "Abiotic_Dehydration_Underwatering":
+            lesion_info["status_message"] = "Foliar surface exhibits moisture deficit and turgor loss (wrinkled folds and dry papery tips). No infectious fungal or pest lesions detected."
+        elif primary == "Abiotic_Overwatering_Edema":
+            lesion_info["status_message"] = "Foliar surface exhibits moisture saturation and edema swelling. No infectious fungal or pest lesions detected."
+        elif primary == "Abiotic_Sunburn_Scald":
+            lesion_info["status_message"] = "Foliar surface exhibits bleached solar scorch. No infectious fungal or pest lesions detected."
+        elif primary == "Abiotic_Nutrient_Chlorosis":
+            lesion_info["status_message"] = "Foliar surface exhibits nutritional chlorosis / mineral deficiency. No infectious fungal or pest lesions detected."
 
     super_state = "Healthy" if primary == "Healthy_Foliage" else ("Abiotic_Stress" if primary.startswith("Abiotic_") else "Biotic_Pathology")
 

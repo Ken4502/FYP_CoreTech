@@ -255,6 +255,8 @@ async def api_predict(
             stress = v2_res.get("surface_stress", {})
             hyd = stress.get("hydration_stress", {}) if isinstance(stress, dict) else {}
             is_underwatered = hyd.get("is_underwatered", False) or (v2_res.get("diagnosis", {}).get("class_id") == "Abiotic_Dehydration_Underwatering")
+            is_overwatered = hyd.get("is_overwatered", False) or (v2_res.get("diagnosis", {}).get("class_id") == "Abiotic_Overwatering_Edema")
+            is_sunburned = hyd.get("is_sunburned", False) or (v2_res.get("diagnosis", {}).get("class_id") == "Abiotic_Sunburn_Scald")
             level = "Low"
             stype = "Normal"
             rec = "Optimal hydration levels detected on foliage."
@@ -266,10 +268,14 @@ async def api_predict(
                 level = "Moderate"
                 stype = "Underwatering Dehydration"
                 rec = "Check soil moisture and perform a deep root soak to restore leaf turgor."
-            elif hyd.get("severe_overwatering", False):
-                level = "Moderate"
+            elif hyd.get("severe_overwatering", False) or is_overwatered:
+                level = "High" if hyd.get("severe_overwatering", False) else "Moderate"
                 stype = "Overwatering / Waterlogging"
-                rec = "Pause watering and ensure pot drainage holes are clear."
+                rec = "Pause watering immediately, ensure pot drainage holes are unblocked, and aerate potting substrate."
+            elif is_sunburned:
+                level = "Moderate"
+                stype = "Solar Scorch / Sunburn"
+                rec = "Move plant back from harsh direct midday sunlight into bright indirect/filtered light."
 
             abiotic_analysis.update({
                 "chlorosis_score": round(float(stress.get("chlorosis_score", 0.0)), 2) if isinstance(stress, dict) else 0.0,
@@ -277,6 +283,9 @@ async def api_predict(
                 "stress_level": level,
                 "stress_type": stype,
                 "recommendation": rec,
+                "is_underwatered": is_underwatered,
+                "is_overwatered": is_overwatered,
+                "is_sunburned": is_sunburned,
             })
             v2_res["abiotic"] = abiotic_analysis
 
@@ -285,6 +294,18 @@ async def api_predict(
                     "type": "Abiotic Hydration Alert",
                     "badge": "Dehydration vs Rust / Bite Holes",
                     "message": "Leaf wrinkling, curled wild margins, and crispy brown edges are abiotic dehydration symptoms, not fungal rust pustules or insect chew damage. Avoid chemical pesticides and perform a deep water soak."
+                })
+            elif is_overwatered:
+                v2_res["co_alerts"].append({
+                    "type": "Abiotic Waterlogging Alert",
+                    "badge": "Overwatering vs Scale / Rot",
+                    "message": "Tissue translucency, soggy chlorosis, and raised corky edema blisters indicate root hypoxia and overwatering, not scale insects or bacterial soft rot. Allow soil to dry and aerate substrate."
+                })
+            elif is_sunburned:
+                v2_res["co_alerts"].append({
+                    "type": "Abiotic Light Stress Alert",
+                    "badge": "Sunburn Scorch vs Fungal Spot",
+                    "message": "Bleached, dry papery leaf areas on sun-exposed surfaces are physical photo-oxidative sunburn damage, not fungal leaf spot. Relocate to filtered light."
                 })
 
             # Enrich predictions for Web UI interactive breakdown
@@ -543,6 +564,8 @@ async def api_predict(
         # Run Abiotic stress analysis early for health and dehydration arbitration
         abiotic_res = analyze_abiotic_stress(pil_img, spots_count=spots_count if has_spots else 0)
         is_underwatered = abiotic_res.get("is_underwatered", False)
+        is_overwatered = abiotic_res.get("is_overwatered", False)
+        is_sunburned = abiotic_res.get("is_sunburned", False)
         
         # Stage-1 Foliar Health Gate Telemetry
         hg_data = diagnosis.get("health_gate", {"p_healthy": 50.0, "p_disease": 50.0})
@@ -565,7 +588,25 @@ async def api_predict(
             top_raw["confidence"] < 75.0
         )
 
-        if is_health_gated and not top_raw["is_healthy"] and not is_underwatered:
+        # Overwatering & Edema Arbitration:
+        # Suppress spurious Scale Insects and Bacterial Soft Rot on waterlogged tissue or corky edema blisters
+        is_spurious_scale_or_rot = any(k in top_cls.lower() for k in ["scale", "bacterial", "soft_rot", "wilt"])
+        is_overwatering_override = is_overwatered and (
+            is_spurious_scale_or_rot or
+            abiotic_res.get("severe_overwatering", False) or
+            top_raw["confidence"] < 75.0
+        )
+
+        # Sunburn & Scorch Arbitration:
+        # Suppress spurious Fungal Leaf Spot / Anthracnose on bleached sun-facing patches
+        is_spurious_spot_or_scorch = any(k in top_cls.lower() for k in ["spot", "alternaria", "anthracnose", "blight", "scorch"])
+        is_sunburn_override = is_sunburned and (
+            is_spurious_spot_or_scorch or
+            abiotic_res.get("bleached_pct", 0.0) >= 4.5 or
+            top_raw["confidence"] < 75.0
+        )
+
+        if is_health_gated and not top_raw["is_healthy"] and not (is_underwatered or is_overwatered or is_sunburned):
             # Promote Healthy Baseline
             healthy_key = f"{target_group}_Healthy"
             if healthy_key in kb:
@@ -650,6 +691,108 @@ async def api_predict(
                 "care_guide": top_guide
             }
             new_preds = [dehydration_pred]
+            for r_idx, ep in enumerate(enriched_predictions[:4], start=2):
+                ep_c = dict(ep)
+                ep_c["rank"] = r_idx
+                new_preds.append(ep_c)
+            enriched_predictions = new_preds
+        elif is_overwatering_override:
+            top_condition_name = "Overwatering / Edema Stress"
+            top_category = "Abiotic Water Stress"
+            top_is_healthy = False
+            top_severity = abiotic_res.get("stress_level", "Moderate")
+            top_confidence = round(max(float(top_raw["confidence"]), 88.0), 2)
+            top_guide = kb.get("Abiotic_Overwatering_Edema", {
+                "plant_name": display_plant,
+                "condition_name": "Overwatering / Edema Stress",
+                "is_healthy": False,
+                "severity": top_severity,
+                "category": "Abiotic Water Stress",
+                "summary": "Foliage exhibits symptoms of overwatering and root waterlogging (translucent water-soaked tissue, soggy chlorosis, or corky edema blisters). Roots are experiencing hypoxia from saturated potting substrate.",
+                "immediate_actions": [
+                    "Cease watering immediately and allow the top 50% of the potting mix to dry out thoroughly.",
+                    "Empty any standing water pooled in the saucer and ensure bottom drainage holes are completely unblocked.",
+                    "Aerate potting soil by gently poking 4-5 holes around root perimeter with a chopstick to introduce root oxygen.",
+                    "Do NOT apply chemical fungicides or pesticides; the condition is physiological root suffocation, not an infection.",
+                    "Inspect roots for root rot (black/mushy tissue); trim dead roots and repot in fresh, well-draining mix if necessary."
+                ],
+                "treatment": {
+                    "organic": ["Soil aeration, drying root ball, and repotting in perlite-rich fast-draining substrate."],
+                    "chemical": ["No chemical fungicides needed; ensure soil oxygenation and moisture control."]
+                },
+                "prevention": [
+                    "Always check soil dryness 2 inches deep before watering.",
+                    "Use pots with functional drainage holes and well-aerated potting soil."
+                ],
+                "symptoms": ["Translucent water-soaked patches, diffuse leaf yellowing, soggy stems, and raised corky edema bumps."],
+                "causes": ["Excessive watering frequency, poorly draining soil mix, or standing saucer water."]
+            })
+            has_spots = False
+            spots_count = 0
+            inf_area = 0.0
+            status_msg = "Clean foliar pathology. Tissue translucency and corky edema blisters reflect root waterlogging/overwatering, not scale insects or bacterial soft rot."
+
+            overwater_pred = {
+                "rank": 1,
+                "class_name": "Abiotic_Overwatering_Edema",
+                "condition_name": "Overwatering / Edema Stress",
+                "confidence": top_confidence,
+                "is_healthy": False,
+                "severity": top_severity,
+                "category": "Abiotic Water Stress",
+                "care_guide": top_guide
+            }
+            new_preds = [overwater_pred]
+            for r_idx, ep in enumerate(enriched_predictions[:4], start=2):
+                ep_c = dict(ep)
+                ep_c["rank"] = r_idx
+                new_preds.append(ep_c)
+            enriched_predictions = new_preds
+        elif is_sunburn_override:
+            top_condition_name = "Solar Scorch / Sunburn"
+            top_category = "Abiotic Light Stress"
+            top_is_healthy = False
+            top_severity = abiotic_res.get("stress_level", "Moderate")
+            top_confidence = round(max(float(top_raw["confidence"]), 88.0), 2)
+            top_guide = kb.get("Abiotic_Sunburn_Scald", {
+                "plant_name": display_plant,
+                "condition_name": "Solar Scorch / Sunburn",
+                "is_healthy": False,
+                "severity": top_severity,
+                "category": "Abiotic Light Stress",
+                "summary": "Bleached tan, white, or papery scorched patches detected on sun-facing foliage surfaces caused by excessive direct ultraviolet radiation and solar heat.",
+                "immediate_actions": [
+                    "Move the plant immediately back from direct midday sun into bright filtered/indirect light.",
+                    "Do NOT prune mildly scorched leaves that still retain healthy green photosynthetic tissue.",
+                    "Maintain consistent root hydration to help plant foliage endure ambient heat."
+                ],
+                "treatment": {
+                    "organic": ["Relocate to filtered canopy light or install sheer curtains."],
+                    "chemical": ["No chemical intervention needed; sunburn is non-infectious radiation damage."]
+                },
+                "prevention": [
+                    "Acclimate plants gradually to increased light levels over 2-3 weeks.",
+                    "Avoid placing delicate foliage directly behind hot window glass in summer."
+                ],
+                "symptoms": ["Bleached white or tan dry surface patches with crisp dry borders."],
+                "causes": ["Sudden exposure to intense direct sunlight, magnifying water droplets, or unshaded outdoor placement."]
+            })
+            has_spots = False
+            spots_count = 0
+            inf_area = 0.0
+            status_msg = "Clean foliar pathology. Bleached tan/white patches reflect photo-oxidative solar scorch/sunburn, not fungal leaf spot."
+
+            sunburn_pred = {
+                "rank": 1,
+                "class_name": "Abiotic_Sunburn_Scald",
+                "condition_name": "Solar Scorch / Sunburn",
+                "confidence": top_confidence,
+                "is_healthy": False,
+                "severity": top_severity,
+                "category": "Abiotic Light Stress",
+                "care_guide": top_guide
+            }
+            new_preds = [sunburn_pred]
             for r_idx, ep in enumerate(enriched_predictions[:4], start=2):
                 ep_c = dict(ep)
                 ep_c["rank"] = r_idx
@@ -741,6 +884,18 @@ async def api_predict(
                 "type": "Abiotic Hydration Alert",
                 "badge": "Dehydration vs Rust / Bite Holes",
                 "message": "Leaf wrinkling, curled wild margins, and crispy brown tips are abiotic dehydration symptoms, not fungal rust spores or insect bite holes. Deep watering is recommended."
+            })
+        elif is_overwatered:
+            co_alerts.append({
+                "type": "Abiotic Waterlogging Alert",
+                "badge": "Overwatering vs Scale / Rot",
+                "message": "Tissue translucency, soggy chlorosis, and raised corky edema bumps indicate overwatering and root hypoxia, not scale insects or soft rot. Allow potting mix to dry out."
+            })
+        elif is_sunburned:
+            co_alerts.append({
+                "type": "Abiotic Light Stress Alert",
+                "badge": "Sunburn Scorch vs Fungal Spot",
+                "message": "Bleached, dry papery patches on sun-facing leaf surfaces are photo-oxidative solar scorch, not fungal infection. Relocate plant to filtered light."
             })
 
         inference_time_ms = round((time.time() - t0) * 1000, 1)

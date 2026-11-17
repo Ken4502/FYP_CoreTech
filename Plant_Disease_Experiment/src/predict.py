@@ -66,6 +66,86 @@ BIOLOGICAL_EXCLUSIONS = {
     ]
 }
 
+def get_biological_exclusions(plant_name_or_group: str) -> list:
+    """
+    Returns list of excluded classes that cannot biologically infect the specified botanical taxon.
+    Covers broad plant families (Cacti/Succulents, Araceae, Orchids, Palms, Ferns, Carnivorous)
+    across all 261 FloraNet species.
+    """
+    p_lower = (plant_name_or_group or "").strip().lower().replace(" ", "_")
+    exclusions = set()
+
+    # 1. Cactaceae, Crassulaceae, Succulents, Sansevieria, Aloe
+    if any(k in p_lower for k in [
+        "cactus", "cacti", "opuntia", "mammillaria", "echinocactus", "cereus",
+        "aloe", "agave", "haworthia", "echeveria", "crassula", "sedum", "kalanchoe",
+        "sansevieria", "snake_plant", "zamioculcas", "succulent", "euphorbia", "adenium"
+    ]):
+        exclusions.update([
+            "Universal_Whiteflies",
+            "Universal_Leaf_Miners",
+            "Universal_Downy_Mildew",
+            "Universal_Powdery_Mildew",
+            "Universal_Alternaria_Leaf_Spot",
+            "Universal_Botrytis_Gray_Mold"
+        ])
+        if "aloe" not in p_lower:
+            exclusions.add("Universal_Rust_Fungi")
+
+    # 2. Araceae (Monstera, Pothos, Philodendron, Anthurium, Alocasia, Spathiphyllum, etc.)
+    if any(k in p_lower for k in [
+        "monstera", "philodendron", "pothos", "epipremnum", "anthurium",
+        "alocasia", "spathiphyllum", "peace_lily", "aglaonema", "syngonium",
+        "dieffenbachia", "caladium", "money_plant", "araceae"
+    ]):
+        exclusions.update([
+            "Universal_Leaf_Miners",
+            "Universal_Powdery_Mildew",
+            "Universal_Downy_Mildew",
+            "Universal_Rust_Fungi"
+        ])
+
+    # 3. Orchidaceae (Orchids)
+    if any(k in p_lower for k in ["orchid", "phalaenopsis", "dendrobium", "cattleya", "oncidium", "vanda", "cymbidium"]):
+        exclusions.update([
+            "Universal_Leaf_Miners",
+            "Universal_Powdery_Mildew",
+            "Universal_Downy_Mildew",
+            "Universal_Rust_Fungi"
+        ])
+
+    # 4. Arecaceae (Palms)
+    if any(k in p_lower for k in ["palm", "areca", "chamaedorea", "howea", "rhapis", "phoenix", "cycad"]):
+        exclusions.update([
+            "Universal_Leaf_Miners",
+            "Universal_Powdery_Mildew",
+            "Universal_Downy_Mildew"
+        ])
+
+    # 5. Ferns (Pteridophytes)
+    if any(k in p_lower for k in ["fern", "nephrolepis", "asplenium", "platycerium", "adiantum", "pteris"]):
+        exclusions.update([
+            "Universal_Powdery_Mildew",
+            "Universal_Downy_Mildew",
+            "Universal_Rust_Fungi",
+            "Universal_Leaf_Miners"
+        ])
+
+    # 6. Carnivorous Plants
+    if any(k in p_lower for k in ["nepenthes", "pitcher_plant", "dionaea", "venus_flytrap", "drosera"]):
+        exclusions.update([
+            "Universal_Powdery_Mildew",
+            "Universal_Rust_Fungi",
+            "Universal_Leaf_Miners"
+        ])
+
+    # Also include legacy exact mappings
+    for grp, excl in BIOLOGICAL_EXCLUSIONS.items():
+        if grp.lower() in p_lower:
+            exclusions.update(excl)
+
+    return list(exclusions)
+
 def load_health_gate():
     """Loads and caches the Stage-1 MobileNetV3 Foliar Health Gate."""
     global _cached_health_gate
@@ -205,7 +285,7 @@ def diagnose_plant(image_input, target_group: str = None, top_k: int = 5, use_tt
     if target_group and target_group.lower() != "auto":
         g_clean = target_group.strip().lower().replace(" ", "_")
         g_cap = target_group.capitalize()
-        excluded = [e.lower() for e in BIOLOGICAL_EXCLUSIONS.get(target_group, BIOLOGICAL_EXCLUSIONS.get(g_cap, []))]
+        excluded = [e.lower() for e in get_biological_exclusions(target_group)]
         
         if g_clean == "universal":
             valid_indices = [i for i, c in enumerate(classes) if c.lower().startswith("universal_") and c.lower() not in excluded]
