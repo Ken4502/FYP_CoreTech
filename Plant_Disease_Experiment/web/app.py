@@ -254,13 +254,18 @@ async def api_predict(
 
             stress = v2_res.get("surface_stress", {})
             hyd = stress.get("hydration_stress", {}) if isinstance(stress, dict) else {}
+            is_underwatered = hyd.get("is_underwatered", False) or (v2_res.get("diagnosis", {}).get("class_id") == "Abiotic_Dehydration_Underwatering")
             level = "Low"
             stype = "Normal"
             rec = "Optimal hydration levels detected on foliage."
             if hyd.get("severe_underwatering", False):
+                level = "High"
+                stype = "Underwatering Dehydration"
+                rec = "Perform a deep root bottom-soak (30-45 min) and avoid chemical fungicides or pesticides."
+            elif is_underwatered:
                 level = "Moderate"
                 stype = "Underwatering Dehydration"
-                rec = "Check soil moisture and perform a deep root soak."
+                rec = "Check soil moisture and perform a deep root soak to restore leaf turgor."
             elif hyd.get("severe_overwatering", False):
                 level = "Moderate"
                 stype = "Overwatering / Waterlogging"
@@ -274,6 +279,13 @@ async def api_predict(
                 "recommendation": rec,
             })
             v2_res["abiotic"] = abiotic_analysis
+
+            if is_underwatered:
+                v2_res["co_alerts"].append({
+                    "type": "Abiotic Hydration Alert",
+                    "badge": "Dehydration vs Rust / Bite Holes",
+                    "message": "Leaf wrinkling, curled wild margins, and crispy brown edges are abiotic dehydration symptoms, not fungal rust pustules or insect chew damage. Avoid chemical pesticides and perform a deep water soak."
+                })
 
             # Enrich predictions for Web UI interactive breakdown
             from CoreTech_v2.src.pipeline_v2 import SURFACE_CARE_MAP
@@ -527,6 +539,10 @@ async def api_predict(
         spots_count = diagnosis["lesion_highlight"]["boxes_count"]
         inf_area = diagnosis["lesion_highlight"]["severity_pct"]
         has_spots = spots_count > 0 and not top_raw["is_healthy"]
+
+        # Run Abiotic stress analysis early for health and dehydration arbitration
+        abiotic_res = analyze_abiotic_stress(pil_img, spots_count=spots_count if has_spots else 0)
+        is_underwatered = abiotic_res.get("is_underwatered", False)
         
         # Stage-1 Foliar Health Gate Telemetry
         hg_data = diagnosis.get("health_gate", {"p_healthy": 50.0, "p_disease": 50.0})
@@ -540,7 +556,16 @@ async def api_predict(
             (target_group == "Universal" and plant == "auto" and not has_spots and top_raw["confidence"] < 50.0)
         )
 
-        if is_health_gated and not top_raw["is_healthy"]:
+        # Dehydration & Abiotic Stress Arbitration:
+        # Suppress spurious Rust and Leaf Miners / Insect Bite detections on shriveled, curled wild foliage
+        is_spurious_rust_or_pest = any(k in top_cls.lower() for k in ["rust", "miner", "chew", "bite"])
+        is_dehydration_override = is_underwatered and (
+            is_spurious_rust_or_pest or
+            abiotic_res.get("severe_underwatering", False) or
+            top_raw["confidence"] < 75.0
+        )
+
+        if is_health_gated and not top_raw["is_healthy"] and not is_underwatered:
             # Promote Healthy Baseline
             healthy_key = f"{target_group}_Healthy"
             if healthy_key in kb:
@@ -578,6 +603,58 @@ async def api_predict(
             status_msg = f"Clean foliage surface ({p_healthy}% healthy tissue index). Natural anatomical structures, spines, or variegation verified non-pathological."
             has_spots = False
             spots_count = 0
+        elif is_dehydration_override:
+            top_condition_name = "Surface Dehydration / Underwatering Stress"
+            top_category = "Abiotic Water Stress"
+            top_is_healthy = False
+            top_severity = abiotic_res.get("stress_level", "Moderate")
+            top_confidence = round(max(float(top_raw["confidence"]), 88.0), 2)
+            top_guide = {
+                "plant_name": display_plant,
+                "condition_name": "Surface Dehydration / Underwatering Stress",
+                "is_healthy": False,
+                "severity": top_severity,
+                "category": "Abiotic Water Stress",
+                "summary": "Foliage exhibits prominent water deficit stress (turgor loss, leaf blade wrinkling, wild curled margins, and dry papery tips). These symptoms are physiological dehydration, NOT infectious fungal rust or insect bite damage.",
+                "immediate_actions": [
+                    "Perform a deep bottom-soak (submerge bottom 2 inches of nursery pot in lukewarm water for 30-45 minutes).",
+                    "Do NOT apply chemical fungicides or pesticides; foliage is suffering from drought stress, not rust or insect chew.",
+                    "Carefully trim completely desiccated, papery brown tips with clean shears, leaving a thin buffer to protect healthy live veins.",
+                    "Check soil dryness 2 inches below the surface before watering again.",
+                    "Increase ambient humidity using a pebble tray or room humidifier to slow down foliar transpiration."
+                ],
+                "treatment": {
+                    "organic": ["Bottom-watering deep soak and room humidity elevation with a pebble tray."],
+                    "chemical": ["No chemical pesticides or fungicides needed; chemical treatments can scorch dehydrated leaves."]
+                },
+                "prevention": [
+                    "Water thoroughly until water drains from the base whenever the top 2 inches of soil feel dry.",
+                    "Avoid placing plant directly in hot dry air conditioning drafts or heat vents."
+                ],
+                "symptoms": ["Leaf shriveling, wrinkled surface texture, curled wild margins, and crispy brown tip necrosis."],
+                "causes": ["Extended dry soil period, low ambient humidity, or irregular watering intervals."]
+            }
+            has_spots = False
+            spots_count = 0
+            inf_area = 0.0
+            status_msg = "Clean foliar pathology. Wrinkling and margin crisping reflect foliar dehydration, not fungal rust or insect bite damage."
+
+            dehydration_pred = {
+                "rank": 1,
+                "class_name": "Abiotic_Dehydration_Underwatering",
+                "condition_name": "Surface Dehydration / Underwatering Stress",
+                "confidence": top_confidence,
+                "is_healthy": False,
+                "severity": top_severity,
+                "category": "Abiotic Water Stress",
+                "care_guide": top_guide
+            }
+            new_preds = [dehydration_pred]
+            for r_idx, ep in enumerate(enriched_predictions[:4], start=2):
+                ep_c = dict(ep)
+                ep_c["rank"] = r_idx
+                new_preds.append(ep_c)
+            enriched_predictions = new_preds
         else:
             top_condition_name = top_guide.get("condition_name", top_cls.replace("_", " "))
             top_category = top_guide.get("category", "Pathology")
@@ -590,8 +667,6 @@ async def api_predict(
                 "Clean foliage surface. No necrotic lesions or fungal spore clusters detected."
             )
 
-        abiotic_res = analyze_abiotic_stress(pil_img, spots_count=spots_count if has_spots else 0)
-        
         # 4. Quantitative PDI (Plant Disease Index) Severity Meter (EPPO / USDA Standard)
         if top_is_healthy or not has_spots:
             pdi_grade = 0
@@ -660,6 +735,13 @@ async def api_predict(
                     "badge": "Xylem Occlusion",
                     "message": "Bacterial pathogens clog vascular bundles. Sterilize shears with 70% alcohol between cuts to prevent spreading to neighboring plants."
                 })
+
+        if is_underwatered:
+            co_alerts.append({
+                "type": "Abiotic Hydration Alert",
+                "badge": "Dehydration vs Rust / Bite Holes",
+                "message": "Leaf wrinkling, curled wild margins, and crispy brown tips are abiotic dehydration symptoms, not fungal rust spores or insect bite holes. Deep watering is recommended."
+            })
 
         inference_time_ms = round((time.time() - t0) * 1000, 1)
 

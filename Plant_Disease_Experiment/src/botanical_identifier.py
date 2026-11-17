@@ -6,7 +6,7 @@ before executing intra-species pathology diagnosis.
 
 import sys
 from pathlib import Path
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, Tuple
 from PIL import Image
 import torch
 import torch.nn as nn

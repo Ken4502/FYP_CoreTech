@@ -1178,5 +1178,40 @@
       "Water early in the day at soil line only.",
       "Provide strong ventilation and maintain dry foliage."
     ]
+  },
+  "Abiotic_Dehydration_Underwatering": {
+    "class_id": "Abiotic_Dehydration_Underwatering",
+    "plant_name": "Botanical Specimen",
+    "scientific_name": "Physiological Desiccation",
+    "condition_name": "Surface Dehydration / Underwatering Stress",
+    "is_healthy": false,
+    "severity": "Moderate",
+    "category": "Abiotic Water Stress",
+    "summary": "Foliage exhibits prominent foliar dehydration (turgor loss, leaf blade wrinkling, wild curled margins, and dry papery tips). These symptoms are physiological moisture deficit stress, NOT infectious fungal rust or insect bite damage.",
+    "symptoms": [
+      "Leaf shriveling, wrinkled surface texture, curled wild margins, and crispy brown tip necrosis."
+    ],
+    "causes": [
+      "Extended dry soil period, low ambient humidity, or irregular watering intervals."
+    ],
+    "immediate_actions": [
+      "Perform a deep root soak (or bottom-water nursery pot in lukewarm water for 30-45 minutes) to rehydrate cellular turgor.",
+      "Do NOT apply chemical fungicides or pesticides; the plant is suffering from water deficit, not fungal rust or chewing insects.",
+      "Prune only completely papery brown crispy margins using clean shears, leaving a thin dry buffer to protect healthy live tissue.",
+      "Check soil dryness 2 inches below the surface before watering again.",
+      "Increase ambient humidity using a pebble tray or humidifier to slow down foliar transpiration."
+    ],
+    "treatment": {
+      "organic": [
+        "Bottom-watering deep soak and room humidity elevation with a pebble tray."
+      ],
+      "chemical": [
+        "No chemical pesticides or fungicides needed; chemical treatments can scorch dehydrated leaves."
+      ]
+    },
+    "prevention": [
+      "Water thoroughly until water drains from the base whenever the top 2 inches of soil feel dry.",
+      "Avoid placing plant directly in hot dry air conditioning drafts or heat vents."
+    ]
   }
 }

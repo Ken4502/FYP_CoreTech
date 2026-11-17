@@ -66,7 +66,16 @@ def analyze_abiotic_stress(pil_img: Image.Image, spots_count: int = 0) -> dict:
     mean_sat = float(np.mean(s_leaf)) / 255.0 * 100.0
     mean_val = float(np.mean(v_leaf)) / 255.0 * 100.0
 
-    # 6. Spatial Smoothness Analysis: Senescence vs Lesion
+    # 6. Metric E: Surface Wrinkle Index & Wild Leaf Contour Tortuosity
+    gray = cv2.cvtColor(bgr, cv2.COLOR_BGR2GRAY).astype(np.float32)
+    lap_abs = np.abs(cv2.Laplacian(gray, cv2.CV_32F, ksize=3))
+    wrinkle_index = round(float(np.percentile(lap_abs[leaf_mask], 85)), 2) if leaf_pixel_count > 0 else 0.0
+
+    contours, _ = cv2.findContours(leaf_mask.astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    total_perimeter = sum(cv2.arcLength(c, True) for c in contours)
+    tortuosity = round(float((total_perimeter ** 2) / (4.0 * np.pi * max(1, leaf_pixel_count))), 2)
+
+    # 7. Spatial Smoothness Analysis: Senescence vs Lesion
     # Natural senescence is a smooth, continuous spatial gradient with low edge variance
     # Pathological spots have high Laplacian edge sharpness and jagged contours
     is_smooth_gradient = False
@@ -75,13 +84,13 @@ def analyze_abiotic_stress(pil_img: Image.Image, spots_count: int = 0) -> dict:
         yellow_img = np.zeros((h, w), dtype=np.uint8)
         yellow_img[yellow_mask_full] = 255
         blurred = cv2.GaussianBlur(yellow_img, (15, 15), 0)
-        contours, _ = cv2.findContours(blurred, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        c_yellow, _ = cv2.findContours(blurred, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         
         # If there are 1 or 2 large smooth connected zones (not 10 scattered spots)
-        if len(contours) in [1, 2, 3] and spots_count == 0:
+        if len(c_yellow) in [1, 2, 3] and spots_count == 0:
             is_smooth_gradient = True
 
-    # 7. Diagnostic Logic & Classification
+    # 8. Diagnostic Logic & Classification
     water_status = "Optimal Hydration"
     water_severity = "Normal"
     aging_status = "Young / Mature Vigorous"
@@ -90,13 +99,31 @@ def analyze_abiotic_stress(pil_img: Image.Image, spots_count: int = 0) -> dict:
     status_summary = ""
 
     # Check Underwatering (Drought Stress)
-    if crispness_pct >= 5.0 or (crispness_pct >= 2.5 and mean_sat < 35.0):
+    is_underwatered = bool(
+        crispness_pct >= 4.0 or
+        (crispness_pct >= 1.8 and mean_sat < 38.0) or
+        (wrinkle_index >= 20.0 and (crispness_pct >= 1.2 or mean_sat < 40.0)) or
+        (wrinkle_index >= 27.0) or
+        (tortuosity >= 3.5 and wrinkle_index >= 18.0 and (crispness_pct >= 1.0 or mean_sat < 42.0))
+    )
+    severe_underwatering = bool(
+        (wrinkle_index >= 28.0 and crispness_pct >= 3.5) or
+        (crispness_pct >= 9.0 and wrinkle_index >= 18.0) or
+        (wrinkle_index >= 36.0)
+    )
+
+    if is_underwatered:
         water_status = "Foliar Dehydration (Underwatering)"
-        water_severity = "High" if crispness_pct > 12.0 else "Moderate"
-        status_summary = f"Foliar moisture analysis indicates water deficit stress. Peripheral leaf margins show {crispness_pct}% papery brown crisping and cellular turgor loss."
+        water_severity = "High" if severe_underwatering else "Moderate"
+        status_summary = (
+            f"Foliar moisture analysis indicates water deficit stress ({wrinkle_index} wrinkle index, "
+            f"{crispness_pct}% papery brown margin crisping). Symptoms represent physiological dehydration, "
+            f"NOT infectious fungal rust or insect bite damage."
+        )
         remedial_advice = [
             "Perform a deep bottom-soak (submerge bottom 2 inches of nursery pot in lukewarm water for 30-45 minutes).",
-            "Prune completely crispy, dead tip margins with clean scissors (leave a thin margin of brown to avoid cutting live green veins).",
+            "Do NOT apply chemical fungicides or pesticides; foliage is suffering from drought stress, not rust or insect chew.",
+            "Prune only completely crispy, dead tip margins with clean scissors (leave a thin brown buffer to protect healthy live veins).",
             "Increase ambient humidity using a pebble tray or room humidifier to slow down foliar transpiration."
         ]
     elif mean_sat < 32.0 and vigor_pct < 60.0:
@@ -138,6 +165,10 @@ def analyze_abiotic_stress(pil_img: Image.Image, spots_count: int = 0) -> dict:
         aging_status = "Active Vegetative Photosynthesis"
         aging_severity = "Normal"
 
+    stress_level = water_severity if is_underwatered else ("Moderate" if water_status != "Optimal Foliar Turgor & Hydration" else "Low")
+    stress_type = "Underwatering Dehydration" if is_underwatered else (water_status if water_status != "Optimal Foliar Turgor & Hydration" else "Normal")
+    recommendation = remedial_advice[0] if remedial_advice else "Optimal foliar hydration detected."
+
     return {
         "water_status": water_status,
         "water_severity": water_severity,
@@ -148,6 +179,16 @@ def analyze_abiotic_stress(pil_img: Image.Image, spots_count: int = 0) -> dict:
         "vigor_pct": vigor_pct,
         "moisture_index": round(mean_sat, 1),
         "status_summary": status_summary,
-        "abiotic_actions": remedial_advice
+        "abiotic_actions": remedial_advice,
+        # Flutter & Web unified keys:
+        "chlorosis_score": chlorosis_pct,
+        "necrosis_score": crispness_pct,
+        "stress_level": stress_level,
+        "stress_type": stress_type,
+        "recommendation": recommendation,
+        "is_underwatered": is_underwatered,
+        "severe_underwatering": severe_underwatering,
+        "surface_wrinkle_index": wrinkle_index,
+        "contour_tortuosity": tortuosity,
     }
 

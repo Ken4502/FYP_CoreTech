@@ -135,12 +135,63 @@ def analyze_masked_surface_stress(pil_crop: Image.Image, mask_crop: np.ndarray) 
 
     chlorophyll_vigor = round(float(np.mean(a_ch < 123) * 100.0), 1)
     yellow_pct = round(float(np.mean((h_ch >= 18) & (h_ch <= 38) & (s_ch > 40) & (b_ch > 136)) * 100.0), 1)
-    crispy_brown_pct = round(float(np.mean((h_ch >= 5) & (h_ch <= 19) & (s_ch >= 35) & (v_ch <= 165)) * 100.0), 1)
+    crispy_brown_pct = round(float(np.mean(((h_ch >= 5) & (h_ch <= 22) & (s_ch >= 28) & (v_ch <= 170)) | ((h_ch >= 5) & (h_ch <= 26) & (s_ch >= 25) & (v_ch <= 180) & (b_ch > 128) & (a_ch >= 124))) * 100.0), 1)
     bleached_pct = round(float(np.mean((s_ch < 35) & (v_ch > 185)) * 100.0), 1)
 
     # Surface wrinkling / shriveling texture index (high local high-freq directional ridges inside mask)
     lap_abs = np.abs(cv2.Laplacian(gray, cv2.CV_32F, ksize=3))
     wrinkle_index = round(float(np.percentile(lap_abs[m], 85)), 2)
+    wrinkle_p95 = round(float(np.percentile(lap_abs[m], 95)), 2)
+    mean_sat = round(float(np.mean(s_ch) / 255.0 * 100.0), 1)
+
+    # Mask contour tortuosity to detect wild / curled / wavy foliage margins
+    contours, _ = cv2.findContours(m.astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    total_perimeter = sum(cv2.arcLength(c, True) for c in contours)
+    tortuosity = round(float((total_perimeter ** 2) / (4.0 * np.pi * max(1, fg_pixels))), 2)
+
+    # Check for genuine compact rust pustules vs diffuse dry patches
+    rust_color_mask = (hsv[:, :, 0] >= 9) & (hsv[:, :, 0] <= 22) & (hsv[:, :, 1] >= 115) & (hsv[:, :, 2] >= 75) & (hsv[:, :, 2] <= 210) & m
+    rust_px = int(np.count_nonzero(rust_color_mask))
+    has_compact_rust_pustules = False
+    if rust_px > 30:
+        r_u8 = rust_color_mask.astype(np.uint8) * 255
+        r_cnts, _ = cv2.findContours(r_u8, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        compact_spots = 0
+        for c in r_cnts:
+            c_area = cv2.contourArea(c)
+            if 15 <= c_area <= 2000:
+                p_len = cv2.arcLength(c, True)
+                if p_len > 0:
+                    circ = 4.0 * np.pi * c_area / (p_len * p_len)
+                    if circ >= 0.45:
+                        compact_spots += 1
+        if compact_spots >= 3:
+            has_compact_rust_pustules = True
+
+    # Hydration stress evaluation
+    is_underwatered = bool(
+        (wrinkle_index >= 20.0 and (crispy_brown_pct >= 1.8 or mean_sat < 40.0)) or
+        (crispy_brown_pct >= 4.5 and (wrinkle_index >= 15.0 or mean_sat < 42.0)) or
+        (wrinkle_index >= 27.0) or
+        (tortuosity >= 3.5 and wrinkle_index >= 18.0 and (crispy_brown_pct >= 1.2 or mean_sat < 42.0))
+    )
+    severe_underwatering = bool(
+        (wrinkle_index >= 28.0 and crispy_brown_pct >= 3.5) or
+        (crispy_brown_pct >= 9.0 and wrinkle_index >= 18.0) or
+        (wrinkle_index >= 36.0)
+    )
+
+    hydration_dict = {
+        "is_underwatered": is_underwatered,
+        "severe_underwatering": severe_underwatering,
+        "severe_overwatering": False,
+        "wrinkle_index": wrinkle_index,
+        "wrinkle_p95": wrinkle_p95,
+        "crispy_margin_pct": crispy_brown_pct,
+        "mean_saturation_pct": mean_sat,
+        "tortuosity": tortuosity,
+        "has_compact_rust_pustules": has_compact_rust_pustules,
+    }
 
     return {
         "chlorophyll_vigor_pct": chlorophyll_vigor,
@@ -148,7 +199,12 @@ def analyze_masked_surface_stress(pil_crop: Image.Image, mask_crop: np.ndarray) 
         "dry_necrotic_margin_pct": crispy_brown_pct,
         "sunburn_bleached_pct": bleached_pct,
         "surface_wrinkle_index": wrinkle_index,
-        "mean_saturation_pct": round(float(np.mean(s_ch) / 255.0 * 100.0), 1),
+        "mean_saturation_pct": mean_sat,
+        "contour_tortuosity": tortuosity,
+        "hydration_stress": hydration_dict,
+        "chlorosis_score": yellow_pct,
+        "necrosis_score": crispy_brown_pct,
+        "has_compact_rust_pustules": has_compact_rust_pustules,
     }
 
 
@@ -200,12 +256,31 @@ def diagnose_surface_condition(
     lesion_info = detect_surface_lesions(pil_crop, mask_crop, yolo_lesion)
 
     if not mil_dict:
+        hyd = stress_metrics.get("hydration_stress", {})
+        if hyd.get("is_underwatered", False):
+            primary = "Abiotic_Dehydration_Underwatering"
+            super_state = "Abiotic_Stress"
+            conf = 88.0 if hyd.get("severe_underwatering", False) else 78.0
+            lesion_info["spots_count"] = 0
+            lesion_info["infected_area_pct"] = 0.0
+            lesion_info["status_message"] = "Foliar surface exhibits moisture deficit and turgor loss (wrinkled folds and dry papery tips). No infectious fungal or pest lesions detected."
+            preds = [{"rank": 1, "class_name": primary, "confidence": conf}]
+            return {
+                "primary_class": primary,
+                "super_state": super_state,
+                "super_probs": {"healthy_pct": 0.0, "biotic_pct": 0.0, "abiotic_pct": 100.0},
+                "confidence": conf,
+                "is_healthy": False,
+                "predictions": preds,
+                "lesion_info": lesion_info,
+                "surface_stress": stress_metrics,
+            }
         return {
-            "primary_class": "Unknown",
-            "super_state": "Unknown",
-            "confidence": 0.0,
+            "primary_class": "Healthy_Foliage",
+            "super_state": "Healthy",
+            "confidence": 90.0,
             "is_healthy": True,
-            "predictions": [],
+            "predictions": [{"rank": 1, "class_name": "Healthy_Foliage", "confidence": 90.0}],
             "lesion_info": lesion_info,
             "surface_stress": stress_metrics,
         }
@@ -253,6 +328,33 @@ def diagnose_surface_condition(
     p_biotic_sup = float(super_probs[1].item())
     p_abiotic_sup = float(super_probs[2].item())
 
+    # DEHYDRATION & ABIOTIC STRESS ARBITRATION
+    # Suppress spurious Rust and Leaf Miners / Insect Bite detections on shriveled, curled wild foliage
+    hyd = stress_metrics.get("hydration_stress", {})
+    is_underwatered = hyd.get("is_underwatered", False)
+    severe_underwatering = hyd.get("severe_underwatering", False)
+    has_compact_rust = hyd.get("has_compact_rust_pustules", False)
+
+    if is_underwatered and ref_classes is not None:
+        idx_dehydration = ref_classes.index("Abiotic_Dehydration_Underwatering") if "Abiotic_Dehydration_Underwatering" in ref_classes else -1
+        idx_rust = ref_classes.index("Rust_Fungi") if "Rust_Fungi" in ref_classes else -1
+        idx_miners = ref_classes.index("Leaf_Miners") if "Leaf_Miners" in ref_classes else -1
+
+        # 1. Suppress false-positive Rust Fungi if true compact pustules are absent
+        if idx_rust != -1 and not has_compact_rust:
+            fine_probs[idx_rust] *= 0.10
+
+        # 2. Suppress false-positive Leaf Miners / bite damage caused by curled wavy margins or shriveled folds
+        if idx_miners != -1:
+            fine_probs[idx_miners] *= 0.12
+
+        # 3. Boost Abiotic_Dehydration_Underwatering
+        if idx_dehydration != -1:
+            boost_min = 0.70 if severe_underwatering else 0.52
+            fine_probs[idx_dehydration] = torch.clamp(fine_probs[idx_dehydration] * 4.0, min=boost_min)
+
+        fine_probs = fine_probs / fine_probs.sum().clamp(min=1e-8)
+
     top_p, top_i = fine_probs.topk(5)
     preds = [
         {"rank": r, "class_name": ref_classes[i.item()], "confidence": round(p.item() * 100.0, 2)}
@@ -267,6 +369,13 @@ def diagnose_surface_condition(
     if primary != "Healthy_Foliage" and p_healthy_sup >= healthy_thresh and lesion_info["spots_count"] == 0 and primary_conf < 65.0:
         primary = "Healthy_Foliage"
         primary_conf = round(p_healthy_sup * 100.0, 2)
+
+    # If diagnosed as Abiotic_Dehydration_Underwatering, calibrate lesion detector output:
+    # Bounding boxes caused by shriveled folds / curled margins are non-infectious mechanical turgor collapse
+    if primary == "Abiotic_Dehydration_Underwatering":
+        lesion_info["spots_count"] = 0
+        lesion_info["infected_area_pct"] = 0.0
+        lesion_info["status_message"] = "Foliar surface exhibits moisture deficit and turgor loss (wrinkled folds and dry papery tips). No infectious fungal or pest lesions detected."
 
     super_state = "Healthy" if primary == "Healthy_Foliage" else ("Abiotic_Stress" if primary.startswith("Abiotic_") else "Biotic_Pathology")
 
