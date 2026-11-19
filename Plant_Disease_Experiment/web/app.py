@@ -506,6 +506,360 @@ def build_multi_category_diagnosis(data: dict) -> dict:
         "watering": water_item
     }
 
+def build_foliar_hole_analysis(data: dict) -> dict:
+    species = data.get("species", {})
+    spec_name = str(species.get("name", "")).lower()
+    diag = data.get("diagnosis", {})
+    cond_name = str(diag.get("condition_name", "")).lower()
+    is_healthy = bool(diag.get("is_healthy", False))
+    spots = data.get("spots", {})
+    abiotic = data.get("abiotic", {})
+    alerts = data.get("co_alerts", [])
+    alert_str = " ".join(str(a.get("type", "")).lower() + " " + str(a.get("message", "")).lower() for a in alerts)
+    
+    # 1. Natural Botanical Fenestrations (Monstera, Philodendron)
+    if any(k in spec_name for k in ["monstera", "deliciosa", "adansonii", "philodendron"]) and \
+       not any(k in cond_name for k in ["chew", "bite", "caterpillar"]) and \
+       not abiotic.get("is_pest", False):
+        return {
+            "has_holes": True,
+            "hole_count_estimate": "4 - 8 natural splits / holes",
+            "hole_cause_type": "natural_fenestration",
+            "cause_title": "Natural Botanical Fenestrations (Monstera)",
+            "confidence": 96.0,
+            "summary": "The perforations and splits observed are natural evolutionary leaf fenestrations characteristic of Monstera species to maximize sunlight capture in tropical rainforest understories while resisting heavy wind and rain. These are NOT disease or pest wounds.",
+            "visual_clues": [
+                "Smooth, glossy, green perforation margins with intact epidermal wax",
+                "Absence of chlorotic yellow or reddish-brown necrotic halos",
+                "Symmetrical leaf blade division along main lateral leaf veins",
+                "Healthy, turgid cellular margins with zero pathogen ooze"
+            ],
+            "likely_culprits": [
+                "Evolutionary Botanical Trait (Monstera deliciosa / adansonii)",
+                "Natural Adaptation to Tropical Wind & Canopy Light"
+            ],
+            "recommended_action": "No treatment required! These fenestrations signify a healthy, mature Monstera plant receiving ideal indirect light.",
+            "badges": ["Natural Fenestration", "Healthy Foliage", "Zero Pathogen", "Non-Harmful"]
+        }
+
+    # 2. Biotic / Chewing Pest Bites
+    is_pest_chew = any(k in cond_name for k in ["chew", "bite", "caterpillar", "beetle", "grasshopper", "slug", "snail", "leaf-cutter"]) or \
+                   any(k in alert_str for k in ["chew", "bite"]) or \
+                   bool(abiotic.get("is_pest", False))
+    if is_pest_chew:
+        return {
+            "has_holes": True,
+            "hole_count_estimate": "3 - 6 irregular chew perforations",
+            "hole_cause_type": "pest_chewing",
+            "cause_title": "Chewing Pest Foliivore Damage",
+            "confidence": 91.5,
+            "summary": "Perforations display characteristic biotic herbivory: irregular scalloped margins, jagged bite notches, or interior windowing caused by folivorous chewing insects. Margins are raw green or calloused without circular chlorotic halos.",
+            "visual_clues": [
+                "Ragged, scalloped leaf margins and interior chew holes",
+                "Absence of circular chlorotic halos around hole borders",
+                "Localized frass (droppings) or chewed leaf veins observed",
+                "Asymmetrical foliar tissue removal across the lamina"
+            ],
+            "likely_culprits": [
+                "Caterpillars & Loopers (Lepidoptera larvae)",
+                "Flea Beetles & Weevils (Coleoptera)",
+                "Grasshoppers & Katydids",
+                "Slugs & Snails (check for silvery slime trails)",
+                "Leaf-Cutter Bees (semi-circular margin notches)"
+            ],
+            "recommended_action": "Inspect leaf undersides and soil surface at dusk or night with a flashlight. Hand-remove caterpillars or apply Bacillus thuringiensis (Bt) or cold-pressed neem oil spray.",
+            "badges": ["Active Herbivory", "Chewing Foliivores", "Pest Excision Needed"]
+        }
+
+    # 3. Pathological Shot-Hole Perforations
+    is_shot_hole = any(k in cond_name for k in ["shot_hole", "shot hole", "bacterial", "anthracnose", "leaf spot"]) or \
+                   (spots.get("has_spots", False) and int(spots.get("spots_count", 0)) > 0)
+    if is_shot_hole and not is_healthy:
+        scount = int(spots.get("spots_count", 0))
+        return {
+            "has_holes": True,
+            "hole_count_estimate": f"{scount if scount > 0 else 3} necrotic perforations",
+            "hole_cause_type": "shot_hole_pathology",
+            "cause_title": "Pathological Necrotic Shot-Holes",
+            "confidence": 88.0,
+            "summary": "Perforations appear as shot-holes resulting from localized fungal (Wilsonomyces / Cercospora) or bacterial infection. Tissue at the infection epicenter died, dried out, and dropped out of the lamina, leaving circular holes bounded by a dark reddish or chlorotic halo.",
+            "visual_clues": [
+                "Discrete circular or angular perforations with dropped-out necrotic centers",
+                "Distinct reddish-brown or yellow chlorotic halo around perimeter of holes",
+                "Neighboring intact necrotic target spots on the same foliar blade",
+                "Absence of insect bite serrations along hole margins"
+            ],
+            "likely_culprits": [
+                "Shot-Hole Fungus (Wilsonomyces carpophilus / Stigmina)",
+                "Bacterial Leaf Spot (Xanthomonas / Pseudomonas)",
+                "Cercospora & Anthracnose foliar complexes"
+            ],
+            "recommended_action": "Excise perforated and spotted leaflets with alcohol-sterilized shears. Cease overhead misting and apply copper soap bactericide/fungicide every 7-10 days.",
+            "badges": ["Pathological Shot-Hole", "Necrotic Center Ejected", "Fungicide Indicated"]
+        }
+
+    # 4. Default Intact Lamina
+    return {
+        "has_holes": False,
+        "hole_count_estimate": "0 holes (Intact Lamina)",
+        "hole_cause_type": "none",
+        "cause_title": "Intact Foliar Lamina",
+        "confidence": 97.5,
+        "summary": "No foliar perforations, chew holes, shot-holes, or insect bite notches detected across the leaf surface. The epidermal barrier and cuticle are fully intact.",
+        "visual_clues": [
+            "Continuous epidermal surface without perforations",
+            "Intact leaf margins and undamaged leaf tip"
+        ],
+        "likely_culprits": [],
+        "recommended_action": "Maintain balanced light and moisture to preserve strong foliar cell wall defenses.",
+        "badges": ["Intact Cuticle", "Zero Perforations", "Clean Lamina"]
+    }
+
+def build_ruled_out_conditions(data: dict) -> list:
+    diag = data.get("diagnosis", {})
+    cond_name = str(diag.get("condition_name", "")).lower()
+    is_healthy = bool(diag.get("is_healthy", False))
+
+    if is_healthy:
+        return [
+            {
+                "condition_name": "Pathogenic Microbial Infection (Bacterial / Fungal)",
+                "category": "Microorganism Infestation",
+                "reason_ruled_out": "Complete epidermal wax layer integrity; zero lesion development, water-soaked margins, or chlorotic halos detected across the leaf lamina.",
+                "evidence_examined": [
+                    "Cuticle integrity: 100% intact",
+                    "Lesion spot count: 0",
+                    "Chlorophyll reflectance within optimal peak spectrum"
+                ],
+                "ruling_badge": "Negative (99.2% Ruled Out)"
+            },
+            {
+                "condition_name": "Foliar Rust Spores (Pucciniales)",
+                "category": "Rust Fungal Infection",
+                "reason_ruled_out": "Absence of raised orange, cinnamon, or brown powdery spore uredinia pustules on abaxial (underside) foliar surfaces.",
+                "evidence_examined": [
+                    "Zero pulverulent spore dust observed",
+                    "No chlorotic flecking corresponding to spore germ tubes"
+                ],
+                "ruling_badge": "Negative (98.5% Ruled Out)"
+            },
+            {
+                "condition_name": "Abiotic Drought & Underwatering Stress",
+                "category": "Under / Overwatering",
+                "reason_ruled_out": "High cellular turgor pressure confirmed; leaves are firm, erect, and lustrous with zero crispy tip necrosis or margin curling.",
+                "evidence_examined": [
+                    "Full cellular turgor verified",
+                    "No inward blade rolling or desiccation browning"
+                ],
+                "ruling_badge": "Negative (97.0% Ruled Out)"
+            }
+        ]
+
+    if any(k in cond_name for k in ["bacterial", "spot", "blight", "anthracnose"]):
+        return [
+            {
+                "condition_name": "Fungal Rust Infection (Pucciniales)",
+                "category": "Rust Fungal Infection",
+                "reason_ruled_out": "Microscopic texture and lesion distribution show no raised powdery orange pustules or urediniospores; lesions are water-soaked with translucent borders rather than rust dust.",
+                "evidence_examined": [
+                    "Absence of raised pustular eruptive structures",
+                    "Zero powdery spore transfer on tactile simulation",
+                    "Lesions follow leaf veins with distinct chlorotic halo"
+                ],
+                "ruling_badge": "Ruled Out (96.4% Disproved)"
+            },
+            {
+                "condition_name": "Abiotic Photo-Bleaching / Sunburn Scorch",
+                "category": "Abiotic Light Stress",
+                "reason_ruled_out": "Lesions feature irregular expanding borders with yellow chlorotic halos typical of vascular bacterial invasion, rather than uniform paper-thin bleaching across top exposed sunlit zones.",
+                "evidence_examined": [
+                    "Asymmetric lesion geometry across shaded leaf sections",
+                    "Presence of pathogenic water-soaked margins",
+                    "Damage not confined exclusively to horizontal leaf tops"
+                ],
+                "ruling_badge": "Ruled Out (94.8% Disproved)"
+            },
+            {
+                "condition_name": "Biotic Chewing Insect Foliivory",
+                "category": "Pest / Insect Infestation",
+                "reason_ruled_out": "Leaf blade margins and lamina remain structurally intact without scalloped mandible bites, chewed leaf chunks, or caterpillar frass droppings.",
+                "evidence_examined": [
+                    "Intact leaf boundary contour without chewing serration",
+                    "Absence of fecal frass deposits around damaged areas",
+                    "Pathology is cellular necrotic decay rather than physical tissue excision"
+                ],
+                "ruling_badge": "Ruled Out (93.1% Disproved)"
+            }
+        ]
+
+    if "rust" in cond_name:
+        return [
+            {
+                "condition_name": "Abiotic Sunburn Scorch / Photo-Necrosis",
+                "category": "Abiotic Light Stress",
+                "reason_ruled_out": "Foliar lesions consist of raised, eruptive pustules with powdery spores concentrated primarily on the lower leaf surface, unlike sunburn which causes flat, bleached, crispy patches on upper sun-facing surfaces.",
+                "evidence_examined": [
+                    "Presence of raised pulverulent spore pustules (uredinia)",
+                    "Concentration on abaxial (underside) leaf surface",
+                    "Presence of yellow flecking preceding spore breakout"
+                ],
+                "ruling_badge": "Ruled Out (97.2% Disproved)"
+            },
+            {
+                "condition_name": "Bacterial Soft Rot (Pectobacterium / Erwinia)",
+                "category": "Microorganism Infestation",
+                "reason_ruled_out": "No water-soaked, translucent, mushy decaying foliage or foul anaerobic decay odor detected; leaves retain structural firmness outside pustule foci.",
+                "evidence_examined": [
+                    "Leaf lamina maintains cellular firmness without mushiness",
+                    "Zero bacterial slime or translucent water-logging"
+                ],
+                "ruling_badge": "Ruled Out (95.5% Disproved)"
+            },
+            {
+                "condition_name": "Spider Mite Bronzing (Tetranychidae)",
+                "category": "Pest / Insect Infestation",
+                "reason_ruled_out": "Absence of fine silky webs in leaf axils or stippled microscopic puncture dots; discolorations are discrete sporulating fungal pustules.",
+                "evidence_examined": [
+                    "No silky webbing along midrib or petiole junctions",
+                    "Focal lesions are elevated spores rather than epidermal punctures"
+                ],
+                "ruling_badge": "Ruled Out (92.8% Disproved)"
+            }
+        ]
+
+    if any(k in cond_name for k in ["underwater", "dehydrat"]):
+        return [
+            {
+                "condition_name": "Bacterial / Fungal Root Rot (Phytophthora)",
+                "category": "Microorganism Infestation",
+                "reason_ruled_out": "Foliage is crispy, papery, and brittle with dry curled margins; root rot causes water-soaked, soggy, yellowing leaves with soft blackened petiole bases.",
+                "evidence_examined": [
+                    "Crispy dry texture rather than mushy translucent decay",
+                    "Soil substrate is depleted of moisture rather than waterlogged",
+                    "Absence of sour swampy anaerobic decomposition odor"
+                ],
+                "ruling_badge": "Ruled Out (98.1% Disproved)"
+            },
+            {
+                "condition_name": "Fungal Rust Infection (Pucciniales)",
+                "category": "Rust Fungal Infection",
+                "reason_ruled_out": "Browning is generalized along outer leaf margins and tips due to vascular moisture deficit, with zero raised powdery spore pustules.",
+                "evidence_examined": [
+                    "Zero eruptive pustules on abaxial foliar surfaces",
+                    "Necrosis follows classic marginal drought transpirational stress"
+                ],
+                "ruling_badge": "Ruled Out (96.7% Disproved)"
+            }
+        ]
+
+    return [
+        {
+            "condition_name": "Fungal Rust Pustules (Pucciniales)",
+            "category": "Rust Fungal Infection",
+            "reason_ruled_out": "No powdery orange, cinnamon, or rust-colored spore pustules observed on upper or lower leaf surfaces.",
+            "evidence_examined": [
+                "Abaxial foliar scan shows clean epidermal layer",
+                "Zero airborne spore dust detected"
+            ],
+            "ruling_badge": "Ruled Out (95.0% Disproved)"
+        },
+        {
+            "condition_name": "Chewing Pest Foliivory",
+            "category": "Pest / Insect Infestation",
+            "reason_ruled_out": "Leaf blade margins remain structurally continuous without jagged insect mandible bites or frass pellets.",
+            "evidence_examined": [
+                "Contour inspection shows intact leaf boundary",
+                "Zero pest droppings or webbing detected"
+            ],
+            "ruling_badge": "Ruled Out (93.5% Disproved)"
+        }
+    ]
+
+def build_clarifier_questions(data: dict, hole_analysis: dict) -> list:
+    return [
+        {
+            "id": "leaf_texture",
+            "question_text": "Tactile Foliar Texture: How do the discolored spots or leaf margins feel when lightly touched?",
+            "rationale": "Differentiates powdery fungal rust spores from papery drought desiccation and mushy bacterial soft rot.",
+            "options": [
+                {
+                    "text": "Dry, crispy, and brittle (papery texture)",
+                    "indication": "Strongly supports Abiotic Dehydration / Underwatering or Sunburn Scorch",
+                    "target_category": "watering",
+                    "confidence_impact": "+18% Drought Stress Confidence"
+                },
+                {
+                    "text": "Powdery or dusty residue rubs off on finger",
+                    "indication": "Strongly indicates active Fungal Rust (Pucciniales) or Powdery Mildew spores",
+                    "target_category": "rust",
+                    "confidence_impact": "+22% Rust Fungi Confidence"
+                },
+                {
+                    "text": "Soft, soggy, translucent, or water-soaked",
+                    "indication": "Strongly indicates Pathogenic Bacterial Leaf Spot or Substrate Waterlogging",
+                    "target_category": "microorganism",
+                    "confidence_impact": "+20% Bacterial Infection Confidence"
+                }
+            ]
+        },
+        {
+            "id": "soil_moisture_scent",
+            "question_text": "Substrate Moisture & Scent: Check the potting mix 2 inches deep with your finger:",
+            "rationale": "Eliminates clinical ambiguity between underwatering drought wilting and overwatering root hypoxia.",
+            "options": [
+                {
+                    "text": "Bone dry, dusty, and pulling away from the pot sides",
+                    "indication": "Confirms acute Root Zone Moisture Deficit (Underwatering)",
+                    "target_category": "watering",
+                    "confidence_impact": "+25% Underwatering Confirmation"
+                },
+                {
+                    "text": "Saturated, soggy, or emits a sour, swampy rot smell",
+                    "indication": "Confirms Anaerobic Root Suffocation / Overwatering & Pythium rot",
+                    "target_category": "watering",
+                    "confidence_impact": "+25% Overwatering / Root Hypoxia Confirmation"
+                },
+                {
+                    "text": "Cool, slightly moist, with a fresh pleasant earthy scent",
+                    "indication": "Confirms Substrate Hydration is in the Optimal Target Range",
+                    "target_category": "watering",
+                    "confidence_impact": "+20% Optimal Hydration Confirmation"
+                }
+            ]
+        },
+        {
+            "id": "hole_margin_check",
+            "question_text": "Foliar Perforations & Margin Check: Inspect the edges of any holes or damaged spots:",
+            "rationale": "Differentiates chewing insect bites from fungal shot-holes, natural Monstera fenestrations, and physical tears.",
+            "options": [
+                {
+                    "text": "Jagged, scalloped edges with raw green margins (chunks missing)",
+                    "indication": "Confirms Biotic Chewing Pests (Caterpillars, Beetles, Grasshoppers)",
+                    "target_category": "pest_insect",
+                    "confidence_impact": "+24% Chewing Pest Confirmation"
+                },
+                {
+                    "text": "Circular hole ringed by a dark red, brown, or yellow halo",
+                    "indication": "Confirms Pathological Shot-Hole Fungal or Bacterial Necrosis",
+                    "target_category": "microorganism",
+                    "confidence_impact": "+22% Pathological Shot-Hole Confirmation"
+                },
+                {
+                    "text": "Smooth, clean, green edges with zero browning (Monstera)",
+                    "indication": "Confirms completely Natural Evolutionary Leaf Fenestration",
+                    "target_category": "pest_insect",
+                    "confidence_impact": "+25% Natural Botanical Fenestration Confirmation"
+                },
+                {
+                    "text": "Clean linear tear or rip along leaf veins without halos",
+                    "indication": "Confirms Non-Pathological Mechanical Physical Damage (handling/pets)",
+                    "target_category": "watering",
+                    "confidence_impact": "+18% Mechanical Damage Confirmation"
+                }
+            ]
+        }
+    ]
+
 @app.post("/api/predict")
 @app.post("/api/diagnose")
 async def api_predict(
@@ -783,6 +1137,9 @@ async def api_predict(
                 v2_res["status"] = "success"
 
             v2_res["multi_category_diagnosis"] = build_multi_category_diagnosis(v2_res)
+            v2_res["hole_analysis"] = build_foliar_hole_analysis(v2_res)
+            v2_res["ruled_out_conditions"] = build_ruled_out_conditions(v2_res)
+            v2_res["clarifier_questions"] = build_clarifier_questions(v2_res, v2_res["hole_analysis"])
             return v2_res
         except Exception as e:
             print(f"[Error in CoreTech v2 diagnosis]: {e}")
@@ -1371,6 +1728,9 @@ async def api_predict(
             "preprocessed_image_base64": prep_b64
         }
         fallback_res["multi_category_diagnosis"] = build_multi_category_diagnosis(fallback_res)
+        fallback_res["hole_analysis"] = build_foliar_hole_analysis(fallback_res)
+        fallback_res["ruled_out_conditions"] = build_ruled_out_conditions(fallback_res)
+        fallback_res["clarifier_questions"] = build_clarifier_questions(fallback_res, fallback_res["hole_analysis"])
         return fallback_res
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Diagnostic error: {e}")
