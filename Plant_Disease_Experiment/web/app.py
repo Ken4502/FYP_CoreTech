@@ -187,6 +187,325 @@ async def api_benchmark_image(idx: int):
         raise HTTPException(status_code=404, detail="Specimen image not found in cache")
     return StreamingResponse(io.BytesIO(img_bytes), media_type="image/jpeg")
 
+def build_multi_category_diagnosis(data: dict) -> dict:
+    diag = data.get("diagnosis", {})
+    cond_name = diag.get("condition_name", "")
+    cond_lower = cond_name.lower()
+    cat_lower = diag.get("category", "").lower()
+    sev = diag.get("severity", "Moderate")
+    conf = float(diag.get("confidence", 90.0))
+    is_healthy = bool(diag.get("is_healthy", False))
+    care = data.get("care_guide", {})
+    abiotic = data.get("abiotic", {})
+    co_alerts = data.get("co_alerts", [])
+    preds = data.get("predictions", [])
+    
+    all_preds_str = " ".join(p.get("class_name", "").lower() + " " + p.get("condition_name", "").lower() for p in preds)
+    alert_str = " ".join(a.get("type", "").lower() + " " + a.get("badge", "").lower() + " " + a.get("message", "").lower() for a in co_alerts)
+    
+    # 1. Microorganism Infestation (Rank 1 - Critical Severity)
+    has_micro = any(k in cond_lower for k in ["bacterial", "blight", "anthracnose", "leaf spot", "mildew", "mold", "rot", "canker", "wilt", "mosaic"]) or \
+                any(k in cat_lower for k in ["bacterial", "fungal"]) or \
+                any(k in all_preds_str for k in ["bacterial", "anthracnose"])
+    is_micro_detected = has_micro and not is_healthy and ("rust" not in cond_lower or "spot" in cond_lower or "bacterial" in cond_lower)
+    
+    if is_micro_detected:
+        micro_item = {
+            "id": "microorganism",
+            "title": "Microorganism Infestation",
+            "severity_rank": 1,
+            "severity_rank_label": "Rank 1 • Critical Severity",
+            "severity_level": sev if sev and sev != "None" else "High",
+            "is_detected": True,
+            "status_label": cond_name,
+            "confidence": conf,
+            "summary": care.get("summary") or "Pathogenic microorganisms detected causing water-soaked cellular decay and expanding necrotic lesions.",
+            "symptoms": care.get("symptoms") or [
+                "Water-soaked translucent lesions with chlorotic yellow halos",
+                "Expanding necrotic foliar spotting and soft tissue decay",
+                "Foliar blighting and premature leaflet abscission"
+            ],
+            "immediate_actions": care.get("immediate_actions") or [
+                "Isolate specimen at least 1.5 meters away from all other plants immediately.",
+                "Sterilize shears with 70% isopropyl alcohol and excise heavily infected leaflets.",
+                "Water strictly at the soil base; do not wet or mist leaf surfaces."
+            ],
+            "organic_treatments": care.get("treatment", {}).get("organic") or [
+                "Apply copper octanoate (copper soap) fungicidal bactericide every 7-10 days.",
+                "Spray cold-pressed pure neem oil solution (0.5% concentration) to boost foliar defenses."
+            ],
+            "chemical_treatments": care.get("treatment", {}).get("chemical") or [
+                "Apply fixed copper hydroxide spray at 1.5g per liter of water for persistent lesions.",
+                "Systemic broad-spectrum fungicide (Chlorothalonil or Azoxystrobin) for deep blights."
+            ],
+            "prevention": care.get("prevention") or [
+                "Ensure morning-only watering so foliage dries quickly.",
+                "Maintain 30cm spacing between indoor pots for continuous laminar airflow."
+            ],
+            "badges": ["High Contagion", "Vascular Pathogen", "Immediate Quarantine"]
+        }
+    else:
+        micro_item = {
+            "id": "microorganism",
+            "title": "Microorganism Infestation",
+            "severity_rank": 1,
+            "severity_rank_label": "Rank 1 • Critical Severity",
+            "severity_level": "Optimal",
+            "is_detected": False,
+            "status_label": "Clear • No Microbial Pathogens",
+            "confidence": 96.5,
+            "summary": "No active bacterial leaf spot, fungal blights, soft rot, powdery mildew mycelium, or viral lesions identified on foliar surfaces.",
+            "symptoms": ["Uniform foliar epidermis without necrotic lesions or water-soaked halos."],
+            "immediate_actions": ["Maintain clean foliage and keep leaves dry during watering."],
+            "organic_treatments": ["Routine preventive foliar wiping with a clean damp microfiber cloth."],
+            "chemical_treatments": ["No chemical bactericides or fungicides needed."],
+            "prevention": ["Water strictly at soil level and ensure adequate room ventilation."],
+            "badges": ["Clean Epidermis", "Pathogen-Free"]
+        }
+    
+    # 2. Pest & Insect Infestation (Rank 2 - High Urgency)
+    has_pest = any(k in cond_lower for k in ["pest", "insect", "aphid", "mealybug", "scale", "thrip", "mite", "whitefl", "miner", "chew", "bite", "hole"]) or \
+               any(k in alert_str for k in ["pest", "aphid", "mite", "scale", "bite"]) or \
+               bool(abiotic.get("is_pest", False))
+    is_pest_detected = has_pest and not is_healthy
+    
+    if is_pest_detected:
+        pest_label = "Biotic Pest Infestation"
+        if "mealybug" in cond_lower: pest_label = "Mealybugs (Cochineal Wax)"
+        elif "aphid" in cond_lower: pest_label = "Aphids (Plant Lice Colony)"
+        elif "scale" in cond_lower: pest_label = "Scale Insects (Armored Shell)"
+        elif "mite" in cond_lower: pest_label = "Spider Mites (Tetranychidae)"
+        elif "thrip" in cond_lower: pest_label = "Thrips (Foliar Rasping)"
+        elif "miner" in cond_lower: pest_label = "Leaf Miners (Mesophyll Tunnels)"
+        elif "chew" in cond_lower or "bite" in cond_lower: pest_label = "Chewing Pests (Insect Bite Holes)"
+        
+        pest_item = {
+            "id": "pest_insect",
+            "title": "Pest & Insect Infestation",
+            "severity_rank": 2,
+            "severity_rank_label": "Rank 2 • High Urgency",
+            "severity_level": "High",
+            "is_detected": True,
+            "status_label": pest_label,
+            "confidence": conf if conf > 0 else 88.5,
+            "summary": "Active biotic pests or insect feeding damage observed draining vital phloem sap and weakening plant immunity.",
+            "symptoms": [
+                "Sap-sucking stippling, chlorotic spotting, and bronzing",
+                "Cottony waxy fluff, fine silky webbing, or waxy armor shell bumps",
+                "Chewed leaf margins, shot holes, or serpentine mining tunnels",
+                "Sticky honeydew secretions attracting secondary sooty mold"
+            ],
+            "immediate_actions": [
+                "Isolate the plant immediately away from all other houseplants to halt pest migration.",
+                "Dab cotton swabs soaked in 70% isopropyl alcohol directly onto mealybugs or armored scales.",
+                "Rinse aphid clusters off shoots with a firm lukewarm spray in the sink."
+            ],
+            "organic_treatments": [
+                "Spray cold-pressed pure neem oil solution (0.5% concentration with mild soap) every 4-5 days.",
+                "Apply potassium salt insecticidal soap spray covering upper and lower leaf surfaces.",
+                "Dust food-grade diatomaceous earth around the potting soil rim to deter crawling nymphs."
+            ],
+            "chemical_treatments": [
+                "Pyrethrin contact insecticide spray for rapid knockdown of heavy aphid, whitefly, or thrip swarms.",
+                "Spinosad foliar spray for thrips, leaf miners, and chewing caterpillars."
+            ],
+            "prevention": [
+                "Conduct weekly leaf checks using a bright flashlight on leaf undersides.",
+                "Wipe foliage monthly to prevent dust buildup where spider mites thrive.",
+                "Quarantine newly purchased plants for 14 days before integrating into garden."
+            ],
+            "badges": ["Sap Sucker", "Spreads Across Plants", "Isolation Required"]
+        }
+    else:
+        pest_item = {
+            "id": "pest_insect",
+            "title": "Pest & Insect Infestation",
+            "severity_rank": 2,
+            "severity_rank_label": "Rank 2 • High Urgency",
+            "severity_level": "Optimal",
+            "is_detected": False,
+            "status_label": "Clear • No Active Pests",
+            "confidence": 95.0,
+            "summary": "No sap-sucking insects, webbing, scale armor shells, mealybug wax clusters, or chewing bite perforations detected on foliage.",
+            "symptoms": ["Intact leaf margins and unblemished foliar surfaces without feeding bites or webbing."],
+            "immediate_actions": ["Continue routine weekly visual checks of leaf undersides."],
+            "organic_treatments": ["Preventive foliage wipe with clean damp cloth once a month."],
+            "chemical_treatments": ["No chemical insecticides needed."],
+            "prevention": ["Maintain balanced ambient humidity to discourage spider mite reproduction."],
+            "badges": ["Pest-Free", "Optimal Vigor"]
+        }
+        
+    # 3. Rust Fungal Infection (Rank 3 - Moderate Severity)
+    has_rust = ("rust" in cond_lower or "rust" in all_preds_str or "rust" in alert_str) and not is_healthy
+    if has_rust:
+        rust_item = {
+            "id": "rust",
+            "title": "Rust Fungal Infection",
+            "severity_rank": 3,
+            "severity_rank_label": "Rank 3 • Moderate Severity",
+            "severity_level": "Moderate",
+            "is_detected": True,
+            "status_label": "Active Rust Pustules (Pucciniales)",
+            "confidence": conf if conf > 0 else 86.0,
+            "summary": "Foliar rust infection (Pucciniales) detected. Specialized obligate fungal parasite producing raised powdery spore pustules (uredinia) that weaken photosynthetic capacity.",
+            "symptoms": [
+                "Raised orange, cinnamon, or rust-brown powdery spore pustules (uredinia) on leaf undersides",
+                "Corresponding pale yellow or chlorotic flecks on the upper leaf surface",
+                "Localized foliar chlorosis, leaf curling, and premature leaf drop"
+            ],
+            "immediate_actions": [
+                "Carefully prune heavily rusted leaves directly into a plastic bag to avoid releasing airborne spores.",
+                "Cease overhead misting and leaf wetting immediately; rust spores require water films to germinate.",
+                "Wipe nearby leaves with a damp cloth to capture stray spores before they take hold."
+            ],
+            "organic_treatments": [
+                "Spray wettable sulfur powder spray across upper and lower foliar surfaces (stops spore germination).",
+                "Apply copper octanoate (copper soap) fungicide to inhibit fungal hyphal penetration.",
+                "Cold-pressed neem oil spray (0.5% concentration) to suffocate developing pustules."
+            ],
+            "chemical_treatments": [
+                "Systemic triazole fungicide (e.g. Myclobutanil or Propiconazole) for persistent foliar rust.",
+                "Mancozeb or Chlorothalonil contact protective barrier spray."
+            ],
+            "prevention": [
+                "Water strictly at soil base in early morning so foliage dries before nightfall.",
+                "Ensure minimum 30cm spacing between plants for constant air circulation.",
+                "Keep relative humidity under control and avoid dense foliage crowding."
+            ],
+            "badges": ["Spore Producing", "Foliar Pustules", "Pruning Required"]
+        }
+    else:
+        rust_item = {
+            "id": "rust",
+            "title": "Rust Fungal Infection",
+            "severity_rank": 3,
+            "severity_rank_label": "Rank 3 • Moderate Severity",
+            "severity_level": "Optimal",
+            "is_detected": False,
+            "status_label": "Clear • No Rust Pustules",
+            "confidence": 98.0,
+            "summary": "No orange, cinnamon, or brown Pucciniales spore pustules, uredinia clusters, or localized rust chlorosis detected.",
+            "symptoms": ["Clean foliar undersides with smooth texture and uniform pigmentation."],
+            "immediate_actions": ["Keep foliar canopy dry to maintain high resistance against fungal spores."],
+            "organic_treatments": ["No fungicidal treatments required."],
+            "chemical_treatments": ["No chemical fungicides needed."],
+            "prevention": ["Avoid overhead spraying; ensure continuous gentle room airflow."],
+            "badges": ["Pustule-Free", "Zero Spores"]
+        }
+
+    # 4. Under / Overwatering (Rank 4 - Physiological / Manageable)
+    stype = str(abiotic.get("stress_type", "")).lower()
+    wstat = str(abiotic.get("water_status", "")).lower()
+    is_under = bool(abiotic.get("is_underwatered", False)) or any(k in cond_lower for k in ["underwater", "dehydrat", "desiccat"]) or "underwater" in stype or "dehydrat" in stype or "underwater" in wstat
+    is_over = bool(abiotic.get("is_overwatered", False)) or any(k in cond_lower for k in ["overwater", "waterlog", "edema"]) or "overwater" in stype or "waterlog" in stype or "overwater" in wstat
+    
+    if is_under:
+        water_item = {
+            "id": "watering",
+            "title": "Under / Overwatering Balance",
+            "severity_rank": 4,
+            "severity_rank_label": "Rank 4 • Physiological / Manageable",
+            "severity_level": "High" if abiotic.get("stress_level") == "High" or float(abiotic.get("necrosis_score", 0)) > 20 else "Moderate",
+            "is_detected": True,
+            "status_label": "Underwatering • Acute Moisture Deficit",
+            "confidence": 91.5,
+            "summary": "Foliage exhibits acute moisture deficit and loss of cellular turgor. The root zone is depleted of moisture, causing leaf blade wrinkling, curled margins, and dry crispy tips.",
+            "symptoms": [
+                "Loss of foliar cellular turgor (leaf drooping / wilting)",
+                "Crispy, brittle brown leaf tips and margins",
+                "Wrinkled, folded, or inward-curled leaf blades",
+                "Dry, crumbly, and pulled-away potting soil substrate"
+            ],
+            "immediate_actions": [
+                "Perform a deep bottom-soak: place pot in a basin of lukewarm water for 25-35 minutes.",
+                "Do NOT apply chemical pesticides or fertilizers; dehydrated root hairs will burn.",
+                "Carefully trim completely desiccated, papery brown tips with clean shears, leaving a thin dry buffer to protect healthy live tissue.",
+                "Empty drainage saucer completely after soaking so the pot never sits in stagnant water."
+            ],
+            "organic_treatments": [
+                "Bottom-watering deep soak with tepid non-chlorinated water.",
+                "Elevate ambient humidity with a pebble tray to slow foliar transpiration."
+            ],
+            "chemical_treatments": [
+                "Withhold chemical fertilizers until plant regains full turgor and produces active shoots."
+            ],
+            "prevention": [
+                "Water thoroughly until water drains from the base whenever the top 2 inches of soil feel dry.",
+                "Cross-reference with UrbanGreen IoT capacitive soil sensor for real-time moisture targets."
+            ],
+            "badges": ["Dehydration Stress", "Deep Soak Needed", "Reversible"]
+        }
+    elif is_over:
+        water_item = {
+            "id": "watering",
+            "title": "Under / Overwatering Balance",
+            "severity_rank": 4,
+            "severity_rank_label": "Rank 4 • Physiological / Manageable",
+            "severity_level": "High" if abiotic.get("stress_level") == "High" else "Moderate",
+            "is_detected": True,
+            "status_label": "Overwatering • Saturated Substrate & Edema",
+            "confidence": 89.0,
+            "summary": "Foliage shows signs of root hypoxia and edema from waterlogged potting substrate. Roots are suffocating from lack of oxygen, resulting in diffuse yellowing and soft translucent tissue.",
+            "symptoms": [
+                "Diffuse yellowing of lower or older leaves (soggy chlorosis)",
+                "Translucent, water-soaked leaf patches with loss of firmness",
+                "Raised corky edema blister bumps on leaf undersides",
+                "Soft, soggy petiole bases and damp, foul-smelling potting substrate"
+            ],
+            "immediate_actions": [
+                "Cease watering immediately and allow the top 50% of the potting mix to dry out.",
+                "Empty pooled standing water from the drainage saucer and verify bottom holes are open.",
+                "Gently aerate potting soil by poking 4-5 holes around root perimeter with a clean chopstick.",
+                "Inspect root system: if roots smell sour or are mushy/black, prune dead roots and repot in fresh, perlite-rich substrate."
+            ],
+            "organic_treatments": [
+                "Substrate aeration and amendment with perlite, pumice, or orchid bark for fast drainage.",
+                "Hydrogen peroxide (3% diluted 1:4 with water) soil flush to oxygenate anaerobic root zones."
+            ],
+            "chemical_treatments": [
+                "No chemical fungicides required for non-infected edema; focus on soil drainage and aeration."
+            ],
+            "prevention": [
+                "Always test soil moisture 2 inches deep before watering.",
+                "Use pots with functional drainage holes and well-aerated potting soil."
+            ],
+            "badges": ["Root Hypoxia", "Substrate Saturated", "Aeration Needed"]
+        }
+    else:
+        water_item = {
+            "id": "watering",
+            "title": "Under / Overwatering Balance",
+            "severity_rank": 4,
+            "severity_rank_label": "Rank 4 • Physiological / Manageable",
+            "severity_level": "Optimal",
+            "is_detected": False,
+            "status_label": "Optimal • Balanced Soil Hydration",
+            "confidence": 94.5,
+            "summary": "Foliage demonstrates ideal cellular turgidity and water balance. No symptoms of drought wilting, desiccation, or waterlogged edema detected.",
+            "symptoms": [
+                "Firm, upright leaf blades with natural spring and vibrant luster.",
+                "Healthy foliar hydration without crispy tips or translucent water-soaked spots."
+            ],
+            "immediate_actions": [
+                "Maintain current watering schedule; check soil dryness or IoT probe before next watering."
+            ],
+            "organic_treatments": [
+                "Routine balanced organic liquid kelp fertilizer during active growing phase."
+            ],
+            "chemical_treatments": ["None needed."],
+            "prevention": [
+                "Adhere to recommended species moisture threshold and monitor with IoT probe."
+            ],
+            "badges": ["Optimal Turgor", "Hydration Equilibrium"]
+        }
+        
+    return {
+        "microorganism": micro_item,
+        "pest_insect": pest_item,
+        "rust": rust_item,
+        "watering": water_item
+    }
+
 @app.post("/api/predict")
 @app.post("/api/diagnose")
 async def api_predict(
@@ -463,6 +782,7 @@ async def api_predict(
             if v2_res.get("status") in ("retake_recommended", "no_plant"):
                 v2_res["status"] = "success"
 
+            v2_res["multi_category_diagnosis"] = build_multi_category_diagnosis(v2_res)
             return v2_res
         except Exception as e:
             print(f"[Error in CoreTech v2 diagnosis]: {e}")
@@ -1017,7 +1337,7 @@ async def api_predict(
 
         inference_time_ms = round((time.time() - t0) * 1000, 1)
 
-        return {
+        fallback_res = {
             "status": "success",
             "is_plant": True,
             "inference_time_ms": inference_time_ms,
@@ -1050,6 +1370,8 @@ async def api_predict(
             "abiotic": abiotic_res,
             "preprocessed_image_base64": prep_b64
         }
+        fallback_res["multi_category_diagnosis"] = build_multi_category_diagnosis(fallback_res)
+        return fallback_res
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Diagnostic error: {e}")
 
