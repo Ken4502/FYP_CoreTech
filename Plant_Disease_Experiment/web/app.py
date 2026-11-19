@@ -864,6 +864,7 @@ def build_clarifier_questions(data: dict, hole_analysis: dict) -> list:
 @app.post("/api/diagnose")
 async def api_predict(
     file: UploadFile = File(...),
+    macro_file: Optional[UploadFile] = File(None),
     plant: str = Form("auto"),
     gemini_api_key: Optional[str] = Form(None)
 ):
@@ -877,6 +878,26 @@ async def api_predict(
         pil_img = pil_img.convert("RGB")
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Invalid image file: {e}")
+
+    macro_pil = None
+    macro_b64 = None
+    if macro_file is not None:
+        try:
+            macro_contents = await macro_file.read()
+            if macro_contents and len(macro_contents) > 0:
+                raw_macro = Image.open(io.BytesIO(macro_contents))
+                macro_pil = ImageOps.exif_transpose(raw_macro)
+                if macro_pil is None:
+                    macro_pil = raw_macro
+                macro_pil = macro_pil.convert("RGB")
+                
+                mbuf = io.BytesIO()
+                macro_pil.resize((384, 384), Image.BILINEAR).save(mbuf, format="JPEG", quality=85)
+                macro_b64 = "data:image/jpeg;base64," + base64.b64encode(mbuf.getvalue()).decode("utf-8")
+        except Exception as me:
+            print(f"[Warning] Failed to decode macro_file: {me}")
+            macro_pil = None
+            macro_b64 = None
 
     # --- CoreTech v2 High-Capacity Online Diagnostic Routing ---
     if V2_AVAILABLE:
@@ -1140,6 +1161,9 @@ async def api_predict(
             v2_res["hole_analysis"] = build_foliar_hole_analysis(v2_res)
             v2_res["ruled_out_conditions"] = build_ruled_out_conditions(v2_res)
             v2_res["clarifier_questions"] = build_clarifier_questions(v2_res, v2_res["hole_analysis"])
+            if macro_b64:
+                v2_res["has_macro_detail"] = True
+                v2_res["macro_image_base64"] = macro_b64
             return v2_res
         except Exception as e:
             print(f"[Error in CoreTech v2 diagnosis]: {e}")
@@ -1731,6 +1755,9 @@ async def api_predict(
         fallback_res["hole_analysis"] = build_foliar_hole_analysis(fallback_res)
         fallback_res["ruled_out_conditions"] = build_ruled_out_conditions(fallback_res)
         fallback_res["clarifier_questions"] = build_clarifier_questions(fallback_res, fallback_res["hole_analysis"])
+        if macro_b64:
+            fallback_res["has_macro_detail"] = True
+            fallback_res["macro_image_base64"] = macro_b64
         return fallback_res
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Diagnostic error: {e}")
