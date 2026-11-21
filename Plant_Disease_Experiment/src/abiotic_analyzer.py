@@ -70,9 +70,24 @@ def analyze_abiotic_stress(pil_img: Image.Image, spots_count: int = 0) -> dict:
     yellow_pixel_count = np.count_nonzero(yellow_mask_full)
     chlorosis_pct = round((yellow_pixel_count / leaf_pixel_count) * 100, 1)
 
+    # Anthocyanin / Natural Red Pigment Check (e.g. Red Aglaonema / Chinese Evergreen, Caladium, Coleus)
+    # Living red/pink variegation has strong magenta/red component (LAB a* >= 133)
+    anthocyanin_mask_full = (
+        ((hsv[:, :, 0] <= 24) | (hsv[:, :, 0] >= 162)) &
+        (hsv[:, :, 1] >= 50) &
+        (lab[:, :, 1] >= 133) &
+        leaf_mask
+    )
+    anthocyanin_pct = round((np.count_nonzero(anthocyanin_mask_full) / leaf_pixel_count) * 100, 1)
+
     # 4. Metric C: Brown Dry Margin Crispness (Underwatering Necrosis)
-    # Brown papery crisp: Hue 8 to 18, Saturation 40-180, Low Value (V 40-140)
-    brown_mask_full = (hsv[:, :, 0] >= 6) & (hsv[:, :, 0] <= 18) & (hsv[:, :, 1] >= 40) & (hsv[:, :, 2] <= 160) & leaf_mask
+    # Brown papery crisp: Hue 8 to 18, Saturation 40-150, Low Value (V 40-140), strictly excluding living red/pink anthocyanin!
+    brown_mask_full = (
+        (hsv[:, :, 0] >= 6) & (hsv[:, :, 0] <= 18) &
+        (hsv[:, :, 1] >= 40) & (hsv[:, :, 2] <= 160) &
+        (lab[:, :, 1] < 133) &  # Exclude living red/pink anthocyanin pigments!
+        leaf_mask
+    )
     brown_pixel_count = np.count_nonzero(brown_mask_full)
     crispness_pct = round((brown_pixel_count / leaf_pixel_count) * 100, 1)
 
@@ -113,28 +128,39 @@ def analyze_abiotic_stress(pil_img: Image.Image, spots_count: int = 0) -> dict:
     status_summary = ""
 
     # Check Underwatering (Drought Stress)
-    is_underwatered = bool(
-        crispness_pct >= 4.0 or
-        (crispness_pct >= 1.8 and mean_sat < 38.0) or
-        (wrinkle_index >= 20.0 and (crispness_pct >= 1.2 or mean_sat < 40.0)) or
-        (wrinkle_index >= 27.0) or
-        (tortuosity >= 3.5 and wrinkle_index >= 18.0 and (crispness_pct >= 1.0 or mean_sat < 42.0))
-    )
-    severe_underwatering = bool(
-        (wrinkle_index >= 28.0 and crispness_pct >= 3.5) or
-        (crispness_pct >= 9.0 and wrinkle_index >= 18.0) or
-        (wrinkle_index >= 36.0)
-    )
+    if anthocyanin_pct >= 3.0:
+        # For naturally red/pink variegated foliage (Aglaonema, Caladium, Coleus):
+        # Require genuine high surface wrinkling and dull necrosis for underwatering
+        is_underwatered = bool(
+            (crispness_pct >= 5.0 and wrinkle_index >= 22.0) or
+            (wrinkle_index >= 30.0 and mean_sat < 36.0)
+        )
+        severe_underwatering = bool(
+            (wrinkle_index >= 32.0 and crispness_pct >= 6.0) or
+            (wrinkle_index >= 38.0)
+        )
+    else:
+        is_underwatered = bool(
+            crispness_pct >= 5.5 or
+            (crispness_pct >= 3.0 and mean_sat < 35.0) or
+            (wrinkle_index >= 35.0 and crispness_pct >= 2.5 and mean_sat < 36.0) or
+            (tortuosity >= 4.0 and wrinkle_index >= 25.0 and crispness_pct >= 2.5 and mean_sat < 38.0)
+        )
+        severe_underwatering = bool(
+            (wrinkle_index >= 32.0 and crispness_pct >= 5.0) or
+            (crispness_pct >= 10.0 and wrinkle_index >= 20.0) or
+            (crispness_pct >= 8.0 and mean_sat < 30.0)
+        )
 
     # Check Overwatering / Edema
     is_overwatered = bool(
-        (chlorosis_pct >= 14.0 and crispness_pct <= 2.2 and wrinkle_index <= 18.0) or
-        (chlorosis_pct >= 20.0 and crispness_pct <= 4.0 and mean_sat <= 48.0) or
-        (mean_val >= 62.0 and chlorosis_pct >= 10.0 and crispness_pct <= 2.0 and wrinkle_index <= 16.0)
+        (chlorosis_pct >= 25.0 and crispness_pct <= 2.0 and mean_sat >= 45.0) or
+        (chlorosis_pct >= 32.0 and crispness_pct <= 3.0) or
+        (mean_val >= 68.0 and chlorosis_pct >= 22.0 and crispness_pct <= 1.5 and wrinkle_index <= 16.0)
     ) and not is_underwatered
     severe_overwatering = bool(
-        (chlorosis_pct >= 28.0 and crispness_pct <= 3.0 and wrinkle_index <= 16.0) or
-        (chlorosis_pct >= 40.0 and crispness_pct <= 5.0)
+        (chlorosis_pct >= 35.0 and crispness_pct <= 3.0 and wrinkle_index <= 16.0) or
+        (chlorosis_pct >= 48.0 and crispness_pct <= 5.0)
     ) and is_overwatered
 
     # Check Sunburn / Solar Scorch

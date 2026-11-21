@@ -1,0 +1,10 @@
+{
+  "cycle": 1588,
+  "total_evaluations": 2072340,
+  "total_passed": 2072340,
+  "overall_accuracy_pct": 100.0,
+  "elapsed_seconds": 28808.2,
+  "remaining_seconds": 0.0,
+  "species_tested_count": 261,
+  "last_cycle_accuracy_pct": 100.0
+}

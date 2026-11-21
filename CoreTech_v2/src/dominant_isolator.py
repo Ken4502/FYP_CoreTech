@@ -67,21 +67,34 @@ def isolate_dominant_plant(
 
     model, mode = load_plant_segmenter(device=device)
     if model is None:
-        # Clean fallback
-        full_mask = np.ones((h, w), dtype=bool)
+        # Measure foliar coverage directly from pixel physics
+        hsv = cv2.cvtColor(rgb, cv2.COLOR_RGB2HSV)
+        lab = cv2.cvtColor(rgb, cv2.COLOR_RGB2LAB)
+        r = rgb[:, :, 0].astype(np.float32)
+        g = rgb[:, :, 1].astype(np.float32)
+        green = (lab[:, :, 1] <= 126) & (hsv[:, :, 0] >= 18) & (hsv[:, :, 0] <= 110) & (hsv[:, :, 1] >= 18) & (hsv[:, :, 2] >= 20) & (g >= r * 0.92)
+        antho = (((hsv[:, :, 0] <= 15) | (hsv[:, :, 0] >= 155)) & (hsv[:, :, 1] >= 40) & (lab[:, :, 1] >= 132) & (r > g * 1.15))
+        k = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
+        clean_foliage = cv2.morphologyEx((green | antho).astype(np.uint8), cv2.MORPH_OPEN, k) > 0
+        foliar_px = int(np.count_nonzero(clean_foliage))
+        foliar_pct = float(foliar_px / total_px * 100.0)
+
+        has_plant = bool(foliar_pct >= 0.5 or allow_fallback)
+        target_mask = clean_foliage if foliar_px >= 300 else np.ones((h, w), dtype=bool)
         return {
-            "detected": True,
+            "detected": has_plant,
             "is_fallback": True,
-            "instances_count": 1,
-            "dominant_coverage_pct": 100.0,
-            "dominant_conf": 1.0,
+            "instances_count": 1 if has_plant else 0,
+            "dominant_coverage_pct": round(foliar_pct, 2) if has_plant else 0.0,
+            "dominant_conf": 1.0 if has_plant else 0.0,
             "dominant_box": [0, 0, w, h],
             "crop_img": pil_img,
             "masked_crop_img": pil_img,
-            "mask_crop": full_mask,
-            "full_mask": full_mask,
+            "unmasked_crop_img": pil_img,
+            "mask_crop": target_mask,
+            "full_mask": target_mask,
             "overlay_img": pil_img,
-            "mode": "unmasked_fallback",
+            "mode": "foliar_physics_segmentation" if foliar_px >= 300 else "unmasked_fallback",
         }
 
     res = model.predict(pil_img, conf=conf_thresh, imgsz=640, verbose=False)[0]
@@ -97,7 +110,10 @@ def isolate_dominant_plant(
                 "dominant_box": [0, 0, w, h],
                 "crop_img": pil_img,
                 "masked_crop_img": pil_img,
+                "unmasked_crop_img": pil_img,
+                "loose_plant_crop": pil_img,
                 "mask_crop": full_mask,
+                "mask_M_star": full_mask,
                 "full_mask": full_mask,
                 "overlay_img": pil_img,
                 "mode": f"{mode}_specimen_fallback",
@@ -111,7 +127,10 @@ def isolate_dominant_plant(
             "dominant_box": None,
             "crop_img": pil_img,
             "masked_crop_img": pil_img,
+            "unmasked_crop_img": pil_img,
+            "loose_plant_crop": pil_img,
             "mask_crop": np.zeros((h, w), dtype=bool),
+            "mask_M_star": np.zeros((h, w), dtype=bool),
             "full_mask": np.zeros((h, w), dtype=bool),
             "overlay_img": pil_img,
             "mode": mode,
@@ -160,7 +179,10 @@ def isolate_dominant_plant(
                 "dominant_box": [0, 0, w, h],
                 "crop_img": pil_img,
                 "masked_crop_img": pil_img,
+                "unmasked_crop_img": pil_img,
+                "loose_plant_crop": pil_img,
                 "mask_crop": full_mask,
+                "mask_M_star": full_mask,
                 "full_mask": full_mask,
                 "overlay_img": pil_img,
                 "mode": f"{mode}_specimen_fallback",
@@ -174,7 +196,10 @@ def isolate_dominant_plant(
             "dominant_box": None,
             "crop_img": pil_img,
             "masked_crop_img": pil_img,
+            "unmasked_crop_img": pil_img,
+            "loose_plant_crop": pil_img,
             "mask_crop": np.zeros((h, w), dtype=bool),
+            "mask_M_star": np.zeros((h, w), dtype=bool),
             "full_mask": np.zeros((h, w), dtype=bool),
             "overlay_img": pil_img,
             "mode": mode,
@@ -210,12 +235,12 @@ def isolate_dominant_plant(
     dom = merged[0]
     dom_mask = dom["mask"]
 
-    # Tight bounding box around dominant mask with 6% padding
+    # Dominant plant bounding box with 15% padding so dried/wilted edge leaves are preserved
     ys, xs = np.where(dom_mask)
     x1, x2 = int(xs.min()), int(xs.max())
     y1, y2 = int(ys.min()), int(ys.max())
-    pad_x = max(8, int((x2 - x1) * 0.06))
-    pad_y = max(8, int((y2 - y1) * 0.06))
+    pad_x = max(16, int((x2 - x1) * 0.15))
+    pad_y = max(16, int((y2 - y1) * 0.15))
     x1 = max(0, x1 - pad_x)
     y1 = max(0, y1 - pad_y)
     x2 = min(w, x2 + pad_x)
@@ -231,6 +256,7 @@ def isolate_dominant_plant(
 
     crop_img = Image.fromarray(clean_full[y1:y2, x1:x2])
     masked_crop_img = Image.fromarray(masked_full[y1:y2, x1:x2])
+    unmasked_crop_img = Image.fromarray(rgb[y1:y2, x1:x2])
     mask_crop = dom_mask[y1:y2, x1:x2]
 
     # Visual overlay showing dominant selected plant vs dimmed secondary plants
@@ -249,7 +275,10 @@ def isolate_dominant_plant(
         "dominant_box": [x1, y1, x2, y2],
         "crop_img": crop_img,
         "masked_crop_img": masked_crop_img,
+        "unmasked_crop_img": unmasked_crop_img,
+        "loose_plant_crop": unmasked_crop_img,
         "mask_crop": mask_crop,
+        "mask_M_star": mask_crop,
         "full_mask": dom_mask,
         "overlay_img": Image.fromarray(vis),
         "mode": mode,

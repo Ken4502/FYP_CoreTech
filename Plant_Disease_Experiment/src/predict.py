@@ -92,11 +92,12 @@ def get_biological_exclusions(plant_name_or_group: str) -> list:
         if "aloe" not in p_lower:
             exclusions.add("Universal_Rust_Fungi")
 
-    # 2. Araceae (Monstera, Pothos, Philodendron, Anthurium, Alocasia, Spathiphyllum, etc.)
+    # 2. Araceae (Monstera, Pothos, Philodendron, Anthurium, Alocasia, Spathiphyllum, Chinese Evergreen, Aglaonema, etc.)
     if any(k in p_lower for k in [
         "monstera", "philodendron", "pothos", "epipremnum", "anthurium",
-        "alocasia", "spathiphyllum", "peace_lily", "aglaonema", "syngonium",
-        "dieffenbachia", "caladium", "money_plant", "araceae"
+        "alocasia", "spathiphyllum", "peace_lily", "aglaonema", "chinese_evergreen",
+        "chinese evergreen", "evergreen", "syngonium", "dieffenbachia", "caladium",
+        "money_plant", "araceae", "coleus", "fittonia", "begonia"
     ]):
         exclusions.update([
             "Universal_Leaf_Miners",

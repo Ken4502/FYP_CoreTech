@@ -142,15 +142,35 @@ def predict_image(image_input, top_k: int = 5, return_preprocessed: bool = False
 
     with torch.no_grad():
         with torch.amp.autocast('cuda' if torch.cuda.is_available() else 'cpu'):
-            if use_tta:
-                # 5-Crop Test-Time Augmentation
-                tta_batch = get_tta_crops(img, image_size=_cached_resolution).to(config.DEVICE)
-                tta_outputs = model(tta_batch)
-                probs = torch.softmax(tta_outputs / temp, dim=1).mean(dim=0)
+            if hasattr(model, "features") and hasattr(model, "classifier"):
+                feats_fn = lambda batch: model.classifier[1](model.classifier[0](model.avgpool(model.features(batch))))
+                W = model.classifier[2][1].weight
+                W_norm = torch.nn.functional.normalize(W, p=2, dim=-1)
+
+                if use_tta:
+                    tta_batch = get_tta_crops(img, image_size=_cached_resolution).to(config.DEVICE)
+                    feats = feats_fn(tta_batch)
+                    feats_norm = torch.nn.functional.normalize(feats, p=2, dim=-1)
+                    cos_sim = torch.nn.functional.linear(feats_norm, W_norm)
+                    logits = cos_sim * 16.0
+                    probs = torch.softmax(logits / temp, dim=1).mean(dim=0)
+                else:
+                    tensor = eval_tf(img).unsqueeze(0).to(config.DEVICE)
+                    feats = feats_fn(tensor)
+                    feats_norm = torch.nn.functional.normalize(feats, p=2, dim=-1)
+                    cos_sim = torch.nn.functional.linear(feats_norm, W_norm)
+                    logits = cos_sim * 16.0
+                    probs = torch.softmax(logits / temp, dim=1)[0]
             else:
-                tensor = eval_tf(img).unsqueeze(0).to(config.DEVICE)
-                outputs = model(tensor)
-                probs = torch.softmax(outputs / temp, dim=1)[0]
+                if use_tta:
+                    # 5-Crop Test-Time Augmentation
+                    tta_batch = get_tta_crops(img, image_size=_cached_resolution).to(config.DEVICE)
+                    tta_outputs = model(tta_batch)
+                    probs = torch.softmax(tta_outputs / temp, dim=1).mean(dim=0)
+                else:
+                    tensor = eval_tf(img).unsqueeze(0).to(config.DEVICE)
+                    outputs = model(tensor)
+                    probs = torch.softmax(outputs / temp, dim=1)[0]
 
     top_probs, top_indices = probs.topk(min(top_k, len(classes)))
 

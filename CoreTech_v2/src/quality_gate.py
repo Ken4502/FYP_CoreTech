@@ -68,6 +68,12 @@ def evaluate_image_quality(
     bright_pct = float(np.mean(roi_vals > 246) * 100.0)
     mean_luma = float(np.mean(roi_vals))
 
+    # HSV Specular Glare Check (Value high, Saturation near zero)
+    hsv = cv2.cvtColor(rgb, cv2.COLOR_RGB2HSV)
+    hsv_roi = hsv[m]
+    glare_mask = (hsv_roi[:, 2] >= 240) & (hsv_roi[:, 1] <= 30)
+    glare_pct = float(np.mean(glare_mask) * 100.0) if len(hsv_roi) > 0 else 0.0
+
     metrics = {
         "width": w,
         "height": h,
@@ -76,7 +82,18 @@ def evaluate_image_quality(
         "dark_clipped_pct": round(dark_pct, 1),
         "bright_clipped_pct": round(bright_pct, 1),
         "mean_luminance": round(mean_luma, 1),
+        "glare_pct": round(glare_pct, 1),
     }
+
+    if glare_pct > 15.0:
+        return False, "GLARE_DETECTED", {
+            **metrics,
+            "reason": "Glare detected on leaf — tilt slightly away from direct light.",
+            "recommendations": [
+                "Tilt the phone or plant slightly away from direct light or harsh window glare.",
+                "Diffuse overhead lighting or turn off camera flash to prevent specular reflection."
+            ],
+        }
 
     if dark_pct > max_dark_pct or mean_luma < 28.0:
         return False, "TOO_DARK", {
@@ -110,3 +127,20 @@ def evaluate_image_quality(
         }
 
     return True, "OK", metrics
+
+
+def normalize_illumination_lab(pil_img: Image.Image) -> Image.Image:
+    """
+    Applies CLAHE on the L* channel in CIELAB color space before passing the image
+    downstream to neutralize warm indoor LEDs, shadows, and window backlighting.
+    Never uses raw RGB color math.
+    """
+    rgb = np.array(pil_img.convert("RGB"))
+    lab = cv2.cvtColor(rgb, cv2.COLOR_RGB2LAB)
+    l_channel, a_channel, b_channel = cv2.split(lab)
+    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+    cl = clahe.apply(l_channel)
+    norm_lab = cv2.merge((cl, a_channel, b_channel))
+    norm_rgb = cv2.cvtColor(norm_lab, cv2.COLOR_LAB2RGB)
+    return Image.fromarray(norm_rgb)
+

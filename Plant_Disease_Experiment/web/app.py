@@ -188,6 +188,78 @@ async def api_benchmark_image(idx: int):
     return StreamingResponse(io.BytesIO(img_bytes), media_type="image/jpeg")
 
 def build_multi_category_diagnosis(data: dict) -> dict:
+    if not data.get("is_plant", True) or data.get("species", {}).get("name") == "No Plant Detected":
+        return {
+            "microorganism": {
+                "id": "microorganism",
+                "title": "Microorganism Infestation",
+                "severity_rank": 1,
+                "severity_rank_label": "Rank 1 • Critical Severity",
+                "severity_level": "Optimal",
+                "is_detected": False,
+                "status_label": "No Plant Detected",
+                "confidence": 0.0,
+                "summary": "No plant foliage detected to diagnose microbial pathogens.",
+                "symptoms": ["Non-plant subject."],
+                "immediate_actions": ["Photograph a living plant, leaf, or flower."],
+                "organic_treatments": [],
+                "chemical_treatments": [],
+                "prevention": [],
+                "badges": ["Non-Plant"]
+            },
+            "pest_insect": {
+                "id": "pest_insect",
+                "title": "Pest & Insect Infestation",
+                "severity_rank": 2,
+                "severity_rank_label": "Rank 2 • High Urgency",
+                "severity_level": "Optimal",
+                "is_detected": False,
+                "status_label": "No Plant Detected",
+                "confidence": 0.0,
+                "summary": "No plant foliage detected to inspect for pests.",
+                "symptoms": ["Non-plant subject."],
+                "immediate_actions": ["Photograph a living plant, leaf, or flower."],
+                "organic_treatments": [],
+                "chemical_treatments": [],
+                "prevention": [],
+                "badges": ["Non-Plant"]
+            },
+            "rust": {
+                "id": "rust",
+                "title": "Rust Fungal Infection",
+                "severity_rank": 3,
+                "severity_rank_label": "Rank 3 • Moderate Severity",
+                "severity_level": "Optimal",
+                "is_detected": False,
+                "status_label": "No Plant Detected",
+                "confidence": 0.0,
+                "summary": "No plant foliage detected to inspect for rust pustules.",
+                "symptoms": ["Non-plant subject."],
+                "immediate_actions": ["Photograph a living plant, leaf, or flower."],
+                "organic_treatments": [],
+                "chemical_treatments": [],
+                "prevention": [],
+                "badges": ["Non-Plant"]
+            },
+            "watering": {
+                "id": "watering",
+                "title": "Under / Overwatering Balance",
+                "severity_rank": 4,
+                "severity_rank_label": "Rank 4 • Physiological / Manageable",
+                "severity_level": "Optimal",
+                "is_detected": False,
+                "status_label": "No Plant Detected",
+                "confidence": 0.0,
+                "summary": "No plant foliage detected to evaluate hydration balance.",
+                "symptoms": ["Non-plant subject."],
+                "immediate_actions": ["Photograph a living plant, leaf, or flower."],
+                "organic_treatments": [],
+                "chemical_treatments": [],
+                "prevention": [],
+                "badges": ["Non-Plant"]
+            }
+        }
+
     diag = data.get("diagnosis", {})
     cond_name = diag.get("condition_name", "")
     cond_lower = cond_name.lower()
@@ -200,14 +272,47 @@ def build_multi_category_diagnosis(data: dict) -> dict:
     co_alerts = data.get("co_alerts", [])
     preds = data.get("predictions", [])
     
-    all_preds_str = " ".join(p.get("class_name", "").lower() + " " + p.get("condition_name", "").lower() for p in preds)
-    alert_str = " ".join(a.get("type", "").lower() + " " + a.get("badge", "").lower() + " " + a.get("message", "").lower() for a in co_alerts)
+    # Species info for botanical rust immunity and morphological priors
+    spec_info = data.get("species", {})
+    s_name = str(spec_info.get("name", "")).lower()
+    s_fam = str(spec_info.get("family", "")).lower()
+    fam_tax_str = f"{s_name} {s_fam}"
+
+    is_rust_immune = any(tax in fam_tax_str for tax in [
+        "araceae", "alocasia", "aglaonema", "chinese evergreen", "monstera",
+        "philodendron", "pothos", "epipremnum", "anthurium", "spathiphyllum", "peace lily",
+        "syngonium", "dieffenbachia", "caladium", "zamioculcas", "zz plant",
+        "orchid", "orchidaceae", "phalaenopsis", "dendrobium", "cattleya", "vanda",
+        "fern", "pteridophyte", "asplenium", "nephrolepis", "boston fern", "staghorn",
+        "cactus", "cacti", "opuntia", "succulent", "crassula", "crassulaceae", "kalanchoe",
+        "sedum", "echeveria", "haworthia", "jade plant",
+        "aloe", "sansevieria", "snake plant", "dracaena", "air plant", "tillandsia", "bromeliad", "bromeliaceae",
+        "palm", "areca", "arecaceae", "rhapis", "lady palm", "fan palm", "bamboo palm", "chamaedorea",
+        "ficus", "rubber plant", "rubber tree", "fiddle leaf", "elastica", "lyrata", "benjamina",
+        "calathea", "maranta", "marantaceae", "prayer plant", "ctenanthe", "stromanthe",
+        "peperomia", "pilea", "pilea peperomioides", "chinese money plant", "pennywort", "hydrocotyle", "centella",
+        "begonia", "begoniaceae", "saintpaulia", "african violet", "gesneriaceae",
+        "hoya", "tradescantia", "spiderwort", "spider plant", "chlorophytum"
+    ])
+
+    top_pred_name = preds[0].get("condition_name", "").lower() if preds else ""
+    top_pred_class = preds[0].get("class_name", "").lower() if preds else ""
     
+    # -------------------------------------------------------------------------
     # 1. Microorganism Infestation (Rank 1 - Critical Severity)
-    has_micro = any(k in cond_lower for k in ["bacterial", "blight", "anthracnose", "leaf spot", "mildew", "mold", "rot", "canker", "wilt", "mosaic"]) or \
-                any(k in cat_lower for k in ["bacterial", "fungal"]) or \
-                any(k in all_preds_str for k in ["bacterial", "anthracnose"])
-    is_micro_detected = has_micro and not is_healthy and ("rust" not in cond_lower or "spot" in cond_lower or "bacterial" in cond_lower)
+    # -------------------------------------------------------------------------
+    # Must be active primary pathogenic infection. Never trigger on healthy plants or trace tail predictions.
+    is_micro_primary = any(k in cond_lower for k in [
+        "bacterial", "blight", "anthracnose", "leaf spot", "mildew", "mold",
+        "rot", "canker", "wilt", "mosaic"
+    ]) or any(k in cat_lower for k in ["bacterial", "fungal"]) or \
+       any(k in top_pred_name for k in ["bacterial", "blight", "anthracnose", "leaf spot"])
+    
+    is_micro_detected = bool(
+        not is_healthy and
+        is_micro_primary and
+        ("rust" not in cond_lower or "spot" in cond_lower or "bacterial" in cond_lower or "anthracnose" in cond_lower)
+    )
     
     if is_micro_detected:
         micro_item = {
@@ -263,21 +368,31 @@ def build_multi_category_diagnosis(data: dict) -> dict:
             "badges": ["Clean Epidermis", "Pathogen-Free"]
         }
     
+    # -------------------------------------------------------------------------
     # 2. Pest & Insect Infestation (Rank 2 - High Urgency)
-    has_pest = any(k in cond_lower for k in ["pest", "insect", "aphid", "mealybug", "scale", "thrip", "mite", "whitefl", "miner", "chew", "bite", "hole"]) or \
-               any(k in alert_str for k in ["pest", "aphid", "mite", "scale", "bite"]) or \
-               bool(abiotic.get("is_pest", False))
-    is_pest_detected = has_pest and not is_healthy
+    # -------------------------------------------------------------------------
+    # Never trigger on healthy foliage!
+    # Never trigger from co_alerts text (which contains negative phrases like 'no insect bites')!
+    # Never trigger on standalone 'hole' (natural splits or shot-hole disease)!
+    pest_kws = ["pest", "insect", "aphid", "mealybug", "scale", "thrip", "mite", "whitefl", "miner", "caterpillar", "chewing pest", "bug bite"]
+    is_pest_in_cond = any(k in cond_lower for k in pest_kws)
+    is_pest_in_top_pred = any(k in top_pred_name for k in pest_kws) or any(k in top_pred_class for k in pest_kws)
+    is_pest_in_abiotic = bool(abiotic.get("is_pest", False))
+    
+    is_pest_detected = bool(
+        not is_healthy and
+        (is_pest_in_cond or is_pest_in_top_pred or is_pest_in_abiotic)
+    )
     
     if is_pest_detected:
         pest_label = "Biotic Pest Infestation"
-        if "mealybug" in cond_lower: pest_label = "Mealybugs (Cochineal Wax)"
-        elif "aphid" in cond_lower: pest_label = "Aphids (Plant Lice Colony)"
-        elif "scale" in cond_lower: pest_label = "Scale Insects (Armored Shell)"
-        elif "mite" in cond_lower: pest_label = "Spider Mites (Tetranychidae)"
-        elif "thrip" in cond_lower: pest_label = "Thrips (Foliar Rasping)"
-        elif "miner" in cond_lower: pest_label = "Leaf Miners (Mesophyll Tunnels)"
-        elif "chew" in cond_lower or "bite" in cond_lower: pest_label = "Chewing Pests (Insect Bite Holes)"
+        if "mealybug" in cond_lower or "mealybug" in top_pred_name: pest_label = "Mealybugs (Cochineal Wax)"
+        elif "aphid" in cond_lower or "aphid" in top_pred_name: pest_label = "Aphids (Plant Lice Colony)"
+        elif "scale" in cond_lower or "scale" in top_pred_name: pest_label = "Scale Insects (Armored Shell)"
+        elif "mite" in cond_lower or "mite" in top_pred_name: pest_label = "Spider Mites (Tetranychidae)"
+        elif "thrip" in cond_lower or "thrip" in top_pred_name: pest_label = "Thrips (Foliar Rasping)"
+        elif "miner" in cond_lower or "miner" in top_pred_name: pest_label = "Leaf Miners (Mesophyll Tunnels)"
+        elif "chew" in cond_lower or "bite" in cond_lower or "chew" in top_pred_name or "bite" in top_pred_name: pest_label = "Chewing Pests (Insect Bite Holes)"
         
         pest_item = {
             "id": "pest_insect",
@@ -336,8 +451,14 @@ def build_multi_category_diagnosis(data: dict) -> dict:
         }
         
     # 3. Rust Fungal Infection (Rank 3 - Moderate Severity)
-    has_rust = ("rust" in cond_lower or "rust" in all_preds_str or "rust" in alert_str) and not is_healthy
-    if has_rust:
+    # Biological Prior: Obligate Pucciniales parasite. Never trigger on rust-immune taxa, healthy plants, or trace tail predictions.
+    is_rust_primary = "rust" in cond_lower or "rust" in top_pred_name or "rust" in top_pred_class
+    is_rust_detected = bool(
+        not is_healthy and
+        not is_rust_immune and
+        is_rust_primary
+    )
+    if is_rust_detected:
         rust_item = {
             "id": "rust",
             "title": "Rust Fungal Infection",
@@ -396,8 +517,20 @@ def build_multi_category_diagnosis(data: dict) -> dict:
     # 4. Under / Overwatering (Rank 4 - Physiological / Manageable)
     stype = str(abiotic.get("stress_type", "")).lower()
     wstat = str(abiotic.get("water_status", "")).lower()
-    is_under = bool(abiotic.get("is_underwatered", False)) or any(k in cond_lower for k in ["underwater", "dehydrat", "desiccat"]) or "underwater" in stype or "dehydrat" in stype or "underwater" in wstat
-    is_over = bool(abiotic.get("is_overwatered", False)) or any(k in cond_lower for k in ["overwater", "waterlog", "edema"]) or "overwater" in stype or "waterlog" in stype or "overwater" in wstat
+    if is_healthy:
+        is_under = False
+        is_over = False
+    else:
+        is_under = bool(
+            (abiotic.get("is_underwatered", False) and (float(abiotic.get("necrosis_score", 0)) >= 3.0 or abiotic.get("stress_level") in ("Moderate", "High")))
+            or any(k in cond_lower for k in ["underwater", "dehydrat", "desiccat"])
+            or "underwater" in stype or "dehydrat" in stype
+        )
+        is_over = bool(
+            (abiotic.get("is_overwatered", False) and not is_under)
+            or any(k in cond_lower for k in ["overwater", "waterlog", "edema"])
+            or "overwater" in stype or "waterlog" in stype
+        )
     
     if is_under:
         water_item = {
@@ -543,13 +676,28 @@ def build_foliar_hole_analysis(data: dict) -> dict:
         }
 
     # 2. Biotic / Chewing Pest Bites
+    foliar_damage = data.get("foliar_damage_indicators", {})
+    surface_stress = data.get("surface_stress", {})
+    ver_meta = data.get("verification_meta", {})
+    detections = data.get("detections", [])
+    has_bite_detection = any("hole" in str(d.get("class", "")).lower() or "chew" in str(d.get("class", "")).lower() or "bite" in str(d.get("display_label", "")).lower() for d in detections)
+    has_optical_holes = bool(
+        foliar_damage.get("has_bug_bite_holes", False)
+        or surface_stress.get("has_optical_bite_holes", False)
+        or ver_meta.get("has_bug_bites_holes", False)
+        or has_bite_detection
+    )
+
     is_pest_chew = any(k in cond_name for k in ["chew", "bite", "caterpillar", "beetle", "grasshopper", "slug", "snail", "leaf-cutter"]) or \
                    any(k in alert_str for k in ["chew", "bite"]) or \
-                   bool(abiotic.get("is_pest", False))
+                   bool(abiotic.get("is_pest", False)) or \
+                   has_optical_holes
     if is_pest_chew:
+        cnt = foliar_damage.get("bite_holes_count") or surface_stress.get("bite_holes_count") or 3
+        count_str = f"{cnt} irregular chew perforation{'s' if cnt != 1 else ''}"
         return {
             "has_holes": True,
-            "hole_count_estimate": "3 - 6 irregular chew perforations",
+            "hole_count_estimate": count_str,
             "hole_cause_type": "pest_chewing",
             "cause_title": "Chewing Pest Foliivore Damage",
             "confidence": 91.5,
@@ -865,7 +1013,9 @@ def build_clarifier_questions(data: dict, hole_analysis: dict) -> list:
 async def api_predict(
     file: UploadFile = File(...),
     macro_file: Optional[UploadFile] = File(None),
+    secondary_file: Optional[UploadFile] = File(None),
     plant: str = Form("auto"),
+    soil_moisture_status: Optional[str] = Form(None),
     gemini_api_key: Optional[str] = Form(None)
 ):
     t0 = time.time()
@@ -881,9 +1031,10 @@ async def api_predict(
 
     macro_pil = None
     macro_b64 = None
-    if macro_file is not None:
+    target_sec_file = secondary_file if secondary_file is not None else macro_file
+    if target_sec_file is not None:
         try:
-            macro_contents = await macro_file.read()
+            macro_contents = await target_sec_file.read()
             if macro_contents and len(macro_contents) > 0:
                 raw_macro = Image.open(io.BytesIO(macro_contents))
                 macro_pil = ImageOps.exif_transpose(raw_macro)
@@ -895,15 +1046,107 @@ async def api_predict(
                 macro_pil.resize((384, 384), Image.BILINEAR).save(mbuf, format="JPEG", quality=85)
                 macro_b64 = "data:image/jpeg;base64," + base64.b64encode(mbuf.getvalue()).decode("utf-8")
         except Exception as me:
-            print(f"[Warning] Failed to decode macro_file: {me}")
+            print(f"[Warning] Failed to decode secondary/macro file: {me}")
             macro_pil = None
             macro_b64 = None
 
     # --- CoreTech v2 High-Capacity Online Diagnostic Routing ---
     if V2_AVAILABLE:
         try:
-            effective_key = gemini_api_key or get_gemini_api_key()
-            v2_res = run_v2_diagnosis(pil_img, gemini_api_key=effective_key)
+            effective_key = gemini_api_key if isinstance(gemini_api_key, str) and gemini_api_key.strip() else get_gemini_api_key()
+            effective_sms = soil_moisture_status if isinstance(soil_moisture_status, str) else None
+            v2_res = run_v2_diagnosis(pil_img, secondary_img=macro_pil, gemini_api_key=effective_key, soil_moisture_status=effective_sms)
+
+            if not v2_res.get("is_plant", True) or v2_res.get("status") == "no_plant" or v2_res.get("species", {}).get("name") == "No Plant Detected":
+                prep_b64 = v2_res.get("preprocessed_image_base64")
+                if not prep_b64:
+                    prep_buf = io.BytesIO()
+                    pil_img.resize((384, 384), Image.BILINEAR).save(prep_buf, format="JPEG", quality=85)
+                    prep_b64 = "data:image/jpeg;base64," + base64.b64encode(prep_buf.getvalue()).decode("utf-8")
+                
+                v2_res["is_plant"] = False
+                v2_res["status"] = "success"
+                v2_res["image_quality_status"] = v2_res.get("image_quality_status", "PASS")
+                v2_res["pdi_grade"] = 0
+                v2_res["overall_health_tier"] = "None"
+                v2_res["affected_area_percent"] = 0.0
+                v2_res["needs_user_soil_check"] = False
+                v2_res["detections"] = []
+                v2_res["disease_available"] = False
+                v2_res["species"] = {
+                    "name": "No Plant Detected",
+                    "confidence": 0.0,
+                    "family": "Non-Plant",
+                    "detected_mode": "Botanical Verification Gate (Non-Plant Rejection)",
+                    "visual_priors": {
+                        "is_variegated": False,
+                        "is_fenestrated": False,
+                        "is_glossy": False,
+                        "is_succulent": False,
+                    },
+                    "top_candidates": []
+                }
+                v2_res["diagnosis"] = {
+                    "condition_name": "No Plant Detected",
+                    "category": "Non-Plant Subject",
+                    "is_healthy": True,
+                    "confidence": 0.0,
+                    "severity": "None"
+                }
+                v2_res["pdi_rating"] = {
+                    "grade": 0,
+                    "label": "Grade 0: No Plant Detected",
+                    "infected_pct": 0.0,
+                    "color": "#9ca3af",
+                    "clinical_action": "Photograph a living plant, leaf, flower, or succulent."
+                }
+                v2_res["co_alerts"] = []
+                v2_res["abiotic"] = {
+                    "chlorosis_score": 0.0,
+                    "necrosis_score": 0.0,
+                    "stress_level": "None",
+                    "stress_type": "Non-Plant Subject",
+                    "recommendation": "Point camera directly at a living plant, leaf, or flower.",
+                    "is_pest": False,
+                    "is_underwatered": False,
+                    "is_overwatered": False,
+                    "is_sunburned": False,
+                    "is_dried": False,
+                    "is_dead": False,
+                    "desiccation_grade": "None",
+                    "water_status": "No Plant Foliage",
+                    "water_severity": "None",
+                    "aging_status": "Non-Plant",
+                    "status_summary": "No botanical specimen detected in the photo.",
+                    "abiotic_actions": [
+                        "Center the camera directly on plant leaves, stems, or flowers.",
+                        "Ensure the living plant fills the majority of the frame.",
+                        "Avoid photographing bedroom furniture, beds, walls, clothing, or electronics."
+                    ]
+                }
+                v2_res["spots"] = {
+                    "has_spots": False,
+                    "spots_count": 0,
+                    "infected_area_pct": 0.0,
+                    "status_message": "Spot detection skipped: Subject is not a recognized botanical specimen.",
+                    "annotated_image_base64": prep_b64
+                }
+                v2_res["multi_category_diagnosis"] = build_multi_category_diagnosis(v2_res)
+                v2_res["hole_analysis"] = {
+                    "has_holes": False,
+                    "holes_count": 0,
+                    "chewing_damage_detected": False,
+                    "severity": "None",
+                    "primary_cause": "None",
+                    "status_message": "No leaf tissue detected."
+                }
+                v2_res["ruled_out_conditions"] = []
+                v2_res["clarifier_questions"] = []
+                v2_res["predictions"] = []
+                if macro_b64:
+                    v2_res["has_macro_detail"] = True
+                    v2_res["macro_image_base64"] = macro_b64
+                return v2_res
 
             # Ensure PDI rating for Flutter PDI meter widget
             is_healthy = v2_res.get("diagnosis", {}).get("is_healthy", False)
@@ -996,9 +1239,9 @@ async def api_predict(
             abiotic_analysis = analyze_abiotic_stress(pil_img, spots_count=spots_count if has_spots else 0)
 
             hyd = stress.get("hydration_stress", {}) if isinstance(stress, dict) else {}
-            is_underwatered = hyd.get("is_underwatered", False) or (v2_res.get("diagnosis", {}).get("class_id") == "Abiotic_Dehydration_Underwatering")
-            is_overwatered = hyd.get("is_overwatered", False) or (v2_res.get("diagnosis", {}).get("class_id") == "Abiotic_Overwatering_Edema")
-            is_sunburned = hyd.get("is_sunburned", False) or (v2_res.get("diagnosis", {}).get("class_id") == "Abiotic_Sunburn_Scald")
+            is_underwatered = (hyd.get("is_underwatered", False) and not is_healthy) or (v2_res.get("diagnosis", {}).get("class_id") == "Abiotic_Dehydration_Underwatering")
+            is_overwatered = (hyd.get("is_overwatered", False) and not is_healthy) or (v2_res.get("diagnosis", {}).get("class_id") == "Abiotic_Overwatering_Edema")
+            is_sunburned = (hyd.get("is_sunburned", False) and not is_healthy) or (v2_res.get("diagnosis", {}).get("class_id") == "Abiotic_Sunburn_Scald")
             level = "Low"
             stype = "Normal"
             rec = "Optimal hydration levels detected on foliage."
@@ -1161,9 +1404,46 @@ async def api_predict(
             v2_res["hole_analysis"] = build_foliar_hole_analysis(v2_res)
             v2_res["ruled_out_conditions"] = build_ruled_out_conditions(v2_res)
             v2_res["clarifier_questions"] = build_clarifier_questions(v2_res, v2_res["hole_analysis"])
+            v2_res.setdefault("image_quality_status", "PASS")
+            v2_res.setdefault("pdi_grade", 0)
+            v2_res.setdefault("overall_health_tier", "Optimal")
+            v2_res.setdefault("affected_area_percent", 0.0)
+            v2_res.setdefault("needs_user_soil_check", False)
+            v2_res.setdefault("detections", [])
+            if "species" in v2_res and "visual_priors" not in v2_res["species"]:
+                v2_res["species"]["visual_priors"] = {
+                    "is_variegated": False,
+                    "is_fenestrated": False,
+                    "is_glossy": False,
+                    "is_succulent": False,
+                }
+
             if macro_b64:
                 v2_res["has_macro_detail"] = True
                 v2_res["macro_image_base64"] = macro_b64
+
+            # Structured debug logging for full pipeline traceability
+            print("\n" + "=" * 60)
+            print("[DIAGNOSTIC TRACE]")
+            print("1. Stage 1A Plant Verifier Booleans:")
+            vm = v2_res.get("verification_meta", {})
+            print(f"   - is_plant: {v2_res.get('is_plant')}")
+            print(f"   - is_wilting_or_drooping: {vm.get('is_wilting_or_drooping')}")
+            print(f"   - has_dried_or_crispy_leaves: {vm.get('has_dried_or_crispy_leaves')}")
+            print(f"   - water_and_viability: {vm.get('water_and_viability')}")
+            print(f"   - primary_pathology: {vm.get('primary_pathology')}")
+            print("2. Final Detections List:")
+            dets = v2_res.get("detections", [])
+            print(f"   Total detections: {len(dets)}")
+            for idx, d in enumerate(dets):
+                print(f"   [{idx + 1}] {d.get('display_label')} (class={d.get('class')}, conf={d.get('confidence')}, tier={d.get('confidence_tier')}, source={d.get('source', 'yolo')})")
+            print("3. Soil Check & Overall Diagnosis:")
+            print(f"   - needs_user_soil_check: {v2_res.get('needs_user_soil_check')}")
+            print(f"   - condition_name: {v2_res.get('diagnosis', {}).get('condition_name')}")
+            print(f"   - is_healthy: {v2_res.get('diagnosis', {}).get('is_healthy')}")
+            print(f"   - affected_area_percent: {v2_res.get('affected_area_percent')}%")
+            print("=" * 60 + "\n")
+
             return v2_res
         except Exception as e:
             print(f"[Error in CoreTech v2 diagnosis]: {e}")
