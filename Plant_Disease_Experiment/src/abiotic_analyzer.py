@@ -141,16 +141,21 @@ def analyze_abiotic_stress(pil_img: Image.Image, spots_count: int = 0) -> dict:
         )
     else:
         is_underwatered = bool(
-            crispness_pct >= 5.5 or
-            (crispness_pct >= 3.0 and mean_sat < 35.0) or
+            crispness_pct >= 9.0 or
+            (crispness_pct >= 4.5 and mean_sat < 36.0) or
             (wrinkle_index >= 35.0 and crispness_pct >= 2.5 and mean_sat < 36.0) or
-            (tortuosity >= 4.0 and wrinkle_index >= 25.0 and crispness_pct >= 2.5 and mean_sat < 38.0)
+            (tortuosity >= 4.0 and wrinkle_index >= 25.0) or
+            (mean_sat < 28.0 and wrinkle_index >= 50.0)
         )
         severe_underwatering = bool(
-            (wrinkle_index >= 32.0 and crispness_pct >= 5.0) or
-            (crispness_pct >= 10.0 and wrinkle_index >= 20.0) or
-            (crispness_pct >= 8.0 and mean_sat < 30.0)
+            (crispness_pct >= 9.0 and wrinkle_index >= 30.0) or
+            (crispness_pct >= 14.0) or
+            (crispness_pct >= 6.0 and mean_sat < 30.0) or
+            (tortuosity >= 5.0 and wrinkle_index >= 40.0) or
+            (mean_sat < 25.0 and wrinkle_index >= 70.0)
         )
+    if severe_underwatering:
+        is_underwatered = True
 
     # Check Overwatering / Edema
     is_overwatered = bool(

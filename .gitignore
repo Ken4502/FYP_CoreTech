@@ -76,3 +76,14 @@ ehthumbs.db
 *.log
 .pytest_cache/
 
+# ==============================================================================
+# Isolated ML Training Datasets & Runs
+# ==============================================================================
+ml_training/symptom_detector/datasets/
+ml_training/symptom_detector/runs/
+ml_training/symptom_detector/debug_samples/
+ml_training/symptom_detector/raw_negatives/
+runs/
+yolo11*.pt
+
+

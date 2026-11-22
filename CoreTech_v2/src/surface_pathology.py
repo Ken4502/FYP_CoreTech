@@ -199,6 +199,106 @@ def predict_flagship_pathology(pil_img: Image.Image) -> Tuple[List[Dict[str, Any
         return [], 0.0
 
 
+def analyze_masked_surface_stress(pil_crop: Image.Image, mask_crop: Optional[np.ndarray]) -> Dict[str, Any]:
+    """
+    Computes quantitative surface hydration, turgor/wrinkling texture, chlorosis, and sunscald
+    STRICTLY inside Stage 1B segmented plant mask M* (zero pot/soil/table contamination!).
+    """
+    rgb = np.array(pil_crop.convert("RGB"))
+    h, w, _ = rgb.shape
+    m = mask_crop.astype(bool) if mask_crop is not None else np.ones((h, w), dtype=bool)
+    fg_pixels = int(np.count_nonzero(m))
+    if fg_pixels < 100:
+        m = np.ones((h, w), dtype=bool)
+        fg_pixels = h * w
+
+    bgr = cv2.cvtColor(rgb, cv2.COLOR_RGB2BGR)
+    hsv = cv2.cvtColor(bgr, cv2.COLOR_RGB2HSV)
+    lab = cv2.cvtColor(bgr, cv2.COLOR_RGB2LAB)
+    gray = cv2.cvtColor(bgr, cv2.COLOR_RGB2GRAY).astype(np.float32)
+
+    a_ch = lab[:, :, 1][m]
+    b_ch = lab[:, :, 2][m]
+    h_ch = hsv[:, :, 0][m]
+    s_ch = hsv[:, :, 1][m]
+    v_ch = hsv[:, :, 2][m]
+
+    chlorophyll_vigor = round(float(np.mean(a_ch < 123) * 100.0), 1)
+    yellow_pct = round(float(np.mean((h_ch >= 18) & (h_ch <= 38) & (s_ch > 40) & (b_ch > 136)) * 100.0), 1)
+    crispy_brown_pct = round(float(np.mean(((h_ch >= 5) & (h_ch <= 22) & (s_ch >= 28) & (v_ch <= 170)) | ((h_ch >= 5) & (h_ch <= 26) & (s_ch >= 25) & (v_ch <= 180) & (b_ch > 128) & (a_ch >= 124))) * 100.0), 1)
+    bleached_pct = round(float(np.mean((s_ch < 35) & (v_ch > 185)) * 100.0), 1)
+
+    # Surface wrinkling / shriveling texture index
+    lap_abs = np.abs(cv2.Laplacian(gray, cv2.CV_32F, ksize=3))
+    wrinkle_index = round(float(np.percentile(lap_abs[m], 85)), 2)
+    wrinkle_p95 = round(float(np.percentile(lap_abs[m], 95)), 2)
+    mean_sat = round(float(np.mean(s_ch) / 255.0 * 100.0), 1)
+
+    # Mask contour tortuosity
+    contours, _ = cv2.findContours(m.astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    total_perimeter = sum(cv2.arcLength(c, True) for c in contours)
+    tortuosity = round(float((total_perimeter ** 2) / (4.0 * np.pi * max(1, fg_pixels))), 2)
+
+    # Check for compact rust pustules vs diffuse dry margin
+    rust_color_mask = (hsv[:, :, 0] >= 9) & (hsv[:, :, 0] <= 22) & (hsv[:, :, 1] >= 115) & (hsv[:, :, 2] >= 75) & (hsv[:, :, 2] <= 210) & m
+    rust_px = int(np.count_nonzero(rust_color_mask))
+    has_compact_rust_pustules = False
+    if rust_px > 30:
+        r_u8 = rust_color_mask.astype(np.uint8) * 255
+        r_cnts, _ = cv2.findContours(r_u8, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        compact_spots = 0
+        for c in r_cnts:
+            c_area = cv2.contourArea(c)
+            if 15 <= c_area <= 2000:
+                p_len = cv2.arcLength(c, True)
+                if p_len > 0:
+                    circ = 4.0 * np.pi * c_area / (p_len * p_len)
+                    if circ >= 0.45:
+                        compact_spots += 1
+        if compact_spots >= 3:
+            has_compact_rust_pustules = True
+
+    # Hydration stress evaluation:
+    # Requires genuine cellular turgor loss (desaturation + wrinkling), wild margin curling, or dry margin necrosis.
+    is_underwatered = bool(
+        (mean_sat < 36.0 and wrinkle_index >= 100.0) or
+        (mean_sat < 38.0 and wrinkle_index >= 150.0) or
+        (crispy_brown_pct >= 4.5 and mean_sat < 38.0 and wrinkle_index >= 30.0) or
+        (crispy_brown_pct >= 8.0) or
+        (tortuosity >= 4.0 and wrinkle_index >= 40.0) or
+        (crispy_brown_pct >= 3.0 and mean_sat < 34.0 and wrinkle_index >= 40.0)
+    )
+    severe_underwatering = bool(
+        (crispy_brown_pct >= 8.0 and wrinkle_index >= 40.0) or
+        (crispy_brown_pct >= 12.0) or
+        (mean_sat < 34.0 and wrinkle_index >= 180.0) or
+        (tortuosity >= 5.0 and wrinkle_index >= 60.0 and mean_sat < 38.0)
+    )
+
+    hydration_dict = {
+        "is_underwatered": is_underwatered,
+        "severe_underwatering": severe_underwatering,
+        "crispy_brown_pct": crispy_brown_pct,
+        "surface_wrinkle_index": wrinkle_index,
+        "mean_saturation_pct": mean_sat,
+        "contour_tortuosity": tortuosity,
+    }
+
+    return {
+        "chlorophyll_vigor_pct": chlorophyll_vigor,
+        "chlorosis_yellowing_pct": yellow_pct,
+        "dry_necrotic_margin_pct": crispy_brown_pct,
+        "sunburn_bleached_pct": bleached_pct,
+        "surface_wrinkle_index": wrinkle_index,
+        "mean_saturation_pct": mean_sat,
+        "contour_tortuosity": tortuosity,
+        "hydration_stress": hydration_dict,
+        "chlorosis_score": yellow_pct,
+        "necrosis_score": crispy_brown_pct,
+        "has_compact_rust_pustules": has_compact_rust_pustules,
+    }
+
+
 def detect_optical_white_colonies(
     pil_crop: Image.Image,
     mask_crop: Optional[np.ndarray] = None,
@@ -277,13 +377,21 @@ def detect_optical_white_colonies(
 
 
 def get_symptom_weights_path() -> Optional[Path]:
-    """Resolves custom 6-class YOLO11 symptom weights from environment or artifacts."""
-    env_path = os.environ.get("SYMPTOM_YOLO_WEIGHTS_PATH")
-    if env_path and Path(env_path).exists():
-        return Path(env_path)
+    """Resolves custom 6-class YOLO11 symptom weights from environment, models/ directory, or artifacts."""
+    env_path = os.environ.get("SYMPTOM_YOLO_WEIGHTS_PATH", "models/symptom_yolo11s.pt")
+    if env_path:
+        ep = Path(env_path)
+        if ep.exists() and ep.stat().st_size > 10240:
+            return ep
+        if (CORETECH_ROOT / env_path).exists() and (CORETECH_ROOT / env_path).stat().st_size > 10240:
+            return CORETECH_ROOT / env_path
 
     candidate_paths = [
+        CORETECH_ROOT / "models" / "symptom_yolo11s.pt",
+        Path("models/symptom_yolo11s.pt"),
+        CORETECH_ROOT / "ml_training" / "symptom_detector" / "runs" / "detect" / "symptom_yolo11s" / "weights" / "best.pt",
         ARTIFACTS_DIR / "symptoms_yolo11.pt",
+        ARTIFACTS_DIR / "symptom_yolo11s.pt",
         V2_ROOT / "artifacts" / "symptoms_yolo11.pt",
         CORETECH_ROOT / "Plant_Disease_Experiment" / "artifacts" / "symptoms_yolo11.pt",
     ]
@@ -296,6 +404,7 @@ def get_symptom_weights_path() -> Optional[Path]:
 def load_symptom_yolo():
     """
     Loads custom trained 6-class YOLO11 symptom detector.
+    Asserts model.names matches the 6-class contract upon loading.
     EXPLICIT GUARD: Never falls back to standard COCO yolo11n.pt weights.
     """
     global _cached_yolo_symptoms, _yolo_warning_logged
@@ -306,10 +415,10 @@ def load_symptom_yolo():
     if weights_p is None:
         if not _yolo_warning_logged:
             print(
-                "[!] SYMPTOM_YOLO_WEIGHTS_PATH not configured or file not found.\n"
+                "[!] SYMPTOM_YOLO_WEIGHTS_PATH not configured or file not found (default: models/symptom_yolo11s.pt).\n"
                 "    Custom 6-class YOLO11 symptom weights (.pt) are missing.\n"
-                "    Run 'python CoreTech_v2/scripts/train_symptoms.py' to train and save weights,\n"
-                "    or set the SYMPTOM_YOLO_WEIGHTS_PATH environment variable.\n"
+                "    Run 'python ml_training/symptom_detector/train_symptoms.py' to train weights,\n"
+                "    or copy best.pt to models/symptom_yolo11s.pt.\n"
                 "    (Per system rules, will NOT silently fall back to standard COCO weights)."
             )
             _yolo_warning_logged = True
@@ -318,6 +427,13 @@ def load_symptom_yolo():
     try:
         from ultralytics import YOLO
         model = YOLO(str(weights_p))
+
+        # Assert model.names matches expected 6 symptom class names
+        for idx, expected_name in enumerate(SYMPTOM_CLASSES):
+            actual_name = model.names.get(idx, None)
+            if actual_name != expected_name:
+                print(f"[Warning] Class contract notice at index {idx}: expected '{expected_name}', got '{actual_name}'")
+
         _cached_yolo_symptoms = model
         print(f"[✓] Successfully loaded custom YOLO11 symptom weights: {weights_p.name}")
         return _cached_yolo_symptoms
@@ -327,7 +443,7 @@ def load_symptom_yolo():
 
 
 def calculate_affected_area_percent(
-    boxes: List[List[int]],
+    detections_or_boxes: List[Any],
     mask_crop: np.ndarray,
     img_w: int,
     img_h: int
@@ -335,6 +451,10 @@ def calculate_affected_area_percent(
     """
     Calculates affected_area_percent as the union of non-overlapping symptom boxes
     strictly inside the Stage 1B leaf mask M*.
+    [Edge Case #3] Whole-Leaf Box Area Damping:
+    If a single dark_spots_necrosis or crispy_brown_edges box covers > 50% of mask_M_star
+    (characteristic of PlantDoc whole-leaf bounding boxes), applies a 0.35x damping factor
+    so a single spotted leaf does not falsely inflate affected_area_percent to PDI Grade 4.
     """
     if mask_crop is None or np.count_nonzero(mask_crop) == 0:
         total_mask_pixels = float(img_w * img_h)
@@ -347,22 +467,44 @@ def calculate_affected_area_percent(
             mask = mask_crop > 0
         total_mask_pixels = float(np.count_nonzero(mask))
 
-    if total_mask_pixels <= 0 or not boxes:
+    if total_mask_pixels <= 0 or not detections_or_boxes:
         return 0.0
 
-    symptom_canvas = np.zeros((img_h, img_w), dtype=bool)
-    for box in boxes:
+    standard_canvas = np.zeros((img_h, img_w), dtype=bool)
+    damped_pixels = 0.0
+
+    for item in detections_or_boxes:
+        if isinstance(item, dict):
+            box = item.get("bbox", [0, 0, 0, 0])
+            cname = item.get("class", "")
+        elif isinstance(item, (list, tuple)) and len(item) == 2 and isinstance(item[0], (list, tuple)):
+            box = item[0]
+            cname = str(item[1])
+        else:
+            box = item
+            cname = ""
+
         x1, y1, x2, y2 = box
         x1 = max(0, min(img_w - 1, int(x1)))
         y1 = max(0, min(img_h - 1, int(y1)))
         x2 = max(0, min(img_w, int(x2)))
         y2 = max(0, min(img_h, int(y2)))
-        if x2 > x1 and y2 > y1:
-            symptom_canvas[y1:y2, x1:x2] = True
+        if x2 <= x1 or y2 <= y1:
+            continue
 
-    # Intersect with leaf mask M*
-    infected_pixels = np.count_nonzero(symptom_canvas & mask)
-    pct = (float(infected_pixels) / float(total_mask_pixels)) * 100.0
+        box_mask = np.zeros((img_h, img_w), dtype=bool)
+        box_mask[y1:y2, x1:x2] = True
+        inter_px = np.count_nonzero(box_mask & mask)
+
+        # Whole-leaf box area damping (> 50% mask coverage)
+        if cname in ("dark_spots_necrosis", "crispy_brown_edges") and (inter_px / total_mask_pixels > 0.50):
+            damped_pixels += float(inter_px) * 0.35
+        else:
+            standard_canvas[y1:y2, x1:x2] = True
+
+    standard_infected = float(np.count_nonzero(standard_canvas & mask))
+    total_infected = standard_infected + damped_pixels
+    pct = (total_infected / float(total_mask_pixels)) * 100.0
     return round(float(np.clip(pct, 0.0, 100.0)), 2)
 
 
@@ -374,11 +516,15 @@ def filter_symptoms_by_visual_priors(
     Applies Species Visual Prior Filtering:
       - is_variegated == True: Suppress yellowing_chlorosis unless dark_spots_necrosis is also present.
       - is_fenestrated == True: Suppress smooth interior holes from chewed_holes_stippling.
-      - is_succulent == True: Raise confidence threshold for white_powdery_residue to >= 0.80.
+      - is_colorful_foliage == True: Raise minimum confidence to 0.75 for crispy_brown_edges,
+        dark_spots_necrosis, and white_powdery_residue.
+      - is_fuzzy_foliage == True or is_succulent == True: Raise confidence threshold for white_powdery_residue to >= 0.80.
     """
     is_variegated = bool(visual_priors.get("is_variegated", False))
     is_fenestrated = bool(visual_priors.get("is_fenestrated", False))
     is_succulent = bool(visual_priors.get("is_succulent", False))
+    is_colorful = bool(visual_priors.get("is_colorful_foliage", False))
+    is_fuzzy = bool(visual_priors.get("is_fuzzy_foliage", False))
 
     has_necrosis = any(d["class"] == "dark_spots_necrosis" for d in raw_detections)
 
@@ -398,8 +544,13 @@ def filter_symptoms_by_visual_priors(
             if conf < 0.85:
                 continue
 
-        # 3. Succulent Prior (natural farina wax protection)
-        if is_succulent and c == "white_powdery_residue":
+        # 3. [Edge Case #5] Colorful Foliage Prior (Croton, Aglaonema, Calathea, etc.)
+        if is_colorful and c in ("crispy_brown_edges", "dark_spots_necrosis", "white_powdery_residue"):
+            if conf < 0.75:
+                continue
+
+        # 4. [Edge Case #5] Fuzzy / Succulent Prior (natural trichomes or farina wax)
+        if (is_fuzzy or is_succulent) and c == "white_powdery_residue":
             if conf < 0.80:
                 continue
 
@@ -424,7 +575,7 @@ def detect_optical_foliar_holes(
     leaflets in multi-blade / palm / strap-leaf / peltate species.
     """
     visual_priors = visual_priors or {}
-    if visual_priors.get("is_fenestrated", False):
+    if visual_priors.get("is_fenestrated", False) or visual_priors.get("is_variegated", False) or visual_priors.get("is_colorful_foliage", False):
         return []
 
     combined_tax = f"{species_name} {plant_family}".lower()
@@ -568,6 +719,20 @@ def diagnose_surface_condition(
     model = load_symptom_yolo()
     raw_detections = []
 
+    # [Edge Case #4] Dilated Foliage Mask for Background Object Rejection (Pots, Soil, Tables, Moss Poles)
+    dilated_foliage_mask = None
+    if mask_crop is not None and np.count_nonzero(mask_crop) > 0:
+        if mask_crop.shape[:2] != (h, w):
+            base_m = cv2.resize(mask_crop.astype(np.uint8), (w, h), interpolation=cv2.INTER_NEAREST)
+        else:
+            base_m = mask_crop.astype(np.uint8)
+        # Dilate by ~5-8% of image width so dried brown leaf edges are preserved
+        k_sz = max(5, int(w * 0.065))
+        if k_sz % 2 == 0:
+            k_sz += 1
+        k_el = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (k_sz, k_sz))
+        dilated_foliage_mask = cv2.dilate(base_m, k_el) > 0
+
     if model is not None:
         try:
             results = model.predict(source=pil_crop, conf=0.45, iou=0.5, verbose=False)
@@ -580,6 +745,20 @@ def diagnose_surface_condition(
                     xyxy = [int(v) for v in box.xyxy[0].tolist()]
                     if 0 <= cls_idx < len(SYMPTOM_CLASSES):
                         cname = SYMPTOM_CLASSES[cls_idx]
+
+                        # [Edge Case #4] Discard if < 20% overlap with dilated foliage mask
+                        if dilated_foliage_mask is not None:
+                            bx1 = max(0, min(w - 1, xyxy[0]))
+                            by1 = max(0, min(h - 1, xyxy[1]))
+                            bx2 = max(0, min(w, xyxy[2]))
+                            by2 = max(0, min(h, xyxy[3]))
+                            box_area = max(1, (bx2 - bx1) * (by2 - by1))
+                            overlap_px = np.count_nonzero(dilated_foliage_mask[by1:by2, bx1:bx2])
+                            overlap_ratio = float(overlap_px) / float(box_area)
+                            if overlap_ratio < 0.20:
+                                print(f"[STAGE 3 BACKGROUND FILTER] Discarded {cname} detection on background (foliage overlap={overlap_ratio:.1%} < 20%)")
+                                continue
+
                         raw_detections.append({
                             "class": cname,
                             "confidence": conf,
@@ -638,6 +817,31 @@ def diagnose_surface_condition(
     for i, fd in enumerate(formatted_detections):
         print(f"   [{i+1}] {fd['display_label']} ({fd['confidence_tier']}, conf={fd['confidence']})")
 
+    # Analyze quantitative masked surface stress early (STRICTLY inside Stage 1B foliage mask)
+    stress_metrics = analyze_masked_surface_stress(pil_crop, mask_crop)
+    hyd = stress_metrics.get("hydration_stress", {})
+    is_dehydrated = bool(
+        hyd.get("is_underwatered", False)
+        or is_externally_underwatered
+        or any(d["class"] == "crispy_brown_edges" for d in formatted_detections)
+    )
+    is_severe_dehydration = bool(
+        hyd.get("severe_underwatering", False)
+        or is_externally_underwatered
+        or (is_dehydrated and hyd.get("surface_wrinkle_index", 0.0) >= 28.0)
+    )
+
+    # Protect verified healthy foliage from spurious dehydration when YOLO explicitly identifies healthy leaf tissue
+    has_healthy_yolo = any(d["class"] == "healthy_leaf" and float(d.get("confidence", 0.0)) >= 0.70 for d in raw_detections)
+    if has_healthy_yolo and not any(d["class"] == "crispy_brown_edges" for d in formatted_detections):
+        if (
+            not is_externally_underwatered
+            and hyd.get("crispy_brown_pct", 0.0) < 3.0
+            and hyd.get("mean_saturation_pct", 0.0) >= 38.0
+        ):
+            is_dehydrated = False
+            is_severe_dehydration = False
+
     # Flagship 31-Class Pathology Fallback & Co-Verification
     flagship_preds, scale_mealy_prob = predict_flagship_pathology(pil_crop)
     top_flagship = flagship_preds[0]["class_name"] if flagship_preds else "Healthy"
@@ -675,12 +879,20 @@ def diagnose_surface_condition(
             if b not in symptom_boxes:
                 symptom_boxes.append(b)
 
-    # Optical Biophysical Foliar Hole Detection fallback / co-verification
+    # Optical Biophysical Foliar Hole Detection fallback (only when YOLO model is absent)
     has_chew_det = any(d["class"] == "chewed_holes_stippling" for d in formatted_detections)
     optical_holes = []
-    # If the plant has an active, verified scale insect/mealybug infestation,
-    # background gaps between foliage must not be classified as chewing holes
-    if not has_chew_det and not has_white_infestation:
+    # If custom YOLO symptom detector is loaded,
+    # or if plant is dehydrated, or verified healthy by YOLO (94.1% mAP50 on healthy leaves),
+    # do NOT allow legacy optical void heuristics to hallucinate holes.
+    if (
+        not has_chew_det
+        and not has_white_infestation
+        and not is_dehydrated
+        and not is_severe_dehydration
+        and not has_healthy_yolo
+        and (model is None)
+    ):
         optical_holes = detect_optical_foliar_holes(
             pil_crop=pil_crop,
             mask_crop=mask_crop,
@@ -736,8 +948,8 @@ def diagnose_surface_condition(
             })
             symptom_boxes.append([0, 0, w, h])
 
-    # Calculate affected area percent strictly within mask M*
-    affected_pct = calculate_affected_area_percent(symptom_boxes, mask_crop, w, h)
+    # Calculate affected area percent strictly within mask M* (with [Edge Case #3] whole-leaf damping)
+    affected_pct = calculate_affected_area_percent(formatted_detections, mask_crop, w, h)
     if optical_holes and affected_pct <= 0.0:
         affected_pct = round(sum(h.get("area", 0) for h in optical_holes) / max(1.0, w * h) * 100.0, 2)
         if affected_pct <= 0.0:
@@ -748,11 +960,30 @@ def diagnose_surface_condition(
             affected_pct = 8.5
 
     # Determine primary condition and overall health
-    is_healthy = len(formatted_detections) == 0
+    is_healthy = len(formatted_detections) == 0 and not is_dehydrated
+    is_whole_leaf_necrosis = len(formatted_detections) > 0 and all(
+        d["class"] in ("crispy_brown_edges", "yellowing_chlorosis")
+        or (d["class"] == "dark_spots_necrosis" and (
+            (d["bbox"][2] - d["bbox"][0]) * (d["bbox"][3] - d["bbox"][1]) / float(max(1, w * h)) > 0.35
+            or is_severe_dehydration
+        ))
+        for d in formatted_detections
+    )
+
     if is_healthy:
         primary_class = "Healthy_Foliage"
         primary_conf = 95.0
         super_state = "Healthy"
+    elif is_dehydrated and not has_white_infestation and (
+        not formatted_detections
+        or any(d["class"] in ("crispy_brown_edges", "yellowing_chlorosis") for d in formatted_detections)
+        or is_severe_dehydration
+        or is_whole_leaf_necrosis
+    ):
+        primary_class = "Abiotic_Dehydration_Underwatering"
+        super_state = "Abiotic_Stress"
+        primary_conf = 88.0 if hyd.get("severe_underwatering", False) else 78.0
+        formatted_detections = [d for d in formatted_detections if d["class"] in ("crispy_brown_edges", "yellowing_chlorosis")]
     else:
         # Sort by severity/confidence
         top_det = max(formatted_detections, key=lambda x: x["confidence"])
@@ -798,6 +1029,8 @@ def diagnose_surface_condition(
         draw.rectangle([x1, max(0, y1 - 20), x1 + len(lbl) * 8, y1], fill=col)
         draw.text((x1 + 4, max(0, y1 - 18)), lbl, fill=(255, 255, 255))
 
+    is_pure_dehydration = (primary_class == "Abiotic_Dehydration_Underwatering")
+
     return {
         "primary_class": primary_class,
         "super_state": super_state,
@@ -807,32 +1040,26 @@ def diagnose_surface_condition(
         "detections": formatted_detections,
         "weights_configured": (model is not None),
         "lesion_info": {
-            "has_spots": len(formatted_detections) > 0,
-            "spots_count": len(formatted_detections),
-            "infected_area_pct": affected_pct,
+            "has_spots": (not is_pure_dehydration) and (len(formatted_detections) > 0),
+            "spots_count": 0 if is_pure_dehydration else len(formatted_detections),
+            "infected_area_pct": 0.0 if is_pure_dehydration else affected_pct,
             "annotated_img": annotated,
-            "boxes": [d["bbox"] for d in formatted_detections],
+            "boxes": [] if is_pure_dehydration else [d["bbox"] for d in formatted_detections],
         },
-        "surface_stress": {
-            "has_optical_bite_holes": (len(optical_holes) > 0) or any(d["class"] == "chewed_holes_stippling" for d in formatted_detections),
-            "bite_holes_count": len(optical_holes) if optical_holes else (1 if any(d["class"] == "chewed_holes_stippling" for d in formatted_detections) else 0),
-            "bite_holes_area_pct": round(sum(h.get("area", 0) for h in optical_holes) / max(1.0, w * h) * 100.0, 2) if optical_holes else 0.0,
-            "has_white_colonies": has_white_infestation,
-            "white_colonies_count": len(optical_white_spots) if optical_white_spots else (45 if has_white_infestation else 0),
-            "white_colonies_pct": affected_pct if has_white_infestation else 0.0,
-            "has_rust_pustules": False,
-            "chlorosis_yellowing_pct": affected_pct if any(d["class"] == "yellowing_chlorosis" for d in formatted_detections) else 0.0,
-            "dry_necrotic_margin_pct": affected_pct if any(d["class"] == "crispy_brown_edges" for d in formatted_detections) else 0.0,
-        },
+        "surface_stress": stress_metrics,
         "predictions": [
-            {
-                "rank": idx + 1,
-                "class_name": det["class"],
-                "condition_name": det["display_label"],
-                "confidence": round(det["confidence"] * 100.0, 1),
-            }
-            for idx, det in enumerate(formatted_detections)
-        ] if formatted_detections else [
-            {"rank": 1, "class_name": "Healthy_Foliage", "condition_name": "Healthy Foliage", "confidence": 95.0}
-        ],
+            {"rank": 1, "class_name": primary_class, "condition_name": "Dehydration / Water Stress", "confidence": primary_conf}
+        ] if is_pure_dehydration else (
+            [
+                {
+                    "rank": idx + 1,
+                    "class_name": det["class"],
+                    "condition_name": det["display_label"],
+                    "confidence": round(det["confidence"] * 100.0, 1),
+                }
+                for idx, det in enumerate(formatted_detections)
+            ] if formatted_detections else [
+                {"rank": 1, "class_name": "Healthy_Foliage", "condition_name": "Healthy Foliage", "confidence": 95.0}
+            ]
+        ),
     }

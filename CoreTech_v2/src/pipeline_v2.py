@@ -244,7 +244,7 @@ SURFACE_CARE_MAP = {
         ],
     },
     "Abiotic_Dehydration_Underwatering": {
-        "condition_name": "Underwatering Dehydration Stress (Needs Water)",
+        "condition_name": "Dehydration / Water Deficit Stress",
         "category": "Abiotic Water Stress",
         "severity": "Moderate",
         "summary": "Foliage exhibits acute moisture deficit, loss of cellular turgor, leaf blade wrinkling, wild curled margins, and dry papery tips. These symptoms are physiological moisture deficit stress, NOT infectious fungal rust or insect bite damage.",
@@ -774,10 +774,37 @@ def run_v2_diagnosis(
                 ]
                 d["recommended_check"] = "Maintain balanced watering cadence; monitor humidity with a hygrometer."
 
+    # Decoupled Soil Moisture & Dehydration Label Arbitration
+    if primary_cond == "Abiotic_Dehydration_Underwatering":
+        care = dict(care)
+        if sms == "dry":
+            care["condition_name"] = "Dehydration / Underwatering (Needs Water)"
+            care["summary"] = "Foliage exhibits acute moisture deficit and loss of cellular turgor. Substrate is verified dry—water thoroughly."
+        elif sms in ("soggy", "wet"):
+            care["condition_name"] = "Overwatering / Root Hypoxia Stress"
+            care["category"] = "Abiotic Water Stress"
+            care["summary"] = "Foliage exhibits wilting due to waterlogged substrate and root hypoxia (root rot). Do NOT add water; allow pot to dry out completely."
+            care["immediate_actions"] = [
+                "Pause watering immediately; allow potting mix to dry out.",
+                "Ensure pot drainage holes are completely unblocked.",
+                "Inspect roots for soft brown decay (root rot)."
+            ]
+        elif sms == "damp":
+            care["condition_name"] = "Dehydration / Transpiration Stress (Damp Soil)"
+            care["summary"] = "Foliage exhibits moisture deficit despite damp substrate. Check ambient humidity, transpiration drafts, or root absorption."
+        else:
+            care["condition_name"] = "Dehydration / Water Stress (Check Soil)"
+            care["summary"] = "Foliage exhibits moisture deficit and loss of cellular turgor. Because underwatering and overwatering (root rot) cause identical wilting symptoms, verify soil moisture before adding water."
+            care["immediate_actions"] = [
+                "Check soil moisture 2 inches down: If dry, water thoroughly. If damp or soggy, do NOT add water.",
+                "Empty excess water from drainage saucer to prevent stagnant pooling.",
+                "Do NOT apply chemical fungicides or pesticides; foliage is reacting to moisture balance, not infectious disease."
+            ]
+
     needs_user_soil_check = bool(
         sms is None
         and not (primary_cond in ("Scale_Insects", "Mealybugs_Cochineal") or path_res.get("surface_stress", {}).get("has_white_colonies") or verified_pest is not None)
-        and (has_chlorosis or has_crispy or has_wilting or is_wilting_or_drooping or has_dried_or_crispy_leaves)
+        and (has_chlorosis or has_crispy or has_wilting or is_wilting_or_drooping or has_dried_or_crispy_leaves or primary_cond == "Abiotic_Dehydration_Underwatering" or path_res.get("primary_class") == "Abiotic_Dehydration_Underwatering")
     )
 
     # PDI Grade calculation
@@ -879,7 +906,12 @@ def run_v2_diagnosis(
     elif primary_cond == "Abiotic_Severe_Desiccation_Dried_Plant":
         spots_status_msg = f"Specimen exhibits severe foliar desiccation ({path_res['surface_stress'].get('desiccation_grade', 'Dried')}). Foliage is dried and moisture-depleted."
     elif primary_cond == "Abiotic_Dehydration_Underwatering":
-        spots_status_msg = "Specimen exhibits acute foliar dehydration and wilting (Needs Water). Living leaves are drooping."
+        if sms == "dry":
+            spots_status_msg = "Specimen exhibits acute foliar dehydration and wilting (Needs Water). Substrate is verified dry."
+        elif sms in ("soggy", "wet"):
+            spots_status_msg = "Specimen exhibits foliar wilting due to waterlogged substrate / overwatering (Root Hypoxia)."
+        else:
+            spots_status_msg = "Specimen exhibits foliar dehydration and loss of turgor. Verify soil moisture before adding water."
     elif lesion_info["spots_count"] > 0:
         spots_status_msg = f"{lesion_info['spots_count']} surface lesion/symptom zone(s) detected ({lesion_info['infected_area_pct']}% of plant mask)."
     else:

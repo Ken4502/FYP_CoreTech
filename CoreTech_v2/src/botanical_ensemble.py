@@ -67,6 +67,17 @@ SPECIES_VISUAL_PRIOR_MATRIX = {
         "aloe", "aloe vera", "echeveria", "cactus", "cacti", "cactaceae", "crassula", "crassulaceae",
         "jade plant", "kalanchoe", "sedum", "haworthia", "sansevieria", "snake plant", "senecio",
         "string of pearls", "agave", "euphorbia", "desert rose", "adenium"
+    ],
+    # Colorful foliage taxa (naturally red, purple, pink, bronze, multi-tone leaves)
+    "colorful_foliage_taxa": [
+        "aglaonema", "chinese evergreen", "codiaeum", "croton", "calathea", "goeppertia",
+        "caladium", "coleus", "begonia", "tradescantia", "hypoestes", "polka dot",
+        "fittonia", "nerve plant", "stromanthe", "cordyline"
+    ],
+    # Naturally hairy/trichome-covered foliage taxa
+    "fuzzy_foliage_taxa": [
+        "saintpaulia", "african violet", "streptocarpus", "kalanchoe tomentosa",
+        "panda plant", "tradescantia sillamontana", "sinningia"
     ]
 }
 
@@ -78,6 +89,8 @@ def get_species_visual_priors(species_name: str, family: str = "") -> Dict[str, 
         "is_fenestrated": any(k in tax_str for k in SPECIES_VISUAL_PRIOR_MATRIX["fenestrated_taxa"]),
         "is_glossy": any(k in tax_str for k in SPECIES_VISUAL_PRIOR_MATRIX["glossy_taxa"]),
         "is_succulent": any(k in tax_str for k in SPECIES_VISUAL_PRIOR_MATRIX["succulent_taxa"]),
+        "is_colorful_foliage": any(k in tax_str for k in SPECIES_VISUAL_PRIOR_MATRIX["colorful_foliage_taxa"]),
+        "is_fuzzy_foliage": any(k in tax_str for k in SPECIES_VISUAL_PRIOR_MATRIX["fuzzy_foliage_taxa"]),
     }
 
 

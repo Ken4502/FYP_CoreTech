@@ -1195,9 +1195,16 @@ async def api_predict(
                 pdi_action = "Conduct stem scratch viability test, execute 30-45 min bottom-watering soak, prune crispy leaves."
             elif is_underwatered_cond:
                 pdi_grade = 2
-                pdi_label = "Grade 2: Foliar Dehydration / Underwatering (Needs Water)"
+                if effective_sms == "dry":
+                    pdi_label = "Grade 2: Foliar Dehydration / Underwatering (Needs Water)"
+                    pdi_action = "Conduct thorough soil soak immediately. Foliage will regain cellular turgidity within hours."
+                elif effective_sms in ("soggy", "wet"):
+                    pdi_label = "Grade 2: Foliar Wilting / Overwatering (Check Roots)"
+                    pdi_action = "Pause watering immediately and inspect pot drainage holes. Saturated roots cannot absorb water."
+                else:
+                    pdi_label = "Grade 2: Foliar Dehydration / Water Stress (Check Soil)"
+                    pdi_action = "Check soil moisture 2 inches down before watering: If dry, soak thoroughly. If damp or soggy, do NOT add water."
                 pdi_color = "#2563eb"
-                pdi_action = "Conduct thorough soil soak immediately. Foliage will regain cellular turgidity within hours."
             elif is_healthy or (not has_spots and class_id == "Healthy_Foliage"):
                 pdi_grade = 0
                 pdi_label = "Grade 0: Optimal Foliar Health (Clean)"
@@ -1245,14 +1252,17 @@ async def api_predict(
             level = "Low"
             stype = "Normal"
             rec = "Optimal hydration levels detected on foliage."
-            if hyd.get("severe_underwatering", False):
-                level = "High"
-                stype = "Underwatering Dehydration"
-                rec = "Perform a deep root bottom-soak (30-45 min) and avoid chemical fungicides or pesticides."
-            elif is_underwatered or is_underwatered_cond:
-                level = "Moderate"
-                stype = "Underwatering Dehydration"
-                rec = "Check soil moisture and perform a deep root soak to restore leaf turgor."
+            if hyd.get("severe_underwatering", False) or is_underwatered or is_underwatered_cond:
+                level = "High" if hyd.get("severe_underwatering", False) else "Moderate"
+                if effective_sms == "dry":
+                    stype = "Underwatering Dehydration (Needs Water)"
+                    rec = "Perform a deep root bottom-soak (30-45 min) and avoid chemical fungicides or pesticides."
+                elif effective_sms in ("soggy", "wet"):
+                    stype = "Overwatering / Root Hypoxia"
+                    rec = "Substrate is saturated; pause watering immediately and allow soil to dry out."
+                else:
+                    stype = "Dehydration / Water Stress (Check Soil)"
+                    rec = "Check soil moisture before watering. Both underwatering and overwatering (root rot) cause foliar wilting."
             elif hyd.get("severe_overwatering", False) or is_overwatered:
                 level = "High" if hyd.get("severe_overwatering", False) else "Moderate"
                 stype = "Overwatering / Waterlogging"
